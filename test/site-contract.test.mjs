@@ -9,16 +9,16 @@ async function read(path) {
   return readFile(resolve(root, path), 'utf8')
 }
 
-test('primary navigation points to implemented routes', async () => {
+test('primary navigation defines every implemented route', async () => {
   const header = await read('components/site-header.tsx')
   const expectedRoutes = ['/', '/about', '/services', '/academy', '/contact']
 
   for (const route of expectedRoutes) {
-    assert.match(header, new RegExp(`href=['\"]${route.replace('/', '\\/')}['\"]`))
+    assert.match(header, new RegExp(`href: ['\"]${route.replace('/', '\\/')}['\"]`))
   }
 })
 
-test('primary navigation has an accessible label and mobile control state', async () => {
+test('primary navigation exposes accessible mobile menu state', async () => {
   const header = await read('components/site-header.tsx')
 
   assert.match(header, /aria-label="Main navigation"/)
@@ -26,7 +26,7 @@ test('primary navigation has an accessible label and mobile control state', asyn
   assert.match(header, /aria-label=\{open \? 'Close menu' : 'Open menu'\}/)
 })
 
-test('home page retains the core conversion paths', async () => {
+test('home hero retains the core conversion paths', async () => {
   const hero = await read('components/home/hero.tsx')
 
   assert.match(hero, /href="\/contact"/)
