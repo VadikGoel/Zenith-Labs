@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CheckSquare, Play, Square, TerminalSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/academy-data'
@@ -31,6 +31,12 @@ export function LessonWorkspace({
   const [running, setRunning] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
+  }, [])
+
   const passedChecks = lesson.checks.map((check) => code.includes(check))
 
   function runVerification() {
@@ -59,6 +65,7 @@ export function LessonWorkspace({
         ])
       }
       setRunning(false)
+      timeoutRef.current = null
     }, 900)
   }
 
@@ -86,7 +93,7 @@ export function LessonWorkspace({
         {/* Instructions checklist */}
         <ul className="mt-5 flex flex-col gap-2.5">
           {lesson.instructions.map((instruction, i) => {
-            const done = passedChecks[Math.min(i, passedChecks.length - 1)]
+            const done = passedChecks[i] ?? false
             return (
               <li key={instruction} className="flex items-start gap-2.5">
                 {done ? (
@@ -151,6 +158,7 @@ export function LessonWorkspace({
         type="button"
         onClick={runVerification}
         disabled={running}
+        aria-busy={running}
         className="group inline-flex items-center justify-center gap-2 self-start rounded-md rounded-tr-3xl bg-primary px-6 py-3 text-sm font-medium tracking-tight text-primary-foreground shadow-[0_0_28px_-8px_var(--color-primary)] transition-all hover:shadow-[0_0_44px_-8px_var(--color-primary)] active:scale-[0.98] disabled:opacity-60"
       >
         <Play className="size-4" aria-hidden="true" />
