@@ -10,10 +10,18 @@ const _geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 const _geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' })
 
 export const metadata: Metadata = {
-  title: 'Zenith Labs — AI-Powered Digital Engineering Studio',
+  title: {
+    default: 'Zenith Labs — AI-Powered Digital Engineering Studio',
+    template: '%s — Zenith Labs',
+  },
   description:
-    'Zenith Labs is an elite AI-powered digital engineering studio. We connect generative AI infrastructure like NVIDIA NIMs to gorgeous consumer experiences.',
-  generator: 'v0.app',
+    'Zenith Labs is an AI-powered digital engineering studio connecting generative AI infrastructure to high-quality consumer experiences.',
+  applicationName: 'Zenith Labs',
+  referrer: 'origin-when-cross-origin',
+  robots: {
+    index: true,
+    follow: true,
+  },
 }
 
 export const viewport: Viewport = {
