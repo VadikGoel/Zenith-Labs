@@ -34,3 +34,11 @@ test('home hero retains the core conversion paths', async () => {
   assert.match(hero, /Deploy With Us/)
   assert.match(hero, /Enter the Academy/)
 })
+
+test('package scripts match the CI validation contract', async () => {
+  const packageJson = JSON.parse(await read('package.json'))
+
+  assert.equal(typeof packageJson.scripts.build, 'string')
+  assert.equal(typeof packageJson.scripts.test, 'string')
+  assert.equal(packageJson.scripts.lint, undefined)
+})
