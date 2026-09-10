@@ -56,12 +56,13 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 
 test('Academy curriculum has stable, verifiable lesson contracts', async () => {
   const academy = await read('lib/academy-data.ts')
-  const lessonIds = [...academy.matchAll(/id: '([^']+)',\n\s*title: '[^']+',\n\s*points:/g)].map(
-    (match) => match[1],
-  )
+  const lessons = [...academy.matchAll(/id: '([^']+)',\s*title: '[^']+',\s*points: (\d+)/g)]
+  const lessonIds = lessons.map((match) => match[1])
+  const totalPoints = lessons.reduce((sum, match) => sum + Number(match[2]), 0)
 
   assert.equal(new Set(lessonIds).size, lessonIds.length)
   assert.equal(lessonIds.length, 6)
+  assert.equal(totalPoints, 100)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
   assert.match(academy, /name: 'Java Enterprise',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
