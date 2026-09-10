@@ -9,11 +9,13 @@ async function read(path) {
   return readFile(resolve(root, path), 'utf8')
 }
 
-test('Academy workspace maps instruction state without overstating completion', async () => {
+test('Academy workspace keeps learning instructions independent from verification checks', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
 
-  assert.match(workspace, /const done = passedChecks\[i\] \?\? false/)
-  assert.doesNotMatch(workspace, /Math\.min\(i, passedChecks\.length - 1\)/)
+  assert.match(workspace, /Verification requirements/)
+  assert.match(workspace, /passedCount\/\{lesson\.checks\.length\} verified/)
+  assert.match(workspace, /lesson\.instructions\.map\(\(instruction, i\) => \(/)
+  assert.doesNotMatch(workspace, /const done = passedChecks\[i\]/)
 })
 
 test('Academy verification timer is cleaned up on unmount and completion', async () => {
