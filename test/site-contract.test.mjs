@@ -38,7 +38,18 @@ test('home hero retains the core conversion paths', async () => {
 test('package scripts match the CI validation contract', async () => {
   const packageJson = JSON.parse(await read('package.json'))
 
+  assert.equal(packageJson.name, 'zenith-labs')
   assert.equal(typeof packageJson.scripts.build, 'string')
   assert.equal(typeof packageJson.scripts.test, 'string')
   assert.equal(packageJson.scripts.lint, undefined)
+})
+
+test('root metadata is production-oriented and identifies Zenith Labs', async () => {
+  const layout = await read('app/layout.tsx')
+
+  assert.match(layout, /default: 'Zenith Labs — AI-Powered Digital Engineering Studio'/)
+  assert.match(layout, /template: '%s — Zenith Labs'/)
+  assert.match(layout, /applicationName: 'Zenith Labs'/)
+  assert.match(layout, /robots: \{\s*index: true,\s*follow: true,\s*\}/)
+  assert.doesNotMatch(layout, /generator: 'v0\.app'/)
 })
