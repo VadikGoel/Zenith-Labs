@@ -1,11 +1,20 @@
-import { Hero } from '@/components/home/hero'
-import { BentoGrid } from '@/components/home/bento-grid'
+import Link from 'next/link';
 
-export default function HomePage() {
-  return (
-    <>
-      <Hero />
-      <BentoGrid />
-    </>
-  )
-}
+const domains=['Web','Systems','AI / ML','Security','Cloud / DevOps','Databases','Graphics','Robotics','Compilers','Game Development','Embedded','Mathematics'];
+const pillars=[
+  ['01','Concept-first','Build durable mental models before attaching them to a language or framework.'],
+  ['02','Adaptive path','Your next unit is selected from prerequisites, mastery, retention, goals and project context.'],
+  ['03','Engineering lab','Read, predict, code, execute, test, debug and explain inside one workspace.'],
+  ['04','Verified mastery','Progression is earned from evidence—not page views, clicks or artificial streaks.'],
+  ['05','Transfer','Carry concepts from Python to Rust, from algorithms to systems, and from lessons into projects.'],
+  ['06','Capability','The endpoint is independent engineering judgment on unfamiliar problems.'],
+];
+export default function Home(){return <main>
+  <nav className="nav container"><Link className="brand" href="/"><span className="mark">Z</span><span>ZENITH <span className="muted">LEARNING</span></span></Link><div className="navlinks"><a href="#system">System</a><a href="#domains">Domains</a><a href="#lab">Learning Lab</a><Link href="/login">Sign in</Link></div><Link className="btn primary" href="/onboarding">Start Learning</Link></nav>
+  <section className="hero container"><div><div className="eyebrow">House of Elvara · by Vadik Goel</div><h1>Learn anything.<br/>Understand everything.<br/>Build anything.</h1><p>Zenith is an adaptive computing and software-engineering platform built around concepts, experimentation, verified mastery and real engineering work—not course completion.</p><div className="actions"><Link className="btn primary" href="/onboarding">Start Learning →</Link><Link className="btn" href="/map">Explore Engineering Map</Link></div></div><div className="hero-art motion"><div className="grid-art"><div className="orbit"><i className="node n1"/><i className="node n2"/><i className="node n3"/><div className="core">Z</div></div></div></div></section>
+  <section className="section" id="system"><div className="container"><div className="eyebrow">The learning system</div><h2>From concept to capability.</h2><p className="section-intro">Every important action connects back to what the learner knows, what they are trying to build, and what evidence demonstrates genuine understanding.</p><div className="cards">{pillars.map(([n,t,d])=><article className="card" key={n}><span className="tag">{n}</span><h3>{t}</h3><p>{d}</p></article>)}</div><div className="flow"><div><strong>01</strong>Question</div><div><strong>02</strong>Concept</div><div><strong>03</strong>Experiment</div><div><strong>04</strong>Code → Test → Debug</div><div><strong>05</strong>Transfer → Master</div></div></div></section>
+  <section className="section" id="domains"><div className="container"><div className="eyebrow">Breadth without chaos</div><h2>One connected engineering map.</h2><p className="section-intro">Concepts connect to technologies, domains, projects and capabilities. Exploring a new technology does not destroy the primary learning path.</p><div className="cards">{domains.map((d,i)=><article className="card" key={d}><span className="tag">0{i+1}</span><h3>{d}</h3><p>Concept graph, prerequisite graph, technology bridges and project evidence.</p></article>)}</div></div></section>
+  <section className="section" id="lab"><div className="container"><div className="eyebrow">Interactive learning laboratory</div><h2>VS Code × computer science laboratory × Zenith.</h2><p className="section-intro">Lessons, Monaco, terminal output, tests, diagnostics and a Socratic mentor share one learning context. Expensive visualization is used only when it improves understanding.</p><div className="card" style={{marginTop:30}}><div className="mono" style={{color:'var(--accent)'}}>lesson.ts</div><pre style={{whiteSpace:'pre-wrap',color:'#c6ced9',lineHeight:1.7}}>{`// predict → run → observe → explain\nconst result = items.reduce((sum, item) => sum + item.value, 0);\n\n// Zenith checks the execution, tests and concept evidence.\n// Repeated runs do not generate unlimited rewards.`}</pre></div></div></section>
+  <section className="section"><div className="container"><div className="eyebrow">Credentials</div><h2>Evidence you can verify.</h2><p className="section-intro">Certificates map to concrete competencies, retain their curriculum version, and can be verified publicly without exposing private learner information.</p><div className="actions"><Link className="btn primary" href="/onboarding">Build your path</Link><Link className="btn" href="/credentials">View credential system</Link></div></div></section>
+  <footer className="footer container"><span>ZENITH LEARNING · HOUSE OF ELVARA</span><span>Learn → reason → build → verify</span></footer>
+</main>}
