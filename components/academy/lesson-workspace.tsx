@@ -38,6 +38,7 @@ export function LessonWorkspace({
   }, [])
 
   const passedChecks = lesson.checks.map((check) => code.includes(check))
+  const passedCount = passedChecks.filter(Boolean).length
 
   function runVerification() {
     if (running) return
@@ -90,35 +91,31 @@ export function LessonWorkspace({
           )}
         </div>
 
-        {/* Instructions checklist */}
-        <ul className="mt-5 flex flex-col gap-2.5">
-          {lesson.instructions.map((instruction, i) => {
-            const done = passedChecks[i] ?? false
-            return (
-              <li key={instruction} className="flex items-start gap-2.5">
-                {done ? (
-                  <CheckSquare
-                    className="mt-0.5 size-4 shrink-0 text-success"
-                    aria-hidden="true"
-                  />
-                ) : (
-                  <Square
-                    className="mt-0.5 size-4 shrink-0 text-muted-foreground/50"
-                    aria-hidden="true"
-                  />
-                )}
-                <span
-                  className={cn(
-                    'text-sm leading-relaxed',
-                    done ? 'text-foreground/80' : 'text-muted-foreground',
-                  )}
-                >
-                  {instruction}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
+        <div className="mt-5 flex items-center justify-between gap-4 border-y border-white/5 py-3">
+          <span className="font-mono text-xs uppercase tracking-tight text-muted-foreground">
+            Verification requirements
+          </span>
+          <span className="font-mono text-xs text-muted-foreground" aria-live="polite">
+            {passedCount}/{lesson.checks.length} verified
+          </span>
+        </div>
+
+        {/* Learning instructions */}
+        <ol className="mt-5 flex flex-col gap-2.5">
+          {lesson.instructions.map((instruction, i) => (
+            <li key={instruction} className="flex items-start gap-2.5">
+              <span
+                aria-hidden="true"
+                className="mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border border-white/10 font-mono text-[10px] text-muted-foreground"
+              >
+                {i + 1}
+              </span>
+              <span className="text-sm leading-relaxed text-muted-foreground">
+                {instruction}
+              </span>
+            </li>
+          ))}
+        </ol>
       </header>
 
       {/* Code editor */}
