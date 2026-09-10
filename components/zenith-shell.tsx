@@ -1,0 +1,6 @@
+'use client';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { BookOpen, Boxes, Home, Map, Award, FolderGit2, Search, TerminalSquare } from 'lucide-react';
+const items=[['/dashboard','Home',Home],['/learn','Learn',BookOpen],['/map','Map',Map],['/projects','Projects',Boxes],['/credentials','Credentials',Award],['/github','GitHub',FolderGit2]] as const;
+export function ZenithShell({children}:{children:React.ReactNode}){const path=usePathname();return <div className="shell"><aside className="sidebar"><Link href="/" className="brand side-brand"><span className="mark">Z</span><span>ZENITH</span></Link><nav className="side-nav">{items.map(([href,label,Icon])=><Link className={path.startsWith(href)?'active':''} href={href} key={href}><Icon size={16}/><span>{label}</span></Link>)}</nav></aside><section className="main"><header className="topbar"><div className="muted" style={{display:'flex',gap:9,alignItems:'center'}}><Search size={15}/> <span className="mono">⌘K</span><span>Search Zenith</span></div><div className="topstats"><span className="stat">XP <b>1,240</b></span><span className="stat">Coins <b>86</b></span><span className="stat">Mastery <b>74%</b></span></div></header>{children}</section></div>}
