@@ -56,16 +56,15 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 
 test('Academy curriculum has stable, verifiable lesson contracts', async () => {
   const academy = await read('lib/academy-data.ts')
-  const lessonIds = [...academy.matchAll(/id: '([^']+)'/g)].map((match) => match[1])
-  const lessonBlocks = [...academy.matchAll(/\{\s*\n\s*id: '([^']+)',[\s\S]*?\n\s*\},/g)]
+  const lessonIds = [...academy.matchAll(/id: '([^']+)',\n\s*title: '[^']+',\n\s*points:/g)].map(
+    (match) => match[1],
+  )
 
-  assert.equal(academy.match(/export const maxPoints = [\s\S]*?reduce\(/)?.[0] ? true : false, true)
   assert.equal(new Set(lessonIds).size, lessonIds.length)
   assert.equal(lessonIds.length, 6)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
   assert.match(academy, /name: 'Java Enterprise',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
-  assert.ok(lessonBlocks.length >= 6)
   assert.doesNotMatch(academy, /points: 0/)
   assert.doesNotMatch(academy, /checks: \[\]/)
 })
