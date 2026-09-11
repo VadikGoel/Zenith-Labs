@@ -27,11 +27,9 @@ for (const track of tracks) {
 }
 
 const firstAvailableTrack = tracks.find((track) => track.available)
-const firstLessonId = firstAvailableTrack?.modules[0]?.lessons[0]?.id
-
-if (!firstLessonId) {
+const firstLessonId = firstAvailableTrack?.modules[0]?.lessons[0]?.id ?? (() => {
   throw new Error('Academy curriculum must contain an available track with at least one lesson')
-}
+})()
 
 const STORAGE_KEY = 'zenith-academy-progress-v1'
 
