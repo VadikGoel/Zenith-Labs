@@ -67,6 +67,32 @@ test('verifier ignores requirements that appear only inside comments', async () 
   assert.equal(result.failedIndex, 1)
 })
 
+test('verifier does not satisfy structural checks from inside string literals', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { ...lesson, checks: ['std::cout'] },
+    'const char* note = "std::cout";',
+  )
+
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
+test('verifier still supports requirements that intentionally include quoted output', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { ...lesson, checks: ['cout << "Hello"'] },
+    'cout << "Hello";',
+  )
+
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+  assert.equal(result.failedIndex, -1)
+})
+
 test('verifier rejects blank requirements', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ checks: ['   '] }, 'anything')
