@@ -24,7 +24,14 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
   if (!lessons.some((lesson) => lesson.id === lessonId)) return false
 
   const prerequisiteId = getLessonPrerequisiteId(track, lessonId)
-  return prerequisiteId === null || completedIds.has(prerequisiteId)
+  if (prerequisiteId === null) return true
+
+  // Explicit prerequisites must belong to this track. A malformed cross-track
+  // reference must never unlock a lesson merely because the same ID is
+  // completed elsewhere.
+  if (!lessons.some((lesson) => lesson.id === prerequisiteId)) return false
+
+  return completedIds.has(prerequisiteId)
 }
 
 /**
