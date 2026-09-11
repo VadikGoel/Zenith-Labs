@@ -84,3 +84,11 @@ test('Academy unlocks explicit prerequisites only within the current track', asy
   assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === prerequisiteId\)\) return false/)
   assert.match(progression, /return completedIds\.has\(prerequisiteId\)/)
 })
+
+test('Academy progression fails closed when a track contains duplicate lesson IDs', async () => {
+  const progression = await read('lib/academy-progression.ts')
+
+  assert.match(progression, /function hasDuplicateLessonIds\(lessons: Lesson\[\]\): boolean/)
+  assert.match(progression, /if \(hasDuplicateLessonIds\(lessons\)\) return false/)
+  assert.match(progression, /if \(hasDuplicateLessonIds\(lessons\)\) continue/)
+})
