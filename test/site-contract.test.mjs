@@ -55,10 +55,13 @@ test('Academy has a 20-lesson minimum for every active track', async () => {
   const trackMatches = [...academy.matchAll(/id: '(csharp|cpp|java|python)'[\s\S]*?available: (true|false),/g)]
   assert.equal(trackMatches.length, 4)
 
-  for (const match of trackMatches) {
-    const start = match.index ?? 0
-    const nextTrack = academy.slice(start + match[0].length).search(/\n  \{\n    id: '/)
-    const end = nextTrack === -1 ? academy.length : start + match[0].length + nextTrack
+  const trackStarts = [...academy.matchAll(/\n  \{\n    id: '(csharp|cpp|java|python)'/g)]
+  assert.equal(trackStarts.length, 4)
+
+  for (let i = 0; i < trackMatches.length; i += 1) {
+    const match = trackMatches[i]
+    const start = trackStarts[i]?.index ?? match.index ?? 0
+    const end = trackStarts[i + 1]?.index ?? academy.length
     const section = academy.slice(start, end)
     const lessonIds = [...section.matchAll(/lesson\('([^']+)'/g)].map((lesson) => lesson[1])
 
