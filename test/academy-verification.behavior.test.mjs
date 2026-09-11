@@ -102,3 +102,13 @@ test('verifier rejects blank requirements', async () => {
   assert.equal(result.complete, false)
   assert.equal(result.failedIndex, 0)
 })
+
+test('verifier fails closed when a malformed lesson has no checks', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ checks: [] }, 'anything that would otherwise look valid')
+
+  assert.deepEqual(result.passedChecks, [])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
