@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2, ChevronDown, Circle, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Track } from '@/lib/academy-data'
-import { isLessonUnlocked } from '@/lib/academy-progression'
+import { getLessonPrerequisiteId, isLessonUnlocked } from '@/lib/academy-progression'
 
 type SyllabusTreeProps = {
   tracks: Track[]
@@ -77,6 +77,7 @@ export function SyllabusTree({
             <div className="flex flex-col gap-1.5">
               {track.modules.map((module) => {
                 const isOpen = openModules.has(module.id)
+                const lessonListId = `academy-module-${module.id}`
                 return (
                   <div
                     key={module.id}
@@ -86,6 +87,7 @@ export function SyllabusTree({
                       type="button"
                       onClick={() => toggleModule(module.id)}
                       aria-expanded={isOpen}
+                      aria-controls={lessonListId}
                       className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
                     >
                       <span className="text-sm tracking-tight text-foreground/85">
@@ -100,11 +102,20 @@ export function SyllabusTree({
                       />
                     </button>
                     {isOpen && (
-                      <ul className="border-t border-white/5 py-1">
+                      <ul id={lessonListId} className="border-t border-white/5 py-1">
                         {module.lessons.map((lesson) => {
                           const done = completedIds.has(lesson.id)
                           const unlocked = isLessonUnlocked(track, lesson.id, completedIds)
                           const active = lesson.id === activeLessonId
+                          const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
+                          const prerequisiteTitle = prerequisiteId
+                            ? track.modules
+                                .flatMap((m) => m.lessons)
+                                .find((candidate) => candidate.id === prerequisiteId)?.title
+                            : undefined
+                          const lockedReason = prerequisiteTitle
+                            ? `Complete “${prerequisiteTitle}” to unlock this lesson`
+                            : 'Complete the prerequisite lesson to unlock this lesson'
                           return (
                             <li key={lesson.id}>
                               <button
@@ -113,7 +124,7 @@ export function SyllabusTree({
                                 disabled={!unlocked}
                                 aria-current={active ? 'true' : undefined}
                                 aria-disabled={!unlocked}
-                                title={unlocked ? undefined : 'Complete the previous lesson to unlock this one'}
+                                title={unlocked ? undefined : lockedReason}
                                 className={cn(
                                   'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors',
                                   active
