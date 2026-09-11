@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ScoreGauge } from '@/components/academy/score-gauge'
 import { SyllabusTree } from '@/components/academy/syllabus-tree'
 import { LessonWorkspace } from '@/components/academy/lesson-workspace'
@@ -26,11 +26,72 @@ for (const track of tracks) {
 }
 
 const firstLessonId = tracks[0].modules[0].lessons[0].id
+const STORAGE_KEY = 'zenith-academy-progress-v1'
+
+type StoredProgress = {
+  activeLessonId?: string
+  completedIds?: string[]
+  codeByLesson?: Record<string, string>
+}
+
+function loadProgress(): StoredProgress {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY)
+    if (!raw) return {}
+    const parsed: unknown = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object') return {}
+    const value = parsed as StoredProgress
+    return {
+      activeLessonId: typeof value.activeLessonId === 'string' && lessonIndex.has(value.activeLessonId)
+        ? value.activeLessonId
+        : undefined,
+      completedIds: Array.isArray(value.completedIds)
+        ? value.completedIds.filter((id): id is string => typeof id === 'string' && lessonIndex.has(id))
+        : [],
+      codeByLesson: value.codeByLesson && typeof value.codeByLesson === 'object'
+        ? Object.fromEntries(
+            Object.entries(value.codeByLesson).filter(
+              ([id, code]) => lessonIndex.has(id) && typeof code === 'string',
+            ),
+          )
+        : {},
+    }
+  } catch {
+    return {}
+  }
+}
 
 export function AcademyDashboard() {
   const [activeLessonId, setActiveLessonId] = useState(firstLessonId)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
   const [codeByLesson, setCodeByLesson] = useState<Record<string, string>>({})
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    const saved = loadProgress()
+    if (saved.activeLessonId) setActiveLessonId(saved.activeLessonId)
+    if (saved.completedIds) setCompletedIds(new Set(saved.completedIds))
+    if (saved.codeByLesson) setCodeByLesson(saved.codeByLesson)
+    setHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!hydrated) return
+
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          activeLessonId,
+          completedIds: [...completedIds],
+          codeByLesson,
+        } satisfies StoredProgress),
+      )
+    } catch {
+      // Storage may be unavailable (private browsing, quota, or policy). The
+      // in-memory Academy experience remains fully usable in that case.
+    }
+  }, [activeLessonId, completedIds, codeByLesson, hydrated])
 
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
 
