@@ -77,11 +77,13 @@ test('Academy verification exposes its busy state to assistive technology', asyn
   assert.match(workspace, /aria-busy=\{running\}/)
 })
 
-test('Academy syllabus enforces sequential lesson progression accessibly', async () => {
+test('Academy syllabus enforces centralized sequential progression accessibly', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
 
-  assert.match(syllabus, /function isUnlocked\(track: Track, lessonId: string\)/)
-  assert.match(syllabus, /completedIds\.has\(lessons\[index - 1\]\?\.id \?\? ''\)/)
+  assert.match(syllabus, /import \{ isLessonUnlocked \} from '@\/lib\/academy-progression'/)
+  assert.match(syllabus, /const unlocked = isLessonUnlocked\(track, lesson\.id, completedIds\)/)
+  assert.doesNotMatch(syllabus, /function isUnlocked\(track: Track, lessonId: string\)/)
+  assert.doesNotMatch(syllabus, /completedIds\.has\(lessons\[index - 1\]\?\.id \?\? ''\)/)
   assert.match(syllabus, /disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
   assert.match(syllabus, /Complete the previous lesson to unlock this one/)
