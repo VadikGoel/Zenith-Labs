@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { CheckCircle2, ChevronDown, Circle, Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Track } from '@/lib/academy-data'
+import { isLessonUnlocked } from '@/lib/academy-progression'
 
 type SyllabusTreeProps = {
   tracks: Track[]
@@ -32,12 +33,6 @@ export function SyllabusTree({
       }
       return next
     })
-  }
-
-  function isUnlocked(track: Track, lessonId: string) {
-    const lessons = track.modules.flatMap((module) => module.lessons)
-    const index = lessons.findIndex((lesson) => lesson.id === lessonId)
-    return index <= 0 || completedIds.has(lessons[index - 1]?.id ?? '')
   }
 
   return (
@@ -108,7 +103,7 @@ export function SyllabusTree({
                       <ul className="border-t border-white/5 py-1">
                         {module.lessons.map((lesson) => {
                           const done = completedIds.has(lesson.id)
-                          const unlocked = isUnlocked(track, lesson.id)
+                          const unlocked = isLessonUnlocked(track, lesson.id, completedIds)
                           const active = lesson.id === activeLessonId
                           return (
                             <li key={lesson.id}>
