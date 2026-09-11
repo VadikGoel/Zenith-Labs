@@ -60,18 +60,20 @@ export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<st
     const lessons = flattenTrackLessons(track)
     if (hasDuplicateLessonIds(lessons)) continue
     const localIds = new Set(lessons.map((lesson) => lesson.id))
+    const trackSanitized = new Set<string>()
     let changed = true
 
     while (changed) {
       changed = false
       for (const lesson of lessons) {
-        if (!candidateIds.has(lesson.id) || sanitized.has(lesson.id)) continue
+        if (!candidateIds.has(lesson.id) || trackSanitized.has(lesson.id)) continue
 
         const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
         const prerequisiteSatisfied = prerequisiteId === null
-          || (localIds.has(prerequisiteId) && sanitized.has(prerequisiteId))
+          || (localIds.has(prerequisiteId) && trackSanitized.has(prerequisiteId))
 
         if (prerequisiteSatisfied) {
+          trackSanitized.add(lesson.id)
           sanitized.add(lesson.id)
           changed = true
         }
