@@ -1,7 +1,5 @@
 import type { Lesson, Track } from './academy-data'
 
-type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
-
 export type CurriculumIssue = {
   code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
   trackId: string
@@ -33,7 +31,7 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
   }
 
   for (const track of tracks) {
-    const lessons = flattenLessons(track) as LessonWithPrerequisite[]
+    const lessons = flattenLessons(track)
     const localIds = new Set(lessons.map((lesson) => lesson.id))
     const indexes = new Map(lessons.map((lesson, index) => [lesson.id, index]))
     const graph = new Map<string, string>()
