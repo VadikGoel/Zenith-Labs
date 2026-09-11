@@ -20,7 +20,6 @@ test('primary navigation defines every implemented route', async () => {
 
 test('primary navigation exposes accessible mobile menu state', async () => {
   const header = await read('components/site-header.tsx')
-
   assert.match(header, /aria-label="Main navigation"/)
   assert.match(header, /aria-expanded=\{open\}/)
   assert.match(header, /aria-label=\{open \? 'Close menu' : 'Open menu'\}/)
@@ -28,7 +27,6 @@ test('primary navigation exposes accessible mobile menu state', async () => {
 
 test('home hero retains the core conversion paths', async () => {
   const hero = await read('components/home/hero.tsx')
-
   assert.match(hero, /href="\/contact"/)
   assert.match(hero, /href="\/academy"/)
   assert.match(hero, /Deploy With Us/)
@@ -37,7 +35,6 @@ test('home hero retains the core conversion paths', async () => {
 
 test('package scripts match the CI validation contract', async () => {
   const packageJson = JSON.parse(await read('package.json'))
-
   assert.equal(packageJson.name, 'zenith-labs')
   assert.equal(typeof packageJson.scripts.build, 'string')
   assert.equal(typeof packageJson.scripts.test, 'string')
@@ -46,7 +43,6 @@ test('package scripts match the CI validation contract', async () => {
 
 test('root metadata is production-oriented and identifies Zenith Labs', async () => {
   const layout = await read('app/layout.tsx')
-
   assert.match(layout, /default: 'Zenith Labs — AI-Powered Digital Engineering Studio'/)
   assert.match(layout, /template: '%s — Zenith Labs'/)
   assert.match(layout, /applicationName: 'Zenith Labs'/)
@@ -54,20 +50,28 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
   assert.doesNotMatch(layout, /generator: 'v0\.app'/)
 })
 
-test('Academy curriculum has stable, verifiable lesson contracts', async () => {
+test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
-  const lessons = [...academy.matchAll(/id: '([^']+)',\s*title: '[^']+',\s*points: (\d+)/g)]
-  const lessonIds = lessons.map((match) => match[1])
-  const totalPoints = lessons.reduce((sum, match) => sum + Number(match[2]), 0)
+  const tracks = [...academy.matchAll(/id: '(csharp|cpp|java|python)'[\s\S]*?available: (true|false)[\s\S]*?modules: (\[[\s\S]*?\]|\[\]),/g)]
+  assert.ok(tracks.length >= 4)
 
-  assert.equal(new Set(lessonIds).size, lessonIds.length)
-  assert.equal(lessonIds.length, 9)
-  assert.equal(totalPoints, 180)
+  const activeSections = tracks.filter((match) => match[2] === 'true')
+  assert.equal(activeSections.length, 2)
+
+  for (const match of activeSections) {
+    const section = match[0]
+    const lessons = [...section.matchAll(/id: '([^']+)'[\s\S]*?points: (\d+)/g)]
+    assert.ok(lessons.length >= 20, `${match[1]} must have at least 20 lessons`)
+    assert.equal(new Set(lessons.map((lesson) => lesson[1])).size, lessons.length)
+    assert.ok(lessons.every((lesson) => Number(lesson[2]) > 0))
+  }
+
+  const allLessons = [...academy.matchAll(/id: '([^']+)'[\s\S]*?points: (\d+)/g)]
+  const totalPoints = allLessons.reduce((sum, match) => sum + Number(match[2]), 0)
+  assert.equal(allLessons.length, 40)
+  assert.equal(totalPoints, 670)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
-  assert.match(academy, /name: 'C# Mastery',[\s\S]*?available: true,[\s\S]*?id: 'cs-methods'/)
-  assert.match(academy, /name: 'C\+\+ Systems',[\s\S]*?available: true,[\s\S]*?id: 'cpp-raii'/)
   assert.match(academy, /name: 'Java Enterprise',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
-  assert.doesNotMatch(academy, /points: 0/)
   assert.doesNotMatch(academy, /checks: \[\]/)
 })
