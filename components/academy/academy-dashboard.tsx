@@ -5,6 +5,7 @@ import { ScoreGauge } from '@/components/academy/score-gauge'
 import { SyllabusTree } from '@/components/academy/syllabus-tree'
 import { LessonWorkspace } from '@/components/academy/lesson-workspace'
 import { tracks, maxPoints, type Lesson } from '@/lib/academy-data'
+import { getUnlockedLessonIds } from '@/lib/academy-progression'
 
 type LessonRef = {
   lesson: Lesson
@@ -32,23 +33,6 @@ type StoredProgress = {
   activeLessonId?: string
   completedIds?: string[]
   codeByLesson?: Record<string, string>
-}
-
-function getUnlockedLessonIds(completedIds: Set<string>) {
-  const unlocked = new Set<string>()
-
-  for (const track of tracks) {
-    if (!track.available) continue
-    const lessons = track.modules.flatMap((module) => module.lessons)
-    for (let index = 0; index < lessons.length; index += 1) {
-      const lesson = lessons[index]
-      if (index === 0 || completedIds.has(lessons[index - 1]?.id ?? '')) {
-        unlocked.add(lesson.id)
-      }
-    }
-  }
-
-  return unlocked
 }
 
 function loadProgress(): StoredProgress {
@@ -87,7 +71,7 @@ export function AcademyDashboard() {
   useEffect(() => {
     const saved = loadProgress()
     const restoredCompletedIds = new Set(saved.completedIds ?? [])
-    const unlocked = getUnlockedLessonIds(restoredCompletedIds)
+    const unlocked = getUnlockedLessonIds(tracks, restoredCompletedIds)
 
     if (saved.activeLessonId && unlocked.has(saved.activeLessonId)) {
       setActiveLessonId(saved.activeLessonId)
