@@ -3,7 +3,7 @@ import type { Lesson, Track } from './academy-data'
 type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite'
+  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -38,6 +38,9 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
     const indexes = new Map(lessons.map((lesson, index) => [lesson.id, index]))
     const graph = new Map<string, string>()
     for (const [index, lesson] of lessons.entries()) {
+      if (lesson.instructions.length === 0) issues.push({ code: 'empty-instructions', trackId: track.id, lessonId: lesson.id })
+      if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
+      if (lesson.successOutput.length === 0) issues.push({ code: 'empty-success-output', trackId: track.id, lessonId: lesson.id })
       const prerequisiteId = lesson.prerequisiteId
       if (!prerequisiteId) continue
       if (!localIds.has(prerequisiteId)) {
