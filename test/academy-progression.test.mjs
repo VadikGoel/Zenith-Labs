@@ -32,6 +32,7 @@ test('Academy progression keeps tracks isolated and ignores unavailable tracks',
 
   assert.match(progression, /for \(const track of tracks\)/)
   assert.match(progression, /if \(!track\.available\) continue/)
+  assert.match(progression, /if \(!track\.available\) return false/)
   assert.match(progression, /flattenTrackLessons\(track\)/)
 })
 
@@ -40,4 +41,10 @@ test('Academy progression gives each track first lesson no prerequisite', async 
 
   assert.match(progression, /if \(index <= 0\) return null/)
   assert.match(progression, /first lesson in each available track has no prerequisite/)
+})
+
+test('Academy progression rejects unknown lesson IDs instead of unlocking them', async () => {
+  const progression = await read('lib/academy-progression.ts')
+
+  assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === lessonId\)\) return false/)
 })
