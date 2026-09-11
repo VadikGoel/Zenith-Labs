@@ -34,6 +34,23 @@ type StoredProgress = {
   codeByLesson?: Record<string, string>
 }
 
+function getUnlockedLessonIds(completedIds: Set<string>) {
+  const unlocked = new Set<string>()
+
+  for (const track of tracks) {
+    if (!track.available) continue
+    const lessons = track.modules.flatMap((module) => module.lessons)
+    for (let index = 0; index < lessons.length; index += 1) {
+      const lesson = lessons[index]
+      if (index === 0 || completedIds.has(lessons[index - 1]?.id ?? '')) {
+        unlocked.add(lesson.id)
+      }
+    }
+  }
+
+  return unlocked
+}
+
 function loadProgress(): StoredProgress {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -69,8 +86,15 @@ export function AcademyDashboard() {
 
   useEffect(() => {
     const saved = loadProgress()
-    if (saved.activeLessonId) setActiveLessonId(saved.activeLessonId)
-    if (saved.completedIds) setCompletedIds(new Set(saved.completedIds))
+    const restoredCompletedIds = new Set(saved.completedIds ?? [])
+    const unlocked = getUnlockedLessonIds(restoredCompletedIds)
+
+    if (saved.activeLessonId && unlocked.has(saved.activeLessonId)) {
+      setActiveLessonId(saved.activeLessonId)
+    } else {
+      setActiveLessonId(firstLessonId)
+    }
+    setCompletedIds(restoredCompletedIds)
     if (saved.codeByLesson) setCodeByLesson(saved.codeByLesson)
     setHydrated(true)
   }, [])
