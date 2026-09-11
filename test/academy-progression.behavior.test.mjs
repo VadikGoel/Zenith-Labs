@@ -99,3 +99,26 @@ test('progress sanitization isolates prerequisite state between tracks', () => {
   assert.deepEqual([...restored].sort(), ['shared'])
   assert.equal(isLessonUnlocked(secondTrack, 'b-child', restored), false)
 })
+
+test('progression fails closed when lesson IDs collide across tracks', () => {
+  const firstTrack = {
+    ...track([lesson('shared', undefined)]),
+    id: 'first-track',
+  }
+  const secondTrack = {
+    ...track([
+      lesson('shared', undefined),
+      lesson('child', 'shared'),
+    ]),
+    id: 'second-track',
+  }
+
+  assert.deepEqual(
+    [...sanitizeCompletedLessonIds([firstTrack, secondTrack], new Set(['shared', 'child']))],
+    [],
+  )
+  assert.deepEqual(
+    [...getUnlockedLessonIds([firstTrack, secondTrack], new Set(['shared']))],
+    [],
+  )
+})
