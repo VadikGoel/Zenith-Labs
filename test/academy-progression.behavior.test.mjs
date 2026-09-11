@@ -32,22 +32,15 @@ test('progression unlocks and restores an explicit prerequisite graph by behavio
   assert.equal(getLessonPrerequisiteId(current, 'root'), null)
   assert.equal(getLessonPrerequisiteId(current, 'branch'), 'root')
   assert.equal(getLessonPrerequisiteId(current, 'capstone'), 'branch')
-
   assert.equal(isLessonUnlocked(current, 'root', new Set()), true)
   assert.equal(isLessonUnlocked(current, 'branch', new Set()), false)
   assert.equal(isLessonUnlocked(current, 'branch', new Set(['root'])), true)
   assert.equal(isLessonUnlocked(current, 'capstone', new Set(['root'])), false)
   assert.equal(isLessonUnlocked(current, 'capstone', new Set(['root', 'branch'])), true)
 
-  const restored = sanitizeCompletedLessonIds(
-    [current],
-    new Set(['root', 'branch', 'capstone', 'ghost']),
-  )
+  const restored = sanitizeCompletedLessonIds([current], new Set(['root', 'branch', 'capstone', 'ghost']))
   assert.deepEqual([...restored].sort(), ['branch', 'capstone', 'root'])
-  assert.deepEqual(
-    [...getUnlockedLessonIds([current], restored)].sort(),
-    ['branch', 'capstone', 'independent', 'root'],
-  )
+  assert.deepEqual([...getUnlockedLessonIds([current], restored)].sort(), ['branch', 'capstone', 'independent', 'root'])
 })
 
 test('progression remains fail-closed for malformed explicit prerequisite graphs', () => {
@@ -79,46 +72,29 @@ test('progression preserves sequential fallback for lessons without explicit met
 
 test('progress sanitization isolates prerequisite state between tracks', () => {
   const firstTrack = {
-    ...track([lesson('shared', undefined)]),
+    ...track([lesson('a-root', undefined), lesson('a-child', 'a-root')]),
     id: 'first-track',
   }
   const secondTrack = {
-    ...track([
-      lesson('b-root', undefined),
-      lesson('shared', 'b-root'),
-      lesson('b-child', 'shared'),
-    ]),
+    ...track([lesson('b-root', undefined), lesson('b-child', 'b-root')]),
     id: 'second-track',
   }
 
-  const restored = sanitizeCompletedLessonIds(
-    [firstTrack, secondTrack],
-    new Set(['shared', 'b-child']),
-  )
-
-  assert.deepEqual([...restored].sort(), ['shared'])
+  const restored = sanitizeCompletedLessonIds([firstTrack, secondTrack], new Set(['a-child', 'b-child']))
+  assert.deepEqual([...restored].sort(), [])
   assert.equal(isLessonUnlocked(secondTrack, 'b-child', restored), false)
+
+  const firstRestored = sanitizeCompletedLessonIds([firstTrack], new Set(['a-root', 'a-child']))
+  assert.deepEqual([...firstRestored].sort(), ['a-child', 'a-root'])
 })
 
 test('progression fails closed when lesson IDs collide across tracks', () => {
-  const firstTrack = {
-    ...track([lesson('shared', undefined)]),
-    id: 'first-track',
-  }
+  const firstTrack = { ...track([lesson('shared', undefined)]), id: 'first-track' }
   const secondTrack = {
-    ...track([
-      lesson('shared', undefined),
-      lesson('child', 'shared'),
-    ]),
+    ...track([lesson('shared', undefined), lesson('child', 'shared')]),
     id: 'second-track',
   }
 
-  assert.deepEqual(
-    [...sanitizeCompletedLessonIds([firstTrack, secondTrack], new Set(['shared', 'child']))],
-    [],
-  )
-  assert.deepEqual(
-    [...getUnlockedLessonIds([firstTrack, secondTrack], new Set(['shared']))],
-    [],
-  )
+  assert.deepEqual([...sanitizeCompletedLessonIds([firstTrack, secondTrack], new Set(['shared', 'child']))], [])
+  assert.deepEqual([...getUnlockedLessonIds([firstTrack, secondTrack], new Set(['shared']))], [])
 })
