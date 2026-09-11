@@ -34,6 +34,12 @@ export function SyllabusTree({
     })
   }
 
+  function isUnlocked(track: Track, lessonId: string) {
+    const lessons = track.modules.flatMap((module) => module.lessons)
+    const index = lessons.findIndex((lesson) => lesson.id === lessonId)
+    return index <= 0 || completedIds.has(lessons[index - 1]?.id ?? '')
+  }
+
   return (
     <nav aria-label="Course syllabus" className="flex flex-col gap-6">
       {tracks.map((track) => {
@@ -102,18 +108,24 @@ export function SyllabusTree({
                       <ul className="border-t border-white/5 py-1">
                         {module.lessons.map((lesson) => {
                           const done = completedIds.has(lesson.id)
+                          const unlocked = isUnlocked(track, lesson.id)
                           const active = lesson.id === activeLessonId
                           return (
                             <li key={lesson.id}>
                               <button
                                 type="button"
                                 onClick={() => onSelectLesson(lesson.id)}
+                                disabled={!unlocked}
                                 aria-current={active ? 'true' : undefined}
+                                aria-disabled={!unlocked}
+                                title={unlocked ? undefined : 'Complete the previous lesson to unlock this one'}
                                 className={cn(
                                   'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors',
                                   active
                                     ? 'bg-primary/10 text-primary'
-                                    : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                                    : unlocked
+                                      ? 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                                      : 'cursor-not-allowed text-muted-foreground/35',
                                 )}
                               >
                                 <span className="flex items-center gap-2.5">
@@ -122,8 +134,13 @@ export function SyllabusTree({
                                       className="size-4 shrink-0 text-success"
                                       aria-hidden="true"
                                     />
-                                  ) : (
+                                  ) : unlocked ? (
                                     <Circle
+                                      className="size-4 shrink-0 opacity-40"
+                                      aria-hidden="true"
+                                    />
+                                  ) : (
+                                    <Lock
                                       className="size-4 shrink-0 opacity-40"
                                       aria-hidden="true"
                                     />
