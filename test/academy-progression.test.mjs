@@ -48,3 +48,13 @@ test('Academy progression rejects unknown lesson IDs instead of unlocking them',
 
   assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === lessonId\)\) return false/)
 })
+
+test('Academy restore sanitizes forged or stale completion state', async () => {
+  const progression = await read('lib/academy-progression.ts')
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(progression, /export function sanitizeCompletedLessonIds\(tracks: Track\[\], candidateIds: Set<string>\)/)
+  assert.match(progression, /if \(!candidateIds\.has\(lesson\.id\)\) break/)
+  assert.match(progression, /if \(prerequisiteId !== null && !sanitized\.has\(prerequisiteId\)\) break/)
+  assert.match(dashboard, /sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
+})
