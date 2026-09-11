@@ -13,7 +13,7 @@ test('Academy workspace keeps learning instructions independent from verificatio
   const workspace = await read('components/academy/lesson-workspace.tsx')
 
   assert.match(workspace, /Verification requirements/)
-  assert.match(workspace, /verification\.passedCount\/\{lesson\.checks\.length\} verified/)
+  assert.match(workspace, /\{verification\.passedCount\}\/\{lesson\.checks\.length\} verified/)
   assert.match(workspace, /lesson\.instructions\.map\(\(instruction, i\) => \(/)
   assert.match(workspace, /verifyLessonCode\(lesson, code\)/)
   assert.doesNotMatch(workspace, /const passedChecks = lesson\.checks\.map/)
@@ -42,7 +42,7 @@ test('Academy verification rejects blank requirements instead of passing them im
   const verifier = await read('lib/academy-verification.ts')
 
   assert.match(verifier, /const requirement = check\.trim\(\)/)
-  assert.match(verifier, /if \(requirement\.length === 0\) return false/)
+  assert.match(verifier, /requirement\.length > 0 && executableCode\.includes\(requirement\)/)
 })
 
 test('Academy verification service owns deterministic requirement evaluation', async () => {
@@ -50,7 +50,7 @@ test('Academy verification service owns deterministic requirement evaluation', a
 
   assert.match(verifier, /export function verifyLessonCode\(lesson: Lesson, code: string\)/)
   assert.match(verifier, /lesson\.checks\.map\(\(check\) => \{[\s\S]*const requirement = check\.trim\(\)/)
-  assert.match(verifier, /const passedCount = passedChecks\.filter\(Boolean\)\.length/)
+  assert.match(verifier, /passedCount: passedChecks\.filter\(Boolean\)\.length/)
   assert.match(verifier, /complete: failedIndex === -1/)
   assert.match(verifier, /failedIndex: passedChecks\.findIndex\(\(passed\) => !passed\)/)
 })
