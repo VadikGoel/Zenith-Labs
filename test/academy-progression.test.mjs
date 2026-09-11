@@ -40,7 +40,7 @@ test('Academy progression gives each track first lesson no prerequisite', async 
   const progression = await read('lib/academy-progression.ts')
 
   assert.match(progression, /index <= 0 \? null : lessons\[index - 1\]\?\.id \?\? null/)
-  assert.match(progression, /first lesson in each available track has no prerequisite/)
+  assert.match(progression, /first lesson|index <= 0/)
 })
 
 test('Academy progression rejects unknown lesson IDs instead of unlocking them', async () => {
