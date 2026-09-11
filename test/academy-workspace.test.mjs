@@ -26,7 +26,8 @@ test('Academy verification service ignores comment-only requirements', async () 
   assert.match(verifier, /current === '\/' && next === '\/'/)
   assert.match(verifier, /current === '\/' && next === '\*'/)
   assert.match(verifier, /const executableCode = stripComments\(code\)/)
-  assert.match(verifier, /executableCode\.includes\(requirement\)/)
+  assert.match(verifier, /const source = requirement\.includes\('"'\) \|\| requirement\.includes\("'"\)/)
+  assert.match(verifier, /source\.includes\(requirement\)/)
 })
 
 test('Academy verification preserves quoted source text while stripping comments', async () => {
@@ -41,7 +42,7 @@ test('Academy verification rejects blank requirements instead of passing them im
   const verifier = await read('lib/academy-verification.ts')
 
   assert.match(verifier, /const requirement = check\.trim\(\)/)
-  assert.match(verifier, /requirement\.length > 0 && executableCode\.includes\(requirement\)/)
+  assert.match(verifier, /if \(requirement\.length === 0\) return false/)
 })
 
 test('Academy verification service owns deterministic requirement evaluation', async () => {
@@ -49,7 +50,7 @@ test('Academy verification service owns deterministic requirement evaluation', a
 
   assert.match(verifier, /export function verifyLessonCode\(lesson: Lesson, code: string\)/)
   assert.match(verifier, /lesson\.checks\.map\(\(check\) => \{[\s\S]*const requirement = check\.trim\(\)/)
-  assert.match(verifier, /passedCount: passedChecks\.filter\(Boolean\)\.length/)
+  assert.match(verifier, /const passedCount = passedChecks\.filter\(Boolean\)\.length/)
   assert.match(verifier, /complete: failedIndex === -1/)
   assert.match(verifier, /failedIndex: passedChecks\.findIndex\(\(passed\) => !passed\)/)
 })
