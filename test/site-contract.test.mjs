@@ -53,8 +53,8 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
   const expectedTrackIds = ['csharp', 'cpp', 'java', 'python']
-  const activeTrackPattern = /id: '(csharp|cpp)', name: '[^']+', language: '[^']+', available: true,/g
-  const inactiveTrackPattern = /id: '(java|python)', name: '[^']+', language: '[^']+', available: false, modules: \[\],/g
+  const activeTrackPattern = /\{\s*id: '(csharp|cpp)',\s*name: '[^']+',\s*language: '[^']+',\s*available: true,/g
+  const inactiveTrackPattern = /\{\s*id: '(java|python)',\s*name: '[^']+',\s*language: '[^']+',\s*available: false,\s*modules: \[\],\s*\}/g
   const activeTracks = [...academy.matchAll(activeTrackPattern)]
   const inactiveTracks = [...academy.matchAll(inactiveTrackPattern)]
 
