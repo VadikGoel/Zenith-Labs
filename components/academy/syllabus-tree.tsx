@@ -77,7 +77,7 @@ export function SyllabusTree({
             <div className="flex flex-col gap-1.5">
               {track.modules.map((module) => {
                 const isOpen = openModules.has(module.id)
-                const lessonListId = `academy-module-${module.id}`
+                const lessonListId = `academy-${track.id}-module-${module.id}`
                 return (
                   <div
                     key={module.id}
