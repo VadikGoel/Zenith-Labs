@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test --experimental-strip-types test/site-contract.test.mjs test/academy-workspace.test.mjs test/academy-verification.behavior.test.mjs test/academy-progression.test.mjs test/academy-progression.behavior.test.mjs test/academy-curriculum.test.mjs test/academy-curriculum.runtime.test.mjs"
+    "test": "node --test --experimental-strip-types test/site-contract.test.mjs test/academy-workspace.test.mjs test/academy-verification.behavior.test.mjs test/academy-progression.test.mjs test/academy-progression.behavior.test.mjs test/academy-production-progression.behavior.test.mjs test/academy-curriculum.test.mjs test/academy-curriculum.runtime.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
