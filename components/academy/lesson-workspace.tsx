@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { CheckSquare, Play, Square, TerminalSquare } from 'lucide-react'
+import { Play, TerminalSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { verifyLessonCode } from '@/lib/academy-verification'
 import type { Lesson } from '@/lib/academy-data'
 
 type LessonWorkspaceProps = {
@@ -37,8 +38,7 @@ export function LessonWorkspace({
     }
   }, [])
 
-  const passedChecks = lesson.checks.map((check) => code.includes(check))
-  const passedCount = passedChecks.filter(Boolean).length
+  const verification = verifyLessonCode(lesson, code)
 
   function runVerification() {
     if (running) return
@@ -47,8 +47,7 @@ export function LessonWorkspace({
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
-      const failedIndex = passedChecks.findIndex((p) => !p)
-      if (failedIndex === -1) {
+      if (verification.complete) {
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
           'compiling... done (0.42s)',
@@ -56,6 +55,7 @@ export function LessonWorkspace({
         ])
         onPass()
       } else {
+        const { failedIndex } = verification
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
           'compiling... done (0.38s)',
@@ -72,7 +72,6 @@ export function LessonWorkspace({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Lesson metadata header */}
       <header className="rounded-2xl border border-white/5 bg-neutral-900/40 p-6 shadow-2xl backdrop-blur-md">
         <p className="font-mono text-xs uppercase tracking-tight text-muted-foreground">
           {trackName} <span className="text-muted-foreground/50">/</span> {moduleName}
@@ -96,11 +95,10 @@ export function LessonWorkspace({
             Verification requirements
           </span>
           <span className="font-mono text-xs text-muted-foreground" aria-live="polite">
-            {passedCount}/{lesson.checks.length} verified
+            {verification.passedCount}/{lesson.checks.length} verified
           </span>
         </div>
 
-        {/* Learning instructions */}
         <ol className="mt-5 flex flex-col gap-2.5">
           {lesson.instructions.map((instruction, i) => (
             <li key={instruction} className="flex items-start gap-2.5">
@@ -118,7 +116,6 @@ export function LessonWorkspace({
         </ol>
       </header>
 
-      {/* Code editor */}
       <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#0a0a10] shadow-2xl">
         <div className="flex items-center justify-between border-b border-white/5 px-4 py-2.5">
           <div className="flex items-center gap-2">
@@ -150,7 +147,6 @@ export function LessonWorkspace({
         </div>
       </div>
 
-      {/* Run button */}
       <button
         type="button"
         onClick={runVerification}
@@ -162,7 +158,6 @@ export function LessonWorkspace({
         {running ? 'Verifying…' : 'Run Verification Engine'}
       </button>
 
-      {/* Terminal output */}
       <div className="overflow-hidden rounded-2xl border border-white/5 bg-[#050508] shadow-2xl">
         <div className="flex items-center gap-2 border-b border-white/5 px-4 py-2.5">
           <TerminalSquare className="size-4 text-muted-foreground" aria-hidden="true" />
@@ -170,19 +165,14 @@ export function LessonWorkspace({
             verification output
           </span>
         </div>
-        <div
-          role="log"
-          aria-live="polite"
-          className="min-h-36 p-5 font-mono text-sm leading-relaxed"
-        >
+        <div role="log" aria-live="polite" className="min-h-36 p-5 font-mono text-sm leading-relaxed">
           {terminalLines.map((line, i) => (
             <p
               key={`${i}-${line}`}
               className={cn(
                 line.startsWith('VERIFICATION PASSED')
                   ? 'text-success'
-                  : line.startsWith('VERIFICATION FAILED') ||
-                      line.startsWith('ASSERTION FAILED')
+                  : line.startsWith('VERIFICATION FAILED') || line.startsWith('ASSERTION FAILED')
                     ? 'text-destructive'
                     : line.startsWith('>')
                       ? 'text-primary'
