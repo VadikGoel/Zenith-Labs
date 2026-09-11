@@ -30,8 +30,10 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
 }
 
 /**
- * Removes forged/stale completion records by accepting only the contiguous
- * completion prefix that can actually be reached through the track rules.
+ * Removes forged/stale completion records while respecting explicit
+ * prerequisites. Unlike the legacy sequential model, a valid explicit graph
+ * may allow a lesson to be completed without completing unrelated lessons
+ * that happen to appear earlier in the curriculum order.
  */
 export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<string>): Set<string> {
   const sanitized = new Set<string>()
@@ -39,11 +41,24 @@ export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<st
   for (const track of tracks) {
     if (!track.available) continue
 
-    for (const lesson of flattenTrackLessons(track)) {
-      if (!candidateIds.has(lesson.id)) break
-      const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
-      if (prerequisiteId !== null && !sanitized.has(prerequisiteId)) break
-      sanitized.add(lesson.id)
+    const lessons = flattenTrackLessons(track)
+    const localIds = new Set(lessons.map((lesson) => lesson.id))
+    let changed = true
+
+    while (changed) {
+      changed = false
+      for (const lesson of lessons) {
+        if (!candidateIds.has(lesson.id) || sanitized.has(lesson.id)) continue
+
+        const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
+        const prerequisiteSatisfied = prerequisiteId === null
+          || (localIds.has(prerequisiteId) && sanitized.has(prerequisiteId))
+
+        if (prerequisiteSatisfied) {
+          sanitized.add(lesson.id)
+          changed = true
+        }
+      }
     }
   }
 
