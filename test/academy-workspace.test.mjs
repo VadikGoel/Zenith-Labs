@@ -102,3 +102,12 @@ test('Academy restores only an unlocked lesson from persisted progress', async (
   assert.match(dashboard, /throw new Error\('Academy curriculum must contain an available track with at least one lesson'\)/)
   assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
 })
+
+test('Academy persistence bounds untrusted localStorage payloads', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /const MAX_PERSISTED_JSON_LENGTH = 1_000_000/)
+  assert.match(dashboard, /if \(!raw \|\| raw\.length > MAX_PERSISTED_JSON_LENGTH\) return \{\}/)
+  assert.match(dashboard, /const MAX_SAVED_CODE_LENGTH = 100_000/)
+  assert.match(dashboard, /typeof code === 'string' && code\.length <= MAX_SAVED_CODE_LENGTH/)
+})
