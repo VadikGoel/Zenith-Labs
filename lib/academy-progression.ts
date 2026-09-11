@@ -1,19 +1,22 @@
 import type { Lesson, Track } from './academy-data'
 
+type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
+
 export function flattenTrackLessons(track: Track): Lesson[] {
   return track.modules.flatMap((module) => module.lessons)
 }
 
 /**
  * Returns the lesson that must be completed before the requested lesson.
- * The first lesson in each available track has no prerequisite.
+ * Explicit prerequisite metadata takes precedence; the sequential fallback
+ * keeps the existing curriculum compatible while metadata is introduced.
  */
 export function getLessonPrerequisiteId(track: Track, lessonId: string): string | null {
-  const lessons = flattenTrackLessons(track)
+  const lessons = flattenTrackLessons(track) as LessonWithPrerequisite[]
   const index = lessons.findIndex((lesson) => lesson.id === lessonId)
 
-  if (index <= 0) return null
-  return lessons[index - 1]?.id ?? null
+  if (index < 0) return null
+  return lessons[index]?.prerequisiteId ?? (index <= 0 ? null : lessons[index - 1]?.id ?? null)
 }
 
 export function isLessonUnlocked(track: Track, lessonId: string, completedIds: Set<string>): boolean {
