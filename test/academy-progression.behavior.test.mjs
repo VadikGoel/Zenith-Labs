@@ -76,3 +76,26 @@ test('progression preserves sequential fallback for lessons without explicit met
   assert.equal(isLessonUnlocked(current, 'third', new Set(['first'])), false)
   assert.equal(isLessonUnlocked(current, 'third', new Set(['first', 'second'])), true)
 })
+
+test('progress sanitization isolates prerequisite state between tracks', () => {
+  const firstTrack = {
+    ...track([lesson('shared', undefined)]),
+    id: 'first-track',
+  }
+  const secondTrack = {
+    ...track([
+      lesson('b-root', undefined),
+      lesson('shared', 'b-root'),
+      lesson('b-child', 'shared'),
+    ]),
+    id: 'second-track',
+  }
+
+  const restored = sanitizeCompletedLessonIds(
+    [firstTrack, secondTrack],
+    new Set(['shared', 'b-child']),
+  )
+
+  assert.deepEqual([...restored].sort(), ['shared'])
+  assert.equal(isLessonUnlocked(secondTrack, 'b-child', restored), false)
+})
