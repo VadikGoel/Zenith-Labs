@@ -5,7 +5,7 @@ import { ScoreGauge } from '@/components/academy/score-gauge'
 import { SyllabusTree } from '@/components/academy/syllabus-tree'
 import { LessonWorkspace } from '@/components/academy/lesson-workspace'
 import { tracks, maxPoints, type Lesson } from '@/lib/academy-data'
-import { getUnlockedLessonIds } from '@/lib/academy-progression'
+import { getUnlockedLessonIds, sanitizeCompletedLessonIds } from '@/lib/academy-progression'
 
 type LessonRef = {
   lesson: Lesson
@@ -70,7 +70,7 @@ export function AcademyDashboard() {
 
   useEffect(() => {
     const saved = loadProgress()
-    const restoredCompletedIds = new Set(saved.completedIds ?? [])
+    const restoredCompletedIds = sanitizeCompletedLessonIds(tracks, new Set(saved.completedIds ?? []))
     const unlocked = getUnlockedLessonIds(tracks, restoredCompletedIds)
 
     if (saved.activeLessonId && unlocked.has(saved.activeLessonId)) {
