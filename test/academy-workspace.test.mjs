@@ -19,11 +19,29 @@ test('Academy workspace keeps learning instructions independent from verificatio
   assert.doesNotMatch(workspace, /const passedChecks = lesson\.checks\.map/)
 })
 
+test('Academy verification service ignores comment-only requirements', async () => {
+  const verifier = await read('lib/academy-verification.ts')
+
+  assert.match(verifier, /function stripComments\(code: string\)/)
+  assert.match(verifier, /current === '\/' && next === '\/'/)
+  assert.match(verifier, /current === '\/' && next === '\*'/)
+  assert.match(verifier, /const executableCode = stripComments\(code\)/)
+  assert.match(verifier, /executableCode\.includes\(check\)/)
+})
+
+test('Academy verification preserves quoted source text while stripping comments', async () => {
+  const verifier = await read('lib/academy-verification.ts')
+
+  assert.match(verifier, /if \(quote\)/)
+  assert.match(verifier, /current === '\\\\'/)
+  assert.match(verifier, /current === quote/)
+})
+
 test('Academy verification service owns deterministic requirement evaluation', async () => {
   const verifier = await read('lib/academy-verification.ts')
 
   assert.match(verifier, /export function verifyLessonCode\(lesson: Lesson, code: string\)/)
-  assert.match(verifier, /lesson\.checks\.map\(\(check\) => code\.includes\(check\)\)/)
+  assert.match(verifier, /lesson\.checks\.map\(\(check\) => executableCode\.includes\(check\)\)/)
   assert.match(verifier, /passedCount: passedChecks\.filter\(Boolean\)\.length/)
   assert.match(verifier, /complete: failedIndex === -1/)
   assert.match(verifier, /failedIndex: passedChecks\.findIndex\(\(passed\) => !passed\)/)
