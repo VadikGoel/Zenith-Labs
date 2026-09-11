@@ -43,14 +43,14 @@ export function LessonWorkspace({
   function runVerification() {
     if (running) return
     setRunning(true)
-    setTerminalLines(['> zenith verify --lesson ' + lesson.id, 'compiling...'])
+    setTerminalLines(['> zenith verify --lesson ' + lesson.id, 'checking requirements...'])
 
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       if (verification.complete) {
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
-          'compiling... done (0.42s)',
+          'requirements checked (deterministic source analysis)',
           ...lesson.successOutput,
         ])
         onPass()
@@ -58,7 +58,7 @@ export function LessonWorkspace({
         const { failedIndex } = verification
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
-          'compiling... done (0.38s)',
+          'requirements checked (deterministic source analysis)',
           `ASSERTION FAILED [${failedIndex + 1}/${lesson.checks.length}]`,
           `expected code to contain: ${lesson.checks[failedIndex]}`,
           '',
