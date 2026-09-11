@@ -26,15 +26,21 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
 
   const lessons = flattenTrackLessons(track)
   if (hasDuplicateLessonIds(lessons)) return false
-  if (!lessons.some((lesson) => lesson.id === lessonId)) return false
+  const lesson = lessons.find((candidate) => candidate.id === lessonId)
+  if (!lesson) return false
 
   const prerequisiteId = getLessonPrerequisiteId(track, lessonId)
   if (prerequisiteId === null) return true
 
+  // A lesson cannot unlock itself, even if forged completion state contains
+  // its own ID. Curriculum validation rejects this graph shape, but runtime
+  // checks must still fail closed if malformed data reaches the client.
+  if (prerequisiteId === lesson.id) return false
+
   // Explicit prerequisites must belong to this track. A malformed cross-track
   // reference must never unlock a lesson merely because the same ID is
   // completed elsewhere.
-  if (!lessons.some((lesson) => lesson.id === prerequisiteId)) return false
+  if (!lessons.some((candidate) => candidate.id === prerequisiteId)) return false
 
   return completedIds.has(prerequisiteId)
 }
