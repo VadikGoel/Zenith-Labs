@@ -23,6 +23,7 @@ test('Academy curriculum validator checks structural identity, lesson contracts,
   assert.match(validator, /empty-instructions/)
   assert.match(validator, /empty-checks/)
   assert.match(validator, /empty-success-output/)
+  assert.doesNotMatch(validator, /type LessonWithPrerequisite = Lesson & \{ prerequisiteId\?: string \}/)
 })
 
 test('Academy progression uses the first-class Lesson prerequisite field', async () => {
