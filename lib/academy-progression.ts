@@ -26,6 +26,27 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
   return prerequisiteId === null || completedIds.has(prerequisiteId)
 }
 
+/**
+ * Removes forged/stale completion records by accepting only the contiguous
+ * completion prefix that can actually be reached through the track rules.
+ */
+export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<string>): Set<string> {
+  const sanitized = new Set<string>()
+
+  for (const track of tracks) {
+    if (!track.available) continue
+
+    for (const lesson of flattenTrackLessons(track)) {
+      if (!candidateIds.has(lesson.id)) break
+      const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
+      if (prerequisiteId !== null && !sanitized.has(prerequisiteId)) break
+      sanitized.add(lesson.id)
+    }
+  }
+
+  return sanitized
+}
+
 export function getUnlockedLessonIds(tracks: Track[], completedIds: Set<string>): Set<string> {
   const unlocked = new Set<string>()
 
