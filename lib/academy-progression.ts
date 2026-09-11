@@ -1,7 +1,5 @@
 import type { Lesson, Track } from './academy-data'
 
-type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
-
 export function flattenTrackLessons(track: Track): Lesson[] {
   return track.modules.flatMap((module) => module.lessons)
 }
@@ -12,7 +10,7 @@ export function flattenTrackLessons(track: Track): Lesson[] {
  * keeps the existing curriculum compatible while metadata is introduced.
  */
 export function getLessonPrerequisiteId(track: Track, lessonId: string): string | null {
-  const lessons = flattenTrackLessons(track) as LessonWithPrerequisite[]
+  const lessons = flattenTrackLessons(track)
   const index = lessons.findIndex((lesson) => lesson.id === lessonId)
 
   if (index < 0) return null
