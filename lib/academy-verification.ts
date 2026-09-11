@@ -80,6 +80,10 @@ function maskLiteralContents(code: string): string {
 
 /** Deterministic verifier used until the Academy gains compiler-backed execution. */
 export function verifyLessonCode(lesson: Lesson, code: string): VerificationResult {
+  if (lesson.checks.length === 0) {
+    return { passedChecks: [], passedCount: 0, complete: false, failedIndex: 0 }
+  }
+
   const executableCode = stripComments(code)
   const structuralCode = maskLiteralContents(executableCode)
   const passedChecks = lesson.checks.map((check) => {
@@ -95,6 +99,6 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
     passedChecks,
     passedCount: passedChecks.filter(Boolean).length,
     complete: failedIndex === -1,
-    failedIndex: passedChecks.findIndex((passed) => !passed),
+    failedIndex,
   }
 }
