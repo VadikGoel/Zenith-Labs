@@ -17,6 +17,11 @@ export function getLessonPrerequisiteId(track: Track, lessonId: string): string 
 }
 
 export function isLessonUnlocked(track: Track, lessonId: string, completedIds: Set<string>): boolean {
+  if (!track.available) return false
+
+  const lessons = flattenTrackLessons(track)
+  if (!lessons.some((lesson) => lesson.id === lessonId)) return false
+
   const prerequisiteId = getLessonPrerequisiteId(track, lessonId)
   return prerequisiteId === null || completedIds.has(prerequisiteId)
 }
