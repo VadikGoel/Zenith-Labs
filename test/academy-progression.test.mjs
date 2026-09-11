@@ -14,7 +14,7 @@ test('Academy progression is centralized in a reusable prerequisite service', as
 
   assert.match(progression, /export function flattenTrackLessons\(track: Track\)/)
   assert.match(progression, /export function getLessonPrerequisiteId\(track: Track, lessonId: string\)/)
-  assert.match(progression, /return lessons\[index - 1\]\?\.id \?\? null/)
+  assert.match(progression, /lessons\[index\]\?\.prerequisiteId \?\? \(index <= 0 \? null : lessons\[index - 1\]\?\.id \?\? null\)/)
   assert.match(progression, /export function isLessonUnlocked\(track: Track, lessonId: string, completedIds: Set<string>\)/)
   assert.match(progression, /completedIds\.has\(prerequisiteId\)/)
 })
@@ -39,7 +39,7 @@ test('Academy progression keeps tracks isolated and ignores unavailable tracks',
 test('Academy progression gives each track first lesson no prerequisite', async () => {
   const progression = await read('lib/academy-progression.ts')
 
-  assert.match(progression, /if \(index <= 0\) return null/)
+  assert.match(progression, /index <= 0 \? null : lessons\[index - 1\]\?\.id \?\? null/)
   assert.match(progression, /first lesson in each available track has no prerequisite/)
 })
 
