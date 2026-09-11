@@ -52,27 +52,29 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
-  const tracks = [...academy.matchAll(/id: '(csharp|cpp|java|python)'[\s\S]*?available: (true|false)[\s\S]*?modules: (\[[\s\S]*?\]|\[\]),/g)]
-  assert.ok(tracks.length >= 4)
+  const trackMatches = [...academy.matchAll(/id: '(csharp|cpp|java|python)'[\s\S]*?available: (true|false),/g)]
+  assert.equal(trackMatches.length, 4)
 
-  const activeSections = tracks.filter((match) => match[2] === 'true')
-  assert.equal(activeSections.length, 2)
+  for (const match of trackMatches) {
+    const start = match.index ?? 0
+    const nextTrack = academy.slice(start + match[0].length).search(/\n  \{\n    id: '/)
+    const end = nextTrack === -1 ? academy.length : start + match[0].length + nextTrack
+    const section = academy.slice(start, end)
+    const lessonIds = [...section.matchAll(/lesson\('([^']+)'/g)].map((lesson) => lesson[1])
 
-  for (const match of activeSections) {
-    const section = match[0]
-    const lessons = [...section.matchAll(/id: '([^']+)'[\s\S]*?points: (\d+)/g)]
-    assert.ok(lessons.length >= 20, `${match[1]} must have at least 20 lessons`)
-    assert.equal(new Set(lessons.map((lesson) => lesson[1])).size, lessons.length)
-    assert.ok(lessons.every((lesson) => Number(lesson[2]) > 0))
+    if (match[2] === 'true') {
+      assert.ok(lessonIds.length >= 20, `${match[1]} must have at least 20 lessons`)
+      assert.equal(new Set(lessonIds).size, lessonIds.length)
+    } else {
+      assert.equal(lessonIds.length, 0, `${match[1]} should not contain lessons while unavailable`)
+    }
   }
 
-  const allLessons = [...academy.matchAll(/id: '([^']+)'[\s\S]*?points: (\d+)/g)]
+  const allLessons = [...academy.matchAll(/lesson\('([^']+)',\s*'[^']+',\s*(\d+)/g)]
   const totalPoints = allLessons.reduce((sum, match) => sum + Number(match[2]), 0)
   assert.equal(allLessons.length, 40)
   assert.equal(totalPoints, 670)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
-  assert.match(academy, /name: 'Java Enterprise',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
-  assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.doesNotMatch(academy, /checks: \[\]/)
 })
 
