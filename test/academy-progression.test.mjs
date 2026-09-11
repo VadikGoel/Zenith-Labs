@@ -22,7 +22,7 @@ test('Academy progression is centralized in a reusable prerequisite service', as
 test('Academy syllabus consumes the centralized progression rule', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
 
-  assert.match(syllabus, /import \{ isLessonUnlocked \} from '@\/lib\/academy-progression'/)
+  assert.match(syllabus, /import \{ getLessonPrerequisiteId, isLessonUnlocked \} from '@\/lib\/academy-progression'/)
   assert.match(syllabus, /isLessonUnlocked\(track, lesson\.id, completedIds\)/)
   assert.doesNotMatch(syllabus, /function isUnlocked\(track: Track, lessonId: string\)/)
 })
@@ -55,8 +55,8 @@ test('Academy restore sanitizes forged or stale completion state', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
 
   assert.match(progression, /export function sanitizeCompletedLessonIds\(tracks: Track\[\], candidateIds: Set<string>\)/)
-  assert.match(progression, /if \(!candidateIds\.has\(lesson\.id\) \|\| sanitized\.has\(lesson\.id\)\) continue/)
-  assert.match(progression, /localIds\.has\(prerequisiteId\) && sanitized\.has\(prerequisiteId\)/)
+  assert.match(progression, /if \(!candidateIds\.has\(lesson\.id\) \|\| trackSanitized\.has\(lesson\.id\)\) continue/)
+  assert.match(progression, /localIds\.has\(prerequisiteId\) && trackSanitized\.has\(prerequisiteId\)/)
   assert.match(dashboard, /sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
 })
 
@@ -66,7 +66,7 @@ test('Academy restore respects explicit prerequisites instead of requiring unrel
   assert.match(progression, /may allow a lesson to be completed without completing unrelated lessons/)
   assert.match(progression, /let changed = true/)
   assert.match(progression, /while \(changed\)/)
-  assert.match(progression, /localIds\.has\(prerequisiteId\) && sanitized\.has\(prerequisiteId\)/)
+  assert.match(progression, /localIds\.has\(prerequisiteId\) && trackSanitized\.has\(prerequisiteId\)/)
 })
 
 test('Academy dashboard starts from the first lesson of the first available track', async () => {
