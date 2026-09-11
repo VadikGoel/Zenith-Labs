@@ -52,27 +52,24 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
-  const trackIds = ['csharp', 'cpp', 'java', 'python']
-  const trackPattern = /\n  \{\n    id: '(csharp|cpp|java|python)',/g
-  const trackStarts = [...academy.matchAll(trackPattern)]
-  assert.equal(trackStarts.length, trackIds.length)
+  const expectedTrackIds = ['csharp', 'cpp', 'java', 'python']
+  const activeTrackPattern = /id: '(csharp|cpp)', name: '[^']+', language: '[^']+', available: true,/g
+  const inactiveTrackPattern = /id: '(java|python)', name: '[^']+', language: '[^']+', available: false, modules: \[\],/g
+  const activeTracks = [...academy.matchAll(activeTrackPattern)]
+  const inactiveTracks = [...academy.matchAll(inactiveTrackPattern)]
 
-  for (let i = 0; i < trackStarts.length; i += 1) {
-    const match = trackStarts[i]
-    assert.equal(match[1], trackIds[i])
+  assert.deepEqual(activeTracks.map((match) => match[1]), ['csharp', 'cpp'])
+  assert.deepEqual(inactiveTracks.map((match) => match[1]), ['java', 'python'])
+  assert.deepEqual([...activeTracks, ...inactiveTracks].map((match) => match[1]).sort(), [...expectedTrackIds].sort())
+
+  for (const match of activeTracks) {
     const start = match.index ?? 0
-    const end = trackStarts[i + 1]?.index ?? academy.length
+    const nextStart = activeTracks.find((candidate) => (candidate.index ?? 0) > start)?.index
+    const end = nextStart ?? academy.length
     const section = academy.slice(start, end)
-    const availability = section.match(/available: (true|false),/)
-    assert.ok(availability, `${match[1]} must declare availability`)
     const lessonIds = [...section.matchAll(/lesson\('([^']+)'/g)].map((lesson) => lesson[1])
-
-    if (availability[1] === 'true') {
-      assert.ok(lessonIds.length >= 20, `${match[1]} must have at least 20 lessons`)
-      assert.equal(new Set(lessonIds).size, lessonIds.length)
-    } else {
-      assert.equal(lessonIds.length, 0, `${match[1]} should not contain lessons while unavailable`)
-    }
+    assert.ok(lessonIds.length >= 20, `${match[1]} must have at least 20 lessons`)
+    assert.equal(new Set(lessonIds).size, lessonIds.length)
   }
 
   const allLessons = [...academy.matchAll(/lesson\('([^']+)',\s*'[^']+',\s*(\d+)/g)]
