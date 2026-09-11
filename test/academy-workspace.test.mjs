@@ -19,6 +19,14 @@ test('Academy workspace keeps learning instructions independent from verificatio
   assert.doesNotMatch(workspace, /const passedChecks = lesson\.checks\.map/)
 })
 
+test('Academy workspace accurately labels deterministic verification instead of simulated compilation', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+
+  assert.match(workspace, /checking requirements\.\.\./)
+  assert.match(workspace, /requirements checked \(deterministic source analysis\)/)
+  assert.doesNotMatch(workspace, /compiling\.\.\. done/)
+})
+
 test('Academy verification service ignores comment-only requirements', async () => {
   const verifier = await read('lib/academy-verification.ts')
 
