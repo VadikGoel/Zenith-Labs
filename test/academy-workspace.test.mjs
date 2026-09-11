@@ -68,3 +68,23 @@ test('Academy verification exposes its busy state to assistive technology', asyn
   assert.match(workspace, /disabled=\{running\}/)
   assert.match(workspace, /aria-busy=\{running\}/)
 })
+
+test('Academy syllabus enforces sequential lesson progression accessibly', async () => {
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
+
+  assert.match(syllabus, /function isUnlocked\(track: Track, lessonId: string\)/)
+  assert.match(syllabus, /completedIds\.has\(lessons\[index - 1\]\?\.id \?\? ''\)/)
+  assert.match(syllabus, /disabled=\{!unlocked\}/)
+  assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
+  assert.match(syllabus, /Complete the previous lesson to unlock this one/)
+  assert.match(syllabus, /<Lock[\s\S]*aria-hidden="true"/)
+})
+
+test('Academy restores only an unlocked lesson from persisted progress', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
+  assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(restoredCompletedIds\)/)
+  assert.match(dashboard, /unlocked\.has\(saved\.activeLessonId\)/)
+  assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
+})
