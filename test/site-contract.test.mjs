@@ -75,3 +75,14 @@ test('Academy has a 20-lesson minimum for every active track', async () => {
   assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.doesNotMatch(academy, /checks: \[\]/)
 })
+
+test('Academy progress survives reloads through local storage', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /useEffect/)
+  assert.match(dashboard, /localStorage\.getItem\(STORAGE_KEY\)/)
+  assert.match(dashboard, /localStorage\.setItem\(/)
+  assert.match(dashboard, /completedIds: \[\.\.\.completedIds\]/)
+  assert.match(dashboard, /codeByLesson/)
+  assert.match(dashboard, /zenith-academy-progress-v1/)
+  assert.match(dashboard, /lessonIndex\.has\(value\.activeLessonId\)/)
+})
