@@ -4,7 +4,7 @@ import { flattenTrackLessons } from './academy-progression'
 type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite'
+  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -32,12 +32,19 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
   for (const track of tracks) {
     const lessons = flattenTrackLessons(track) as LessonWithPrerequisite[]
     const localIds = new Set(lessons.map((lesson) => lesson.id))
+    const indexes = new Map(lessons.map((lesson, index) => [lesson.id, index]))
     const graph = new Map<string, string>()
     for (const [index, lesson] of lessons.entries()) {
       const prerequisiteId = lesson.prerequisiteId
       if (!prerequisiteId) continue
-      if (!localIds.has(prerequisiteId)) issues.push({ code: lessonOwners.has(prerequisiteId) ? 'cross-track-prerequisite' : 'missing-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
+      if (!localIds.has(prerequisiteId)) {
+        issues.push({ code: lessonOwners.has(prerequisiteId) ? 'cross-track-prerequisite' : 'missing-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
+      }
       if (index === 0) issues.push({ code: 'first-lesson-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
+      const prerequisiteIndex = indexes.get(prerequisiteId)
+      if (prerequisiteIndex !== undefined && prerequisiteIndex >= index) {
+        issues.push({ code: 'forward-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
+      }
       graph.set(lesson.id, prerequisiteId)
     }
     const visiting = new Set<string>()
