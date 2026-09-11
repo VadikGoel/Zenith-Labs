@@ -1,5 +1,4 @@
 import type { Lesson, Track } from './academy-data'
-import { flattenTrackLessons } from './academy-progression'
 
 type LessonWithPrerequisite = Lesson & { prerequisiteId?: string }
 
@@ -8,6 +7,10 @@ export type CurriculumIssue = {
   trackId: string
   lessonId?: string
   prerequisiteId?: string
+}
+
+function flattenLessons(track: Track): Lesson[] {
+  return track.modules.flatMap((module) => module.lessons)
 }
 
 export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
@@ -23,14 +26,14 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
       if (moduleIds.has(module.id)) issues.push({ code: 'duplicate-module-id', trackId: track.id })
       moduleIds.add(module.id)
     }
-    for (const lesson of flattenTrackLessons(track)) {
+    for (const lesson of flattenLessons(track)) {
       if (lessonOwners.has(lesson.id)) issues.push({ code: 'duplicate-lesson-id', trackId: track.id, lessonId: lesson.id })
       else lessonOwners.set(lesson.id, track.id)
     }
   }
 
   for (const track of tracks) {
-    const lessons = flattenTrackLessons(track) as LessonWithPrerequisite[]
+    const lessons = flattenLessons(track) as LessonWithPrerequisite[]
     const localIds = new Set(lessons.map((lesson) => lesson.id))
     const indexes = new Map(lessons.map((lesson, index) => [lesson.id, index]))
     const graph = new Map<string, string>()
