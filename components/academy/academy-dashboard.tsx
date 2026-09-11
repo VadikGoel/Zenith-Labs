@@ -32,6 +32,8 @@ const firstLessonId = firstAvailableTrack?.modules[0]?.lessons[0]?.id ?? (() => 
 })()
 
 const STORAGE_KEY = 'zenith-academy-progress-v1'
+const MAX_PERSISTED_JSON_LENGTH = 1_000_000
+const MAX_SAVED_CODE_LENGTH = 100_000
 
 type StoredProgress = {
   activeLessonId?: string
@@ -42,7 +44,7 @@ type StoredProgress = {
 function loadProgress(): StoredProgress {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return {}
+    if (!raw || raw.length > MAX_PERSISTED_JSON_LENGTH) return {}
     const parsed: unknown = JSON.parse(raw)
     if (!parsed || typeof parsed !== 'object') return {}
     const value = parsed as StoredProgress
@@ -56,7 +58,7 @@ function loadProgress(): StoredProgress {
       codeByLesson: value.codeByLesson && typeof value.codeByLesson === 'object'
         ? Object.fromEntries(
             Object.entries(value.codeByLesson).filter(
-              ([id, code]) => lessonIndex.has(id) && typeof code === 'string',
+              ([id, code]) => lessonIndex.has(id) && typeof code === 'string' && code.length <= MAX_SAVED_CODE_LENGTH,
             ),
           )
         : {},
