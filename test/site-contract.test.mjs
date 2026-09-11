@@ -73,7 +73,7 @@ test('Academy has a 20-lesson minimum for every active track', async () => {
   const allLessons = [...academy.matchAll(/lesson\('([^']+)',\s*'[^']+',\s*(\d+)/g)]
   const totalPoints = allLessons.reduce((sum, match) => sum + Number(match[2]), 0)
   assert.equal(allLessons.length, 40)
-  assert.equal(totalPoints, 670)
+  assert.equal(totalPoints, 945)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
   assert.doesNotMatch(academy, /checks: \[\]/)
 })
