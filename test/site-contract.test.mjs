@@ -61,9 +61,11 @@ test('Academy curriculum has stable, verifiable lesson contracts', async () => {
   const totalPoints = lessons.reduce((sum, match) => sum + Number(match[2]), 0)
 
   assert.equal(new Set(lessonIds).size, lessonIds.length)
-  assert.equal(lessonIds.length, 6)
-  assert.equal(totalPoints, 100)
+  assert.equal(lessonIds.length, 9)
+  assert.equal(totalPoints, 180)
   assert.match(academy, /export const maxPoints = tracks[\s\S]*?reduce\(/)
+  assert.match(academy, /name: 'C# Mastery',[\s\S]*?available: true,[\s\S]*?id: 'cs-methods'/)
+  assert.match(academy, /name: 'C\+\+ Systems',[\s\S]*?available: true,[\s\S]*?id: 'cpp-raii'/)
   assert.match(academy, /name: 'Java Enterprise',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.match(academy, /name: 'Python for AI',[\s\S]*?available: false,[\s\S]*?modules: \[\],/)
   assert.doesNotMatch(academy, /points: 0/)
