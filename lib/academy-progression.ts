@@ -8,6 +8,17 @@ function hasDuplicateLessonIds(lessons: Lesson[]): boolean {
   return new Set(lessons.map((lesson) => lesson.id)).size !== lessons.length
 }
 
+function hasDuplicateLessonIdsAcrossTracks(tracks: Track[]): boolean {
+  const owners = new Set<string>()
+  for (const track of tracks) {
+    for (const lesson of flattenTrackLessons(track)) {
+      if (owners.has(lesson.id)) return true
+      owners.add(lesson.id)
+    }
+  }
+  return false
+}
+
 /**
  * Returns the lesson that must be completed before the requested lesson.
  * Explicit prerequisite metadata takes precedence; the sequential fallback
@@ -52,6 +63,8 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
  * that happen to appear earlier in the curriculum order.
  */
 export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<string>): Set<string> {
+  if (hasDuplicateLessonIdsAcrossTracks(tracks)) return new Set<string>()
+
   const sanitized = new Set<string>()
 
   for (const track of tracks) {
@@ -85,6 +98,8 @@ export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<st
 }
 
 export function getUnlockedLessonIds(tracks: Track[], completedIds: Set<string>): Set<string> {
+  if (hasDuplicateLessonIdsAcrossTracks(tracks)) return new Set<string>()
+
   const unlocked = new Set<string>()
 
   for (const track of tracks) {
