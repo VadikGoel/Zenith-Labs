@@ -46,7 +46,8 @@ test('Academy progression gives each track first lesson no prerequisite', async 
 test('Academy progression rejects unknown lesson IDs instead of unlocking them', async () => {
   const progression = await read('lib/academy-progression.ts')
 
-  assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === lessonId\)\) return false/)
+  assert.match(progression, /const lesson = lessons\.find\(\(candidate\) => candidate\.id === lessonId\)/)
+  assert.match(progression, /if \(!lesson\) return false/)
 })
 
 test('Academy restore sanitizes forged or stale completion state', async () => {
@@ -81,7 +82,8 @@ test('Academy unlocks explicit prerequisites only within the current track', asy
   const progression = await read('lib/academy-progression.ts')
 
   assert.match(progression, /if \(prerequisiteId === null\) return true/)
-  assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === prerequisiteId\)\) return false/)
+  assert.match(progression, /if \(prerequisiteId === lesson\.id\) return false/)
+  assert.match(progression, /if \(!lessons\.some\(\(candidate\) => candidate\.id === prerequisiteId\)\) return false/)
   assert.match(progression, /return completedIds\.has\(prerequisiteId\)/)
 })
 
@@ -91,4 +93,11 @@ test('Academy progression fails closed when a track contains duplicate lesson ID
   assert.match(progression, /function hasDuplicateLessonIds\(lessons: Lesson\[\]\): boolean/)
   assert.match(progression, /if \(hasDuplicateLessonIds\(lessons\)\) return false/)
   assert.match(progression, /if \(hasDuplicateLessonIds\(lessons\)\) continue/)
+})
+
+test('Academy progression fails closed on self-referential prerequisites', async () => {
+  const progression = await read('lib/academy-progression.ts')
+
+  assert.match(progression, /A lesson cannot unlock itself/)
+  assert.match(progression, /if \(prerequisiteId === lesson\.id\) return false/)
 })
