@@ -54,9 +54,18 @@ test('Academy restore sanitizes forged or stale completion state', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
 
   assert.match(progression, /export function sanitizeCompletedLessonIds\(tracks: Track\[\], candidateIds: Set<string>\)/)
-  assert.match(progression, /if \(!candidateIds\.has\(lesson\.id\)\) break/)
-  assert.match(progression, /if \(prerequisiteId !== null && !sanitized\.has\(prerequisiteId\)\) break/)
+  assert.match(progression, /if \(!candidateIds\.has\(lesson\.id\) \|\| sanitized\.has\(lesson\.id\)\) continue/)
+  assert.match(progression, /localIds\.has\(prerequisiteId\) && sanitized\.has\(prerequisiteId\)/)
   assert.match(dashboard, /sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
+})
+
+test('Academy restore respects explicit prerequisites instead of requiring unrelated earlier lessons', async () => {
+  const progression = await read('lib/academy-progression.ts')
+
+  assert.match(progression, /may allow a lesson to be completed without completing unrelated lessons/)
+  assert.match(progression, /let changed = true/)
+  assert.match(progression, /while \(changed\)/)
+  assert.match(progression, /localIds\.has\(prerequisiteId\) && sanitized\.has\(prerequisiteId\)/)
 })
 
 test('Academy dashboard starts from the first lesson of the first available track', async () => {
