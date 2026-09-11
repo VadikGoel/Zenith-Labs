@@ -52,3 +52,11 @@ test('Academy curriculum validator rejects lessons that could auto-pass without 
   assert.match(validator, /if \(lesson\.checks\.length === 0\) issues\.push\(\{ code: 'empty-checks'/)
   assert.match(validator, /if \(lesson\.successOutput\.length === 0\) issues\.push\(\{ code: 'empty-success-output'/)
 })
+
+test('Academy syllabus scopes ARIA module ids by track', async () => {
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
+
+  assert.match(syllabus, /const lessonListId = `academy-\$\{track\.id\}-module-\$\{module\.id\}`/)
+  assert.match(syllabus, /aria-controls=\{lessonListId\}/)
+  assert.match(syllabus, /id=\{lessonListId\}/)
+})
