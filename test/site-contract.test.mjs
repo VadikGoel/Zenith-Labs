@@ -53,15 +53,15 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
   const expectedTrackIds = ['csharp', 'cpp', 'java', 'python']
-  const activeTrackPattern = /\{\s*id: '(csharp|cpp)',\s*name: '[^']+',\s*language: '[^']+',\s*available: true,/g
-  const inactiveTrackPattern = /\{\s*id: '(java|python)',\s*name: '[^']+',\s*language: '[^']+',\s*available: false,\s*modules: \[\],\s*\}/g
-  const activeTracks = [...academy.matchAll(activeTrackPattern)]
-  const inactiveTracks = [...academy.matchAll(inactiveTrackPattern)]
+  const trackFieldsPattern = /id: '(csharp|cpp|java|python)'[\s\S]{0,220}?available: (true|false)/g
+  const trackFields = [...academy.matchAll(trackFieldsPattern)]
 
-  assert.deepEqual(activeTracks.map((match) => match[1]), ['csharp', 'cpp'])
-  assert.deepEqual(inactiveTracks.map((match) => match[1]), ['java', 'python'])
-  assert.deepEqual([...activeTracks, ...inactiveTracks].map((match) => match[1]).sort(), [...expectedTrackIds].sort())
+  assert.deepEqual(trackFields.map((match) => match[1]), expectedTrackIds)
+  assert.deepEqual(trackFields.map((match) => match[2]), ['true', 'true', 'false', 'false'])
+  assert.match(academy, /id: 'java'[\s\S]{0,220}?available: false,[\s\S]{0,80}?modules: \[\]/)
+  assert.match(academy, /id: 'python'[\s\S]{0,220}?available: false,[\s\S]{0,80}?modules: \[\]/)
 
+  const activeTracks = trackFields.filter((match) => match[2] === 'true')
   for (const match of activeTracks) {
     const start = match.index ?? 0
     const nextStart = activeTracks.find((candidate) => (candidate.index ?? 0) > start)?.index
