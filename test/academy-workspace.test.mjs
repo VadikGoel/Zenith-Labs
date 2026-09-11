@@ -93,9 +93,12 @@ test('Academy syllabus enforces centralized sequential progression accessibly', 
 test('Academy restores only an unlocked lesson from persisted progress', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
 
-  assert.match(dashboard, /import \{ getUnlockedLessonIds \} from '@\/lib\/academy-progression'/)
+  assert.match(dashboard, /import \{ getUnlockedLessonIds, sanitizeCompletedLessonIds \} from '@\/lib\/academy-progression'/)
+  assert.match(dashboard, /const restoredCompletedIds = sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
   assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(tracks, restoredCompletedIds\)/)
   assert.doesNotMatch(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
   assert.match(dashboard, /unlocked\.has\(saved\.activeLessonId\)/)
+  assert.match(dashboard, /const firstLessonId = firstAvailableTrack\?\.modules\[0\]\?\.lessons\[0\]\?\.id \?\? \(\(\) => \{/)
+  assert.match(dashboard, /throw new Error\('Academy curriculum must contain an available track with at least one lesson'\)/)
   assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
 })
