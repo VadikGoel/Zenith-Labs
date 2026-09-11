@@ -80,7 +80,10 @@ function stripComments(code: string): string {
  */
 export function verifyLessonCode(lesson: Lesson, code: string): VerificationResult {
   const executableCode = stripComments(code)
-  const passedChecks = lesson.checks.map((check) => executableCode.includes(check))
+  const passedChecks = lesson.checks.map((check) => {
+    const requirement = check.trim()
+    return requirement.length > 0 && executableCode.includes(requirement)
+  })
   const passedCount = passedChecks.filter(Boolean).length
   const failedIndex = passedChecks.findIndex((passed) => !passed)
 
