@@ -93,8 +93,9 @@ test('Academy syllabus enforces centralized sequential progression accessibly', 
 test('Academy restores only an unlocked lesson from persisted progress', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
 
-  assert.match(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
-  assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(restoredCompletedIds\)/)
+  assert.match(dashboard, /import \{ getUnlockedLessonIds \} from '@\/lib\/academy-progression'/)
+  assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(tracks, restoredCompletedIds\)/)
+  assert.doesNotMatch(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
   assert.match(dashboard, /unlocked\.has\(saved\.activeLessonId\)/)
   assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
 })
