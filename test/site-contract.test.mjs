@@ -52,20 +52,22 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
 
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
-  const trackMatches = [...academy.matchAll(/id: '(csharp|cpp|java|python)'[\s\S]*?available: (true|false),/g)]
-  assert.equal(trackMatches.length, 4)
+  const trackIds = ['csharp', 'cpp', 'java', 'python']
+  const trackPattern = /\n  \{\n    id: '(csharp|cpp|java|python)',/
+  const trackStarts = [...academy.matchAll(trackPattern)]
+  assert.equal(trackStarts.length, trackIds.length)
 
-  const trackStarts = [...academy.matchAll(/\n  \{\n    id: '(csharp|cpp|java|python)'/g)]
-  assert.equal(trackStarts.length, 4)
-
-  for (let i = 0; i < trackMatches.length; i += 1) {
-    const match = trackMatches[i]
-    const start = trackStarts[i]?.index ?? match.index ?? 0
+  for (let i = 0; i < trackStarts.length; i += 1) {
+    const match = trackStarts[i]
+    assert.equal(match[1], trackIds[i])
+    const start = match.index ?? 0
     const end = trackStarts[i + 1]?.index ?? academy.length
     const section = academy.slice(start, end)
+    const availability = section.match(/available: (true|false),/)
+    assert.ok(availability, `${match[1]} must declare availability`)
     const lessonIds = [...section.matchAll(/lesson\('([^']+)'/g)].map((lesson) => lesson[1])
 
-    if (match[2] === 'true') {
+    if (availability[1] === 'true') {
       assert.ok(lessonIds.length >= 20, `${match[1]} must have at least 20 lessons`)
       assert.equal(new Set(lessonIds).size, lessonIds.length)
     } else {
