@@ -9,7 +9,7 @@ async function read(path) {
   return readFile(resolve(root, path), 'utf8')
 }
 
-test('Academy curriculum validator checks structural identity and prerequisite integrity', async () => {
+test('Academy curriculum validator checks structural identity, lesson contracts, and prerequisite integrity', async () => {
   const validator = await read('lib/academy-curriculum.ts')
 
   assert.match(validator, /export function validateCurriculum\(tracks: Track\[\]\): CurriculumIssue\[\]/)
@@ -20,6 +20,9 @@ test('Academy curriculum validator checks structural identity and prerequisite i
   assert.match(validator, /cross-track-prerequisite/)
   assert.match(validator, /prerequisite-cycle/)
   assert.match(validator, /forward-prerequisite/)
+  assert.match(validator, /empty-instructions/)
+  assert.match(validator, /empty-checks/)
+  assert.match(validator, /empty-success-output/)
 })
 
 test('Academy progression prefers explicit prerequisites while preserving legacy ordering', async () => {
@@ -37,4 +40,12 @@ test('Academy curriculum validator rejects invalid prerequisite placement', asyn
   assert.match(validator, /if \(index === 0\) issues\.push\(\{ code: 'first-lesson-prerequisite'/)
   assert.match(validator, /prerequisiteIndex !== undefined && prerequisiteIndex >= index/)
   assert.match(validator, /code: 'forward-prerequisite'/)
+})
+
+test('Academy curriculum validator rejects lessons that could auto-pass without a contract', async () => {
+  const validator = await read('lib/academy-curriculum.ts')
+
+  assert.match(validator, /if \(lesson\.instructions\.length === 0\) issues\.push\(\{ code: 'empty-instructions'/)
+  assert.match(validator, /if \(lesson\.checks\.length === 0\) issues\.push\(\{ code: 'empty-checks'/)
+  assert.match(validator, /if \(lesson\.successOutput\.length === 0\) issues\.push\(\{ code: 'empty-success-output'/)
 })
