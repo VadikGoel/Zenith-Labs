@@ -4,6 +4,10 @@ export function flattenTrackLessons(track: Track): Lesson[] {
   return track.modules.flatMap((module) => module.lessons)
 }
 
+function hasDuplicateLessonIds(lessons: Lesson[]): boolean {
+  return new Set(lessons.map((lesson) => lesson.id)).size !== lessons.length
+}
+
 /**
  * Returns the lesson that must be completed before the requested lesson.
  * Explicit prerequisite metadata takes precedence; the sequential fallback
@@ -21,6 +25,7 @@ export function isLessonUnlocked(track: Track, lessonId: string, completedIds: S
   if (!track.available) return false
 
   const lessons = flattenTrackLessons(track)
+  if (hasDuplicateLessonIds(lessons)) return false
   if (!lessons.some((lesson) => lesson.id === lessonId)) return false
 
   const prerequisiteId = getLessonPrerequisiteId(track, lessonId)
@@ -47,6 +52,7 @@ export function sanitizeCompletedLessonIds(tracks: Track[], candidateIds: Set<st
     if (!track.available) continue
 
     const lessons = flattenTrackLessons(track)
+    if (hasDuplicateLessonIds(lessons)) continue
     const localIds = new Set(lessons.map((lesson) => lesson.id))
     let changed = true
 
