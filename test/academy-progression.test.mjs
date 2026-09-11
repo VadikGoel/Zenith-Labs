@@ -58,3 +58,12 @@ test('Academy restore sanitizes forged or stale completion state', async () => {
   assert.match(progression, /if \(prerequisiteId !== null && !sanitized\.has\(prerequisiteId\)\) break/)
   assert.match(dashboard, /sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
 })
+
+test('Academy dashboard starts from the first lesson of the first available track', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /const firstAvailableTrack = tracks\.find\(\(track\) => track\.available\)/)
+  assert.match(dashboard, /firstAvailableTrack\?\.modules\[0\]\?\.lessons\[0\]\?\.id/)
+  assert.match(dashboard, /Academy curriculum must contain an available track with at least one lesson/)
+  assert.doesNotMatch(dashboard, /const firstLessonId = tracks\[0\]\.modules\[0\]\.lessons\[0\]\.id/)
+})
