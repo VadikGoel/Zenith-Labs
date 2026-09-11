@@ -4,6 +4,8 @@ export type Lesson = {
   points: number
   instructions: string[]
   starterCode: string
+  /** Optional explicit prerequisite; omitted lessons use sequential fallback during migration. */
+  prerequisiteId?: string
   /** substrings that must appear in the code for verification to pass */
   checks: string[]
   successOutput: string[]
