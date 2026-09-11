@@ -113,21 +113,20 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
   const structuralCode = maskLiteralContents(executableCode)
   const passedChecks = lesson.checks.map((check) => {
     const requirement = check.trim()
-    if (requirement.length === 0) return false
+    const executableMatch = requirement.length > 0 && executableCode.includes(requirement)
 
     const source = requirement.includes('"') || requirement.includes("'")
       ? executableCode
       : structuralCode
 
-    return source.includes(requirement)
+    return executableMatch || source.includes(requirement)
   })
-  const passedCount = passedChecks.filter(Boolean).length
   const failedIndex = passedChecks.findIndex((passed) => !passed)
 
   return {
     passedChecks,
-    passedCount,
+    passedCount: passedChecks.filter(Boolean).length,
     complete: failedIndex === -1,
-    failedIndex,
+    failedIndex: passedChecks.findIndex((passed) => !passed),
   }
 }
