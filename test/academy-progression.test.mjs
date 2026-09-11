@@ -76,3 +76,11 @@ test('Academy dashboard starts from the first lesson of the first available trac
   assert.match(dashboard, /Academy curriculum must contain an available track with at least one lesson/)
   assert.doesNotMatch(dashboard, /const firstLessonId = tracks\[0\]\.modules\[0\]\.lessons\[0\]\.id/)
 })
+
+test('Academy unlocks explicit prerequisites only within the current track', async () => {
+  const progression = await read('lib/academy-progression.ts')
+
+  assert.match(progression, /if \(prerequisiteId === null\) return true/)
+  assert.match(progression, /if \(!lessons\.some\(\(lesson\) => lesson\.id === prerequisiteId\)\) return false/)
+  assert.match(progression, /return completedIds\.has\(prerequisiteId\)/)
+})
