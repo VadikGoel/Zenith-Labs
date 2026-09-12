@@ -85,17 +85,24 @@ function serializeProgress(progress: StoredProgress): string {
     ...[...lessonIndex.keys()],
   ].filter((id, index, ids): id is string => Boolean(id) && ids.indexOf(id) === index)
 
-  const codeByLesson: Record<string, string> = {}
   const byId = new Map(codeEntries)
+  const codeByLesson: Record<string, string> = {}
+  const baseLength = JSON.stringify(base).length
+  const codeFieldPrefix = ',"codeByLesson":'
+  let codeObjectLength = 2
+
   for (const id of prioritizedIds) {
     const code = byId.get(id)
     if (code === undefined) continue
+
+    const entryLength = JSON.stringify(id).length + 1 + JSON.stringify(code).length
+    const commaLength = Object.keys(codeByLesson).length > 0 ? 1 : 0
+    const nextCodeObjectLength = codeObjectLength + commaLength + entryLength
+    const candidateLength = baseLength + codeFieldPrefix.length + nextCodeObjectLength
+    if (candidateLength > MAX_PERSISTED_JSON_LENGTH) break
+
     codeByLesson[id] = code
-    const candidate = JSON.stringify({ ...base, codeByLesson })
-    if (candidate.length > MAX_PERSISTED_JSON_LENGTH) {
-      delete codeByLesson[id]
-      break
-    }
+    codeObjectLength = nextCodeObjectLength
   }
 
   return JSON.stringify({ ...base, codeByLesson })
