@@ -201,7 +201,7 @@ export function AcademyDashboard() {
             Engineering Curriculum
           </h1>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            Learn by shipping. Every lesson is verified against a live
+            Learn by shipping. Every lesson is verified against a deterministic
             assertion engine.
           </p>
         </div>
