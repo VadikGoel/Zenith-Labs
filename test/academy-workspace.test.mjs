@@ -96,7 +96,7 @@ test('Academy restores only an unlocked lesson from persisted progress', async (
   assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(tracks, restoredCompletedIds\)/)
   assert.doesNotMatch(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
   assert.match(dashboard, /unlocked\.has\(saved\.activeLessonId\)/)
-  assert.match(dashboard, /const firstLessonId = firstAvailableTrack\?\.modules\[0\]\?\.lessons\[0\]\?\.id \?\? \(\(\) => \{/)
+  assert.match(dashboard, /const firstLessonId = firstAvailableTrack\?\.modules\n  \.flatMap\(\(module\) => module\.lessons\)\n  \.find\(\(lesson\) => lesson !== undefined\)\?\.id \?\? \(\(\) => \{/)
   assert.match(dashboard, /throw new Error\('Academy curriculum must contain an available track with at least one lesson'\)/)
   assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
 })
