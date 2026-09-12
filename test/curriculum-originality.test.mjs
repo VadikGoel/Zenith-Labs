@@ -4,6 +4,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
 
 const ROOT = process.cwd()
+const SELF = relative(ROOT, new URL(import.meta.url).pathname)
 const IGNORED_DIRECTORIES = new Set(['.git', '.next', 'node_modules'])
 const TEXT_EXTENSIONS = new Set([
   '.css',
@@ -37,11 +38,13 @@ async function collectTextFiles(directory) {
   return files
 }
 
-test('Zenith curriculum code does not reference freeCodeCamp content', async () => {
+test('Zenith curriculum code does not reference external curriculum branding', async () => {
   const files = await collectTextFiles(ROOT)
   const references = []
 
   for (const file of files) {
+    if (relative(ROOT, file) === SELF) continue
+
     const content = await readFile(file, 'utf8')
     if (/freecodecamp/i.test(content)) {
       references.push(relative(ROOT, file))
