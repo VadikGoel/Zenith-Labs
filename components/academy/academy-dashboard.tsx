@@ -34,6 +34,7 @@ const firstLessonId = firstAvailableTrack?.modules[0]?.lessons[0]?.id ?? (() => 
 const STORAGE_KEY = 'zenith-academy-progress-v1'
 const MAX_PERSISTED_JSON_LENGTH = 1_000_000
 const MAX_SAVED_CODE_LENGTH = 100_000
+const CODE_PERSIST_DEBOUNCE_MS = 250
 
 type StoredProgress = {
   activeLessonId?: string
@@ -68,6 +69,15 @@ function loadProgress(): StoredProgress {
   }
 }
 
+function persistProgress(progress: StoredProgress) {
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+  } catch {
+    // Storage may be unavailable (private browsing, quota, or policy). The
+    // in-memory Academy experience remains fully usable in that case.
+  }
+}
+
 export function AcademyDashboard() {
   const [activeLessonId, setActiveLessonId] = useState(firstLessonId)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
@@ -91,21 +101,26 @@ export function AcademyDashboard() {
 
   useEffect(() => {
     if (!hydrated) return
+    persistProgress({
+      activeLessonId,
+      completedIds: [...completedIds],
+      codeByLesson,
+    })
+  }, [activeLessonId, completedIds, hydrated])
 
-    try {
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          activeLessonId,
-          completedIds: [...completedIds],
-          codeByLesson,
-        } satisfies StoredProgress),
-      )
-    } catch {
-      // Storage may be unavailable (private browsing, quota, or policy). The
-      // in-memory Academy experience remains fully usable in that case.
-    }
-  }, [activeLessonId, completedIds, codeByLesson, hydrated])
+  useEffect(() => {
+    if (!hydrated) return
+
+    const timeoutId = window.setTimeout(() => {
+      persistProgress({
+        activeLessonId,
+        completedIds: [...completedIds],
+        codeByLesson,
+      })
+    }, CODE_PERSIST_DEBOUNCE_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [codeByLesson, hydrated, activeLessonId, completedIds])
 
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
 
