@@ -16,13 +16,34 @@ function lesson(id, prerequisiteId) {
   }
 }
 
-function track(id, lessons, moduleId = `${id}-module`) {
-  return { id, title: id, modules: [{ id: moduleId, title: moduleId, lessons }] }
+function track(id, lessons, moduleId = `${id}-module`, available = false) {
+  return { id, name: id, language: 'test', available, modules: [{ id: moduleId, title: moduleId, lessons }] }
 }
 
 test('Academy production curriculum passes structural integrity validation', () => {
   const issues = validateCurriculum(tracks)
   assert.deepEqual(issues, [], `Academy curriculum integrity issues:\n${JSON.stringify(issues, null, 2)}`)
+})
+
+test('Academy production tracks require explicit prerequisites for every non-root lesson', () => {
+  const activeTracks = tracks.filter((track) => track.available)
+  assert.ok(activeTracks.length > 0)
+
+  for (const track of activeTracks) {
+    const lessons = track.modules.flatMap((module) => module.lessons)
+    assert.ok(lessons.length > 0, `${track.id} must contain lessons`)
+    assert.equal(lessons[0]?.prerequisiteId, undefined, `${track.id} root lesson must not have a prerequisite`)
+    for (const lesson of lessons.slice(1)) {
+      assert.ok(lesson.prerequisiteId, `${track.id}/${lesson.id} must declare an explicit prerequisite`)
+    }
+  }
+})
+
+test('Academy curriculum validator catches implicit prerequisites in active tracks', () => {
+  const issues = validateCurriculum([
+    track('active', [lesson('root'), lesson('implicit')], undefined, true),
+  ])
+  assert.ok(issues.some((issue) => issue.code === 'implicit-prerequisite'))
 })
 
 test('Academy curriculum validator catches broken prerequisite graphs at runtime', () => {
