@@ -42,8 +42,8 @@ test('Academy curriculum validator catches broken prerequisite graphs at runtime
 
 test('Academy curriculum validator distinguishes cross-track and duplicate identities at runtime', () => {
   const issues = validateCurriculum([
-    track('first', [lesson('shared')]),
-    track('second', [lesson('shared'), lesson('cross-track', 'shared')]),
+    track('first', [lesson('shared'), lesson('external')]),
+    track('second', [lesson('shared'), lesson('cross-track', 'external')]),
   ])
   const codes = issues.map((issue) => issue.code)
   assert.ok(codes.includes('duplicate-lesson-id'))
