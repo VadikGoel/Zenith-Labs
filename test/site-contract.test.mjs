@@ -14,7 +14,7 @@ test('primary navigation defines every implemented route', async () => {
   const expectedRoutes = ['/', '/about', '/services', '/academy', '/contact']
 
   for (const route of expectedRoutes) {
-    assert.match(header, new RegExp(`href: ['\\\"]${route.replace('/', '\\\\/')}['\\\"]`))
+    assert.match(header, new RegExp(`href: ['\\\"]${route.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}['\\\"]`))
   }
 })
 
