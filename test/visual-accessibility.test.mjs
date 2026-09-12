@@ -20,3 +20,9 @@ test('mobile navigation toggle exposes its controlled menu region', async () => 
   assert.match(header, /<button[\s\S]*?aria-expanded=\{open\}[\s\S]*?aria-controls="mobile-main-menu"/)
   assert.match(header, /<div[\s\S]*?id="mobile-main-menu"/)
 })
+
+test('navigation links expose the active page semantically', async () => {
+  const header = await read('components/site-header.tsx')
+  const activePageBindings = header.match(/aria-current=\{pathname === link\.href \? 'page' : undefined\}/g) ?? []
+  assert.equal(activePageBindings.length, 2)
+})
