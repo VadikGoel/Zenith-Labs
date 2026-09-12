@@ -72,6 +72,7 @@ export function SiteHeader() {
             type="button"
             onClick={() => setOpen(!open)}
             aria-expanded={open}
+            aria-controls="mobile-main-menu"
             aria-label={open ? 'Close menu' : 'Open menu'}
             className="text-muted-foreground transition-colors hover:text-foreground md:hidden"
           >
@@ -83,7 +84,10 @@ export function SiteHeader() {
 
       {/* Mobile menu */}
       {open && (
-        <div className="border-b border-white/5 bg-[#060608]/90 backdrop-blur-md md:hidden">
+        <div
+          id="mobile-main-menu"
+          className="border-b border-white/5 bg-[#060608]/90 backdrop-blur-md md:hidden"
+        >
           <ul className="flex flex-col gap-1 px-6 py-4">
             {navLinks.map((link) => (
               <li key={link.href}>
@@ -114,6 +118,4 @@ export function SiteHeader() {
           </ul>
         </div>
       )}
-    </header>
-  )
 }
