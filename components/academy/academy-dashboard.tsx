@@ -159,7 +159,7 @@ export function AcademyDashboard() {
     }, CODE_PERSIST_DEBOUNCE_MS)
 
     return () => window.clearTimeout(timeoutId)
-  }, [codeByLesson, hydrated, activeLessonId, completedIds])
+  }, [codeByLesson, hydrated])
 
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
 
