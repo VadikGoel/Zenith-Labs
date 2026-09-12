@@ -7,10 +7,12 @@ export type VerificationResult = {
   failedIndex: number
 }
 
-/** Remove comments without touching quoted string or character literals. */
+type Quote = '"' | "'" | '`'
+
+/** Remove comments without touching quoted string, character, or template literals. */
 function stripComments(code: string): string {
   let result = ''
-  let quote: '"' | "'" | null = null
+  let quote: Quote | null = null
   let escaped = false
   let blockComment = false
   let lineComment = false
@@ -41,7 +43,7 @@ function stripComments(code: string): string {
       else if (current === quote) quote = null
       continue
     }
-    if (current === '"' || current === "'") {
+    if (current === '"' || current === "'" || current === '`') {
       quote = current
       result += current
     } else if (current === '/' && next === '/') {
@@ -60,7 +62,7 @@ function stripComments(code: string): string {
 /** Mask literal contents so structural checks cannot match text inside literals. */
 function maskLiteralContents(code: string): string {
   let result = ''
-  let quote: '"' | "'" | null = null
+  let quote: Quote | null = null
   let escaped = false
   for (let i = 0; i < code.length; i += 1) {
     const current = code[i]
@@ -72,7 +74,7 @@ function maskLiteralContents(code: string): string {
       else result += ' '
       continue
     }
-    if (current === '"' || current === "'") { quote = current; result += current }
+    if (current === '"' || current === "'" || current === '`') { quote = current; result += current }
     else result += current
   }
   return result
@@ -80,14 +82,13 @@ function maskLiteralContents(code: string): string {
 
 /**
  * Match a quoted-output requirement only when the expression begins in real
- * source code, rather than inside a larger string literal that happens to
- * contain the same text.
+ * source code, rather than inside a larger string or template literal.
  */
 function containsQuotedRequirement(code: string, requirement: string): boolean {
   if (requirement.startsWith('"') || requirement.startsWith("'")) return code.includes(requirement)
 
   let searchFrom = 0
-  let quote: '"' | "'" | null = null
+  let quote: Quote | null = null
   let escaped = false
 
   while (searchFrom <= code.length - requirement.length) {
@@ -102,7 +103,7 @@ function containsQuotedRequirement(code: string, requirement: string): boolean {
         if (escaped) escaped = false
         else if (current === '\\') escaped = true
         else if (current === quote) quote = null
-      } else if (current === '"' || current === "'") {
+      } else if (current === '"' || current === "'" || current === '`') {
         quote = current
       }
     }
