@@ -25,13 +25,14 @@ test('Academy production curriculum passes structural integrity validation', () 
   assert.deepEqual(issues, [], `Academy curriculum integrity issues:\n${JSON.stringify(issues, null, 2)}`)
 })
 
-test('Academy production tracks require explicit prerequisites for every non-root lesson', () => {
+test('Academy production tracks require exactly one root and explicit prerequisites for every later lesson', () => {
   const activeTracks = tracks.filter((track) => track.available)
   assert.ok(activeTracks.length > 0)
 
   for (const track of activeTracks) {
     const lessons = track.modules.flatMap((module) => module.lessons)
     assert.ok(lessons.length > 0, `${track.id} must contain lessons`)
+    assert.equal(lessons.filter((lesson) => !lesson.prerequisiteId).length, 1, `${track.id} must contain exactly one root lesson`)
     assert.equal(lessons[0]?.prerequisiteId, undefined, `${track.id} root lesson must not have a prerequisite`)
     for (const lesson of lessons.slice(1)) {
       assert.ok(lesson.prerequisiteId, `${track.id}/${lesson.id} must declare an explicit prerequisite`)
@@ -44,6 +45,14 @@ test('Academy curriculum validator catches implicit prerequisites in active trac
     track('active', [lesson('root'), lesson('implicit')], undefined, true),
   ])
   assert.ok(issues.some((issue) => issue.code === 'implicit-prerequisite'))
+})
+
+test('Academy curriculum validator rejects active tracks with zero or multiple roots', () => {
+  const issues = validateCurriculum([
+    track('no-root', [lesson('first', 'missing'), lesson('second', 'first')], undefined, true),
+    track('multiple-roots', [lesson('root-a'), lesson('root-b')], undefined, true),
+  ])
+  assert.equal(issues.filter((issue) => issue.code === 'root-count').length, 2)
 })
 
 test('Academy curriculum validator rejects empty active tracks and modules but permits unavailable placeholders', () => {
