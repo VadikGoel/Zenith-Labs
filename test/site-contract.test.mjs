@@ -58,6 +58,15 @@ test('root metadata is production-oriented and identifies Zenith Labs', async ()
   assert.doesNotMatch(layout, /generator: 'v0\.app'/)
 })
 
+test('baseline security headers are configured for every application route', async () => {
+  const config = await read('next.config.ts')
+  assert.match(config, /source: '\/\(\.\*\)'/)
+  assert.match(config, /X-Content-Type-Options.*nosniff/)
+  assert.match(config, /X-Frame-Options.*SAMEORIGIN/)
+  assert.match(config, /Referrer-Policy.*strict-origin-when-cross-origin/)
+  assert.match(config, /Permissions-Policy.*camera=\(\).*microphone=\(\).*geolocation=\(\)/)
+})
+
 test('Academy has a 20-lesson minimum for every active track', async () => {
   const academy = await read('lib/academy-data.ts')
   const expectedTrackIds = ['csharp', 'cpp', 'java', 'python']
