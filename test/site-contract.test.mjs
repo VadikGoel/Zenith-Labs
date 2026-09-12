@@ -97,3 +97,15 @@ test('Academy progress survives reloads through local storage', async () => {
   assert.match(dashboard, /zenith-academy-progress-v1/)
   assert.match(dashboard, /lessonIndex\.has\(value\.activeLessonId\)/)
 })
+
+test('Academy syllabus exposes keyboard-friendly semantic controls and locked-lesson context', async () => {
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
+  assert.match(syllabus, /<nav aria-label="Course syllabus"/)
+  assert.match(syllabus, /<button[\s\S]*?type="button"[\s\S]*?aria-expanded=\{isOpen\}[\s\S]*?aria-controls=\{lessonListId\}/)
+  assert.match(syllabus, /<ul id=\{lessonListId\}/)
+  assert.match(syllabus, /disabled=\{!unlocked\}/)
+  assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
+  assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
+  assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
+  assert.match(syllabus, /Complete “\$\{prerequisiteTitle\}” to unlock this lesson/)
+})
