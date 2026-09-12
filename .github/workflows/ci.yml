@@ -33,5 +33,6 @@ jobs:
       - name: Test
         run: npm test
 
+      # Keep the production bundle as the final release gate.
       - name: Production build
         run: npm run build
