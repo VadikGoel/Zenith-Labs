@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ScoreGauge } from '@/components/academy/score-gauge'
 import { SyllabusTree } from '@/components/academy/syllabus-tree'
 import { LessonWorkspace } from '@/components/academy/lesson-workspace'
@@ -117,11 +117,22 @@ function persistProgress(progress: StoredProgress) {
   }
 }
 
+type ProgressSnapshot = {
+  activeLessonId: string
+  completedIds: Set<string>
+  codeByLesson: Record<string, string>
+}
+
 export function AcademyDashboard() {
   const [activeLessonId, setActiveLessonId] = useState(firstLessonId)
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set())
   const [codeByLesson, setCodeByLesson] = useState<Record<string, string>>({})
   const [hydrated, setHydrated] = useState(false)
+  const progressRef = useRef<ProgressSnapshot>({
+    activeLessonId: firstLessonId,
+    completedIds: new Set(),
+    codeByLesson: {},
+  })
 
   useEffect(() => {
     const saved = loadProgress()
@@ -138,6 +149,8 @@ export function AcademyDashboard() {
     setHydrated(true)
   }, [])
 
+  progressRef.current = { activeLessonId, completedIds, codeByLesson }
+
   useEffect(() => {
     if (!hydrated) return
     persistProgress({
@@ -145,16 +158,17 @@ export function AcademyDashboard() {
       completedIds: [...completedIds],
       codeByLesson,
     })
-  }, [activeLessonId, completedIds, hydrated])
+  }, [activeLessonId, completedIds, hydrated, codeByLesson])
 
   useEffect(() => {
     if (!hydrated) return
 
     const timeoutId = window.setTimeout(() => {
+      const snapshot = progressRef.current
       persistProgress({
-        activeLessonId,
-        completedIds: [...completedIds],
-        codeByLesson,
+        activeLessonId: snapshot.activeLessonId,
+        completedIds: [...snapshot.completedIds],
+        codeByLesson: snapshot.codeByLesson,
       })
     }, CODE_PERSIST_DEBOUNCE_MS)
 
