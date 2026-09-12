@@ -1,7 +1,7 @@
 import type { Lesson, Track } from './academy-data'
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
+  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -40,7 +40,10 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
       if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
       if (lesson.successOutput.length === 0) issues.push({ code: 'empty-success-output', trackId: track.id, lessonId: lesson.id })
       const prerequisiteId = lesson.prerequisiteId
-      if (!prerequisiteId) continue
+      if (!prerequisiteId) {
+        if (track.available && index > 0) issues.push({ code: 'implicit-prerequisite', trackId: track.id, lessonId: lesson.id })
+        continue
+      }
       if (!localIds.has(prerequisiteId)) {
         issues.push({ code: lessonOwners.has(prerequisiteId) ? 'cross-track-prerequisite' : 'missing-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
       }
