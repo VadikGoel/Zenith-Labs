@@ -147,11 +147,14 @@ test('Academy persistence ref is synchronized after commit, not mutated during r
   assert.doesNotMatch(dashboard, /\}, \[activeLessonId, completedIds, hydrated, codeByLesson\]\)/)
 })
 
-test('Academy flushes the latest committed progress when the page is hidden', async () => {
+test('Academy flushes the latest committed progress when the page is hidden or unloaded', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
   assert.match(dashboard, /const flushProgress = \(\) => \{\n      const snapshot = progressRef\.current/)
+  assert.match(dashboard, /const flushWhenHidden = \(\) => \{\n      if \(document\.visibilityState === 'hidden'\) flushProgress\(\)/)
   assert.match(dashboard, /window\.addEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.addEventListener\('visibilitychange', flushWhenHidden\)/)
   assert.match(dashboard, /window\.removeEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.removeEventListener\('visibilitychange', flushWhenHidden\)/)
   assert.match(dashboard, /persistProgress\(\{\n        activeLessonId: snapshot\.activeLessonId,[\s\S]*?codeByLesson: snapshot\.codeByLesson,/)
 })
 
