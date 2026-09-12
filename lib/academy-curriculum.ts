@@ -1,7 +1,7 @@
 import type { Lesson, Track } from './academy-data'
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-track' | 'empty-module' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
+  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'root-count' | 'empty-track' | 'empty-module' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -37,12 +37,14 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
     const localIds = new Set(lessons.map((lesson) => lesson.id))
     const indexes = new Map(lessons.map((lesson, index) => [lesson.id, index]))
     const graph = new Map<string, string>()
+    let rootCount = 0
     for (const [index, lesson] of lessons.entries()) {
       if (lesson.instructions.length === 0) issues.push({ code: 'empty-instructions', trackId: track.id, lessonId: lesson.id })
       if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
       if (lesson.successOutput.length === 0) issues.push({ code: 'empty-success-output', trackId: track.id, lessonId: lesson.id })
       const prerequisiteId = lesson.prerequisiteId
       if (!prerequisiteId) {
+        rootCount += 1
         if (track.available && index > 0) issues.push({ code: 'implicit-prerequisite', trackId: track.id, lessonId: lesson.id })
         continue
       }
@@ -55,6 +57,9 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
         issues.push({ code: 'forward-prerequisite', trackId: track.id, lessonId: lesson.id, prerequisiteId })
       }
       graph.set(lesson.id, prerequisiteId)
+    }
+    if (track.available && lessons.length > 0 && rootCount !== 1) {
+      issues.push({ code: 'root-count', trackId: track.id })
     }
     const visiting = new Set<string>()
     const visited = new Set<string>()
