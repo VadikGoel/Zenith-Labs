@@ -41,6 +41,13 @@ test('package scripts match the CI validation contract', async () => {
   assert.equal(packageJson.scripts.lint, undefined)
 })
 
+test('CI pins third-party GitHub Actions to immutable commit SHAs', async () => {
+  const workflow = await read('.github/workflows/ci.yml')
+  assert.match(workflow, /uses: actions\/checkout@[0-9a-f]{40} # v5\.0\.0/)
+  assert.match(workflow, /uses: actions\/setup-node@[0-9a-f]{40} # v5\.0\.0/)
+  assert.doesNotMatch(workflow, /uses: actions\/(checkout|setup-node)@v\d/)
+})
+
 test('root metadata is production-oriented and identifies Zenith Labs', async () => {
   const layout = await read('app/layout.tsx')
   assert.match(layout, /default: 'Zenith Labs — AI-Powered Digital Engineering Studio'/)
