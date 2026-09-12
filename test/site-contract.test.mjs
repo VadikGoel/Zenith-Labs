@@ -136,10 +136,10 @@ test('Academy persistence budgeting avoids quadratic candidate serialization', a
   assert.doesNotMatch(dashboard, /const candidate = JSON\.stringify\(\{ \.\.\.base, codeByLesson \}\)/)
 })
 
-test('Academy persistence debounce reads the latest progress snapshot', async () => {
+test('Academy persistence ref is synchronized after commit, not mutated during render', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
-  assert.match(dashboard, /const progressRef = useRef<ProgressSnapshot>\(/)
-  assert.match(dashboard, /progressRef\.current = \{ activeLessonId, completedIds, codeByLesson \}/)
+  assert.match(dashboard, /useEffect\(\(\) => \{\n    progressRef\.current = \{ activeLessonId, completedIds, codeByLesson \}\n  \}, \[activeLessonId, completedIds, codeByLesson\]\)/)
+  assert.doesNotMatch(dashboard, /\n  progressRef\.current = \{ activeLessonId, completedIds, codeByLesson \}\n\n  useEffect/)
   assert.match(dashboard, /const snapshot = progressRef\.current/)
   assert.match(dashboard, /activeLessonId: snapshot\.activeLessonId/)
   assert.match(dashboard, /completedIds: \[\.\.\.snapshot\.completedIds\]/)
