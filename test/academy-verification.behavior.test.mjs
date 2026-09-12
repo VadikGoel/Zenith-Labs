@@ -73,6 +73,16 @@ test('verifier does not satisfy quoted expressions from inside a larger string l
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier does not satisfy structural or quoted expressions from inside template literals', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const structural = verifyLessonCode({ ...lesson, checks: ['std::cout'] }, 'const note = `std::cout`;')
+  const quoted = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'const note = `cout << "Hello"`;')
+  assert.deepEqual(checks(structural), [false])
+  assert.deepEqual(checks(quoted), [false])
+  assert.equal(structural.complete, false)
+  assert.equal(quoted.complete, false)
+})
+
 test('verifier still supports requirements that intentionally include quoted output', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'cout << "Hello";')
