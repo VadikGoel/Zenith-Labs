@@ -98,6 +98,14 @@ test('Academy progress survives reloads through local storage', async () => {
   assert.match(dashboard, /lessonIndex\.has\(value\.activeLessonId\)/)
 })
 
+test('Academy selects the first lesson even when the first available module is empty', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const firstAvailableTrack = tracks\.find\(\(track\) => track\.available\)/)
+  assert.match(dashboard, /firstAvailableTrack\?\.modules\n  \.flatMap\(\(module\) => module\.lessons\)/)
+  assert.match(dashboard, /\.find\(\(lesson\) => lesson !== undefined\)\?\.id/)
+  assert.doesNotMatch(dashboard, /firstAvailableTrack\?\.modules\[0\]\?\.lessons\[0\]\?\.id/)
+})
+
 test('Academy code persistence is debounced to avoid a storage write on every keystroke', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
   assert.match(dashboard, /const CODE_PERSIST_DEBOUNCE_MS = 250/)
