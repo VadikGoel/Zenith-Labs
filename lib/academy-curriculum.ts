@@ -1,7 +1,7 @@
 import type { Lesson, Track } from './academy-data'
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
+  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'empty-track' | 'empty-module' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -19,10 +19,12 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
   for (const track of tracks) {
     if (trackIds.has(track.id)) issues.push({ code: 'duplicate-track-id', trackId: track.id })
     trackIds.add(track.id)
+    if (track.modules.length === 0) issues.push({ code: 'empty-track', trackId: track.id })
     const moduleIds = new Set<string>()
     for (const module of track.modules) {
       if (moduleIds.has(module.id)) issues.push({ code: 'duplicate-module-id', trackId: track.id })
       moduleIds.add(module.id)
+      if (module.lessons.length === 0) issues.push({ code: 'empty-module', trackId: track.id })
     }
     for (const lesson of flattenLessons(track)) {
       if (lessonOwners.has(lesson.id)) issues.push({ code: 'duplicate-lesson-id', trackId: track.id, lessonId: lesson.id })
