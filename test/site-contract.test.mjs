@@ -125,4 +125,5 @@ test('Academy lesson workspace exposes uniquely associated editor and live verif
   assert.match(workspace, /aria-busy=\{running\}/)
   assert.match(workspace, /focus-visible:ring-primary\/70/)
   assert.match(workspace, /focus-visible:outline-primary/)
+  assert.match(workspace, /role="status" aria-live="polite"[\s\S]*?>\s*Completed/)
 })
