@@ -13,12 +13,12 @@ function lessonById(track, id) {
   return track?.modules.flatMap((module) => module.lessons).find((lesson) => lesson.id === id)
 }
 
-test('production C# Foundations progression follows the intended lesson chain', () => {
+test('production C# Foundations progression is defined by explicit prerequisite metadata', () => {
   assert.ok(csharp, 'C# track must exist')
   assert.equal(csharp.available, true)
 
   const expectedPrerequisites = [
-    ['cs-hello', null],
+    ['cs-hello', undefined],
     ['cs-vars', 'cs-hello'],
     ['cs-branching', 'cs-vars'],
     ['cs-methods', 'cs-branching'],
@@ -26,8 +26,10 @@ test('production C# Foundations progression follows the intended lesson chain', 
   ]
 
   for (const [lessonId, prerequisiteId] of expectedPrerequisites) {
-    assert.ok(lessonById(csharp, lessonId), `${lessonId} must exist in production curriculum`)
-    assert.equal(getLessonPrerequisiteId(csharp, lessonId), prerequisiteId)
+    const lesson = lessonById(csharp, lessonId)
+    assert.ok(lesson, `${lessonId} must exist in production curriculum`)
+    assert.equal(lesson?.prerequisiteId, prerequisiteId)
+    assert.equal(getLessonPrerequisiteId(csharp, lessonId), prerequisiteId ?? null)
   }
 })
 
