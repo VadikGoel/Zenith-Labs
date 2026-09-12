@@ -69,9 +69,39 @@ function loadProgress(): StoredProgress {
   }
 }
 
+function serializeProgress(progress: StoredProgress): string {
+  const base = {
+    activeLessonId: progress.activeLessonId,
+    completedIds: progress.completedIds ?? [],
+  }
+  const codeEntries = Object.entries(progress.codeByLesson ?? {})
+    .filter(([id, code]) => lessonIndex.has(id) && typeof code === 'string' && code.length <= MAX_SAVED_CODE_LENGTH)
+
+  const prioritizedIds = [
+    progress.activeLessonId,
+    ...(progress.completedIds ?? []),
+    ...[...lessonIndex.keys()],
+  ].filter((id, index, ids): id is string => Boolean(id) && ids.indexOf(id) === index)
+
+  const codeByLesson: Record<string, string> = {}
+  const byId = new Map(codeEntries)
+  for (const id of prioritizedIds) {
+    const code = byId.get(id)
+    if (code === undefined) continue
+    codeByLesson[id] = code
+    const candidate = JSON.stringify({ ...base, codeByLesson })
+    if (candidate.length > MAX_PERSISTED_JSON_LENGTH) {
+      delete codeByLesson[id]
+      break
+    }
+  }
+
+  return JSON.stringify({ ...base, codeByLesson })
+}
+
 function persistProgress(progress: StoredProgress) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+    window.localStorage.setItem(STORAGE_KEY, serializeProgress(progress))
   } catch {
     // Storage may be unavailable (private browsing, quota, or policy). The
     // in-memory Academy experience remains fully usable in that case.
