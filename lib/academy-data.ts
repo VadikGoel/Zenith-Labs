@@ -25,8 +25,9 @@ export type Track = {
   modules: Module[]
 }
 
-const lesson = (id: string, title: string, points: number, instructions: string[], starterCode: string, checks: string[], output: string[]): Lesson => ({
+const lesson = (id: string, title: string, points: number, instructions: string[], starterCode: string, checks: string[], output: string[], prerequisiteId?: string): Lesson => ({
   id, title, points, instructions, starterCode, checks, successOutput: output,
+  ...(prerequisiteId ? { prerequisiteId } : {}),
 })
 
 export const tracks: Track[] = [
@@ -36,10 +37,10 @@ export const tracks: Track[] = [
       {
         id: 'cs-foundations', title: 'Foundations', lessons: [
           lesson('cs-hello', 'Hello, Zenith', 10, ['Declare Program', 'Add static Main', 'Print Hello, Zenith'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['Console.WriteLine', 'Hello, Zenith'], ['Hello, Zenith', 'VERIFICATION PASSED — 2/2 assertions green']),
-          lesson('cs-vars', 'Variables & Types', 15, ['Declare an int credits', 'Declare a string studio', 'Use interpolation'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['int credits', 'string studio', '$"'], ['Zenith grants 42 credits', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-branching', 'Decisions & Branching', 15, ['Declare score', 'Use if/else', 'Print the result'], `using System;\nclass Program { static void Main() { int score = 80; /* TODO */ } }`, ['int score', 'if (', 'else', 'Console.WriteLine'], ['PASS', 'VERIFICATION PASSED — 4/4 assertions green']),
-          lesson('cs-methods', 'Methods & Return Values', 20, ['Define Add', 'Use two int parameters', 'Return and print the sum'], `using System;\nclass Program { /* TODO Add */ static void Main() { /* TODO */ } }`, ['static int Add', 'return', 'Add(', 'Console.WriteLine'], ['42', 'VERIFICATION PASSED — 4/4 assertions green']),
-          lesson('cs-loops', 'Loops & Repetition', 20, ['Create a loop', 'Repeat three times', 'Print each value'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['for (', 'Console.WriteLine'], ['1', '2', '3', 'VERIFICATION PASSED — 2/2 assertions green']),
+          lesson('cs-vars', 'Variables & Types', 15, ['Declare an int credits', 'Declare a string studio', 'Use interpolation'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['int credits', 'string studio', '$"'], ['Zenith grants 42 credits', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-hello'),
+          lesson('cs-branching', 'Decisions & Branching', 15, ['Declare score', 'Use if/else', 'Print the result'], `using System;\nclass Program { static void Main() { int score = 80; /* TODO */ } }`, ['int score', 'if (', 'else', 'Console.WriteLine'], ['PASS', 'VERIFICATION PASSED — 4/4 assertions green'], 'cs-vars'),
+          lesson('cs-methods', 'Methods & Return Values', 20, ['Define Add', 'Use two int parameters', 'Return and print the sum'], `using System;\nclass Program { /* TODO Add */ static void Main() { /* TODO */ } }`, ['static int Add', 'return', 'Add(', 'Console.WriteLine'], ['42', 'VERIFICATION PASSED — 4/4 assertions green'], 'cs-branching'),
+          lesson('cs-loops', 'Loops & Repetition', 20, ['Create a loop', 'Repeat three times', 'Print each value'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['for (', 'Console.WriteLine'], ['1', '2', '3', 'VERIFICATION PASSED — 2/2 assertions green'], 'cs-methods'),
         ],
       },
       {
