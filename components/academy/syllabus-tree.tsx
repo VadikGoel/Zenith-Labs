@@ -94,7 +94,7 @@ export function SyllabusTree({
                       onClick={() => toggleModule(track.id, module.id)}
                       aria-expanded={isOpen}
                       aria-controls={lessonListId}
-                      className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
+                      className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     >
                       <span className="text-sm tracking-tight text-foreground/85">
                         {module.title}
@@ -133,7 +133,7 @@ export function SyllabusTree({
                                 aria-label={unlocked ? lesson.title : `${lesson.title}. ${lockedReason}`}
                                 title={unlocked ? undefined : lockedReason}
                                 className={cn(
-                                  'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors',
+                                  'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary',
                                   active
                                     ? 'bg-primary/10 text-primary'
                                     : unlocked
