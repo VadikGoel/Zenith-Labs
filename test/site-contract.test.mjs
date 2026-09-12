@@ -14,7 +14,7 @@ test('primary navigation defines every implemented route', async () => {
   const expectedRoutes = ['/', '/about', '/services', '/academy', '/contact']
 
   for (const route of expectedRoutes) {
-    assert.match(header, new RegExp(`href: ['\"]${route.replace('/', '\\/')}['\"]`))
+    assert.match(header, new RegExp(`href: ['\\\"]${route.replace('/', '\\\\/')}['\\\"]`))
   }
 })
 
@@ -108,6 +108,7 @@ test('Academy syllabus exposes keyboard-friendly semantic controls and locked-le
   assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
   assert.match(syllabus, /Complete “\$\{prerequisiteTitle\}” to unlock this lesson/)
+  assert.match(syllabus, /focus-visible:outline-primary/)
 })
 
 test('Academy lesson workspace exposes uniquely associated editor and live verification output', async () => {
@@ -122,4 +123,6 @@ test('Academy lesson workspace exposes uniquely associated editor and live verif
   assert.match(workspace, /id=\{outputId\}/)
   assert.match(workspace, /role="log" aria-live="polite"/)
   assert.match(workspace, /aria-busy=\{running\}/)
+  assert.match(workspace, /focus-visible:ring-primary\/70/)
+  assert.match(workspace, /focus-visible:outline-primary/)
 })
