@@ -177,6 +177,22 @@ export function AcademyDashboard() {
     return () => window.clearTimeout(timeoutId)
   }, [codeByLesson, hydrated])
 
+  useEffect(() => {
+    if (!hydrated) return
+
+    const flushProgress = () => {
+      const snapshot = progressRef.current
+      persistProgress({
+        activeLessonId: snapshot.activeLessonId,
+        completedIds: [...snapshot.completedIds],
+        codeByLesson: snapshot.codeByLesson,
+      })
+    }
+
+    window.addEventListener('pagehide', flushProgress)
+    return () => window.removeEventListener('pagehide', flushProgress)
+  }, [hydrated])
+
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
 
   const totalScore = useMemo(
