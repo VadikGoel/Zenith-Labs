@@ -43,6 +43,7 @@ export function SiteHeader() {
               <li key={link.href}>
                 <Link
                   href={link.href}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   className={cn(
                     'text-sm tracking-tight transition-colors hover:text-foreground',
                     pathname === link.href
@@ -94,6 +95,7 @@ export function SiteHeader() {
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   className={cn(
                     'block rounded-md px-3 py-2.5 text-sm tracking-tight transition-colors',
                     pathname === link.href
@@ -118,4 +120,6 @@ export function SiteHeader() {
           </ul>
         </div>
       )}
+    </header>
+  )
 }
