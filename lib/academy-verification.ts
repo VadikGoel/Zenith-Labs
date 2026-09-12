@@ -81,22 +81,18 @@ function maskLiteralContents(code: string): string {
 }
 
 /**
- * Match a quoted-output requirement only when the expression begins in real
+ * Match a quoted-output requirement only when its occurrence begins in real
  * source code, rather than inside a larger string or template literal.
  */
 function containsQuotedRequirement(code: string, requirement: string): boolean {
-  if (requirement.startsWith('"') || requirement.startsWith("'")) return code.includes(requirement)
-
   let searchFrom = 0
-  let quote: Quote | null = null
-  let escaped = false
 
   while (searchFrom <= code.length - requirement.length) {
     const index = code.indexOf(requirement, searchFrom)
     if (index === -1) return false
 
-    quote = null
-    escaped = false
+    let quote: Quote | null = null
+    let escaped = false
     for (let i = 0; i < index; i += 1) {
       const current = code[i]
       if (quote) {
@@ -107,6 +103,7 @@ function containsQuotedRequirement(code: string, requirement: string): boolean {
         quote = current
       }
     }
+
     if (!quote) return true
     searchFrom = index + 1
   }
