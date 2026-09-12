@@ -46,6 +46,16 @@ test('Academy curriculum validator catches implicit prerequisites in active trac
   assert.ok(issues.some((issue) => issue.code === 'implicit-prerequisite'))
 })
 
+test('Academy curriculum validator rejects empty tracks and modules at runtime', () => {
+  const issues = validateCurriculum([
+    { id: 'empty-track', name: 'Empty Track', language: 'test', available: true, modules: [] },
+    { id: 'empty-module', name: 'Empty Module', language: 'test', available: true, modules: [{ id: 'empty', title: 'Empty', lessons: [] }] },
+  ])
+  const codes = issues.map((issue) => issue.code)
+  assert.ok(codes.includes('empty-track'))
+  assert.ok(codes.includes('empty-module'))
+})
+
 test('Academy curriculum validator catches broken prerequisite graphs at runtime', () => {
   const issues = validateCurriculum([
     track('broken', [
