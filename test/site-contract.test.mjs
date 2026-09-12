@@ -125,6 +125,15 @@ test('Academy progress writes stay within a bounded serialized storage budget', 
   assert.match(dashboard, /progress\.completedIds/)
 })
 
+test('Academy persistence budgeting avoids quadratic candidate serialization', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const baseLength = JSON\.stringify\(base\)\.length/)
+  assert.match(dashboard, /const codeFieldPrefix = ',\\"codeByLesson\\":'/)
+  assert.match(dashboard, /const entryLength = JSON\.stringify\(id\)\.length \+ 1 \+ JSON\.stringify\(code\)\.length/)
+  assert.match(dashboard, /const candidateLength = baseLength \+ codeFieldPrefix\.length \+ nextCodeObjectLength/)
+  assert.doesNotMatch(dashboard, /const candidate = JSON\.stringify\(\{ \.\.\.base, codeByLesson \}\)/)
+})
+
 test('Academy syllabus exposes keyboard-friendly semantic controls and locked-lesson context', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
   assert.match(syllabus, /<nav aria-label="Course syllabus"/)
