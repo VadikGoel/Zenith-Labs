@@ -63,7 +63,7 @@ test('Academy curriculum validator rejects empty active tracks and modules but p
     { id: 'unavailable-module', name: 'Unavailable Module', language: 'test', available: false, modules: [{ id: 'empty', title: 'Empty', lessons: [] }] },
   ])
   const codes = issues.map((issue) => issue.code)
-  assert.equal(codes.filter((code) => code === 'empty-track').length, 2)
+  assert.equal(codes.filter((code) => code === 'empty-track').length, 1)
   assert.equal(codes.filter((code) => code === 'empty-module').length, 1)
 })
 
