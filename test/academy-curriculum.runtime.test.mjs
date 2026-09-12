@@ -46,14 +46,16 @@ test('Academy curriculum validator catches implicit prerequisites in active trac
   assert.ok(issues.some((issue) => issue.code === 'implicit-prerequisite'))
 })
 
-test('Academy curriculum validator rejects empty tracks and modules at runtime', () => {
+test('Academy curriculum validator rejects empty active tracks and modules but permits unavailable placeholders', () => {
   const issues = validateCurriculum([
-    { id: 'empty-track', name: 'Empty Track', language: 'test', available: true, modules: [] },
-    { id: 'empty-module', name: 'Empty Module', language: 'test', available: true, modules: [{ id: 'empty', title: 'Empty', lessons: [] }] },
+    { id: 'empty-active-track', name: 'Empty Active Track', language: 'test', available: true, modules: [] },
+    { id: 'empty-active-module', name: 'Empty Active Module', language: 'test', available: true, modules: [{ id: 'empty', title: 'Empty', lessons: [] }] },
+    { id: 'unavailable-track', name: 'Unavailable Track', language: 'test', available: false, modules: [] },
+    { id: 'unavailable-module', name: 'Unavailable Module', language: 'test', available: false, modules: [{ id: 'empty', title: 'Empty', lessons: [] }] },
   ])
   const codes = issues.map((issue) => issue.code)
-  assert.ok(codes.includes('empty-track'))
-  assert.ok(codes.includes('empty-module'))
+  assert.equal(codes.filter((code) => code === 'empty-track').length, 2)
+  assert.equal(codes.filter((code) => code === 'empty-module').length, 1)
 })
 
 test('Academy curriculum validator catches broken prerequisite graphs at runtime', () => {
