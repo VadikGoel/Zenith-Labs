@@ -4,7 +4,7 @@ export type Lesson = {
   points: number
   instructions: string[]
   starterCode: string
-  /** Optional explicit prerequisite; omitted lessons use sequential fallback during migration. */
+  /** Optional explicit prerequisite; roots omit it. */
   prerequisiteId?: string
   /** substrings that must appear in the code for verification to pass */
   checks: string[]
@@ -45,29 +45,29 @@ export const tracks: Track[] = [
       },
       {
         id: 'cs-types', title: 'Core Types & Collections', lessons: [
-          lesson('cs-arrays', 'Arrays', 15, ['Create an int array', 'Read an element', 'Print it'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['int[]', 'Console.WriteLine'], ['20', 'VERIFICATION PASSED — 2/2 assertions green']),
-          lesson('cs-lists', 'Lists & Generics', 20, ['Create List<int>', 'Add values', 'Read a value'], `using System;\nusing System.Collections.Generic;\nclass Program { static void Main() { /* TODO */ } }`, ['List<int>', '.Add(', 'Console.WriteLine'], ['30', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-dictionary', 'Dictionaries', 20, ['Create a Dictionary', 'Store a key/value pair', 'Read by key'], `using System;\nusing System.Collections.Generic;\nclass Program { static void Main() { /* TODO */ } }`, ['Dictionary<', '[', 'Console.WriteLine'], ['Zenith', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-exceptions', 'Exceptions & Recovery', 25, ['Use try/catch', 'Handle an exception', 'Print a recovery message'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['try', 'catch', 'Console.WriteLine'], ['Recovered', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-enums', 'Enums & Domain Values', 20, ['Define an enum', 'Select a member', 'Print the value'], `using System;\nenum Status { Draft, Ready, Live }\nclass Program { static void Main() { /* TODO */ } }`, ['enum Status', 'Status.', 'Console.WriteLine'], ['Live', 'VERIFICATION PASSED — 3/3 assertions green']),
+          lesson('cs-arrays', 'Arrays', 15, ['Create an int array', 'Read an element', 'Print it'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['int[]', 'Console.WriteLine'], ['20', 'VERIFICATION PASSED — 2/2 assertions green'], 'cs-loops'),
+          lesson('cs-lists', 'Lists & Generics', 20, ['Create List<int>', 'Add values', 'Read a value'], `using System;\nusing System.Collections.Generic;\nclass Program { static void Main() { /* TODO */ } }`, ['List<int>', '.Add(', 'Console.WriteLine'], ['30', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-arrays'),
+          lesson('cs-dictionary', 'Dictionaries', 20, ['Create a Dictionary', 'Store a key/value pair', 'Read by key'], `using System;\nusing System.Collections.Generic;\nclass Program { static void Main() { /* TODO */ } }`, ['Dictionary<', '[', 'Console.WriteLine'], ['Zenith', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-lists'),
+          lesson('cs-exceptions', 'Exceptions & Recovery', 25, ['Use try/catch', 'Handle an exception', 'Print a recovery message'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['try', 'catch', 'Console.WriteLine'], ['Recovered', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-dictionary'),
+          lesson('cs-enums', 'Enums & Domain Values', 20, ['Define an enum', 'Select a member', 'Print the value'], `using System;\nenum Status { Draft, Ready, Live }\nclass Program { static void Main() { /* TODO */ } }`, ['enum Status', 'Status.', 'Console.WriteLine'], ['Live', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-exceptions'),
         ],
       },
       {
         id: 'cs-oop', title: 'Object Orientation', lessons: [
-          lesson('cs-class', 'Classes & Records', 20, ['Define Agent', 'Instantiate it', 'Print it'], `using System;\n// TODO: record Agent(string Name, int Version)\nclass Program { static void Main() { /* TODO */ } }`, ['record Agent', 'new Agent', 'Console.WriteLine'], ['Agent { Name = Sentinel, Version = 2 }', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-properties', 'Properties & Encapsulation', 20, ['Define a class', 'Add a property', 'Read the property'], `class Agent { /* TODO */ }`, ['class Agent', 'public string Name', 'Name'], ['Sentinel', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-inheritance', 'Inheritance & Polymorphism', 25, ['Create a base type', 'Derive a type', 'Override behavior'], `class Agent { public virtual string Run() => "base"; }\nclass Sentinel : Agent { /* TODO */ }`, ['virtual', 'class Sentinel : Agent', 'override'], ['sentinel', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-interfaces', 'Interfaces & Contracts', 25, ['Define an interface', 'Implement it', 'Call the contract'], `interface IRunner { string Run(); }\nclass Agent { /* TODO */ }`, ['interface IRunner', 'IRunner', 'Run()'], ['running', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-delegates', 'Delegates & Events', 25, ['Declare a delegate', 'Assign a method', 'Invoke it'], `using System;\nclass Program { delegate int Operation(int a, int b); static void Main() { /* TODO */ } }`, ['delegate', 'Operation', 'Console.WriteLine'], ['42', 'VERIFICATION PASSED — 3/3 assertions green']),
+          lesson('cs-class', 'Classes & Records', 20, ['Define Agent', 'Instantiate it', 'Print it'], `using System;\n// TODO: record Agent(string Name, int Version)\nclass Program { static void Main() { /* TODO */ } }`, ['record Agent', 'new Agent', 'Console.WriteLine'], ['Agent { Name = Sentinel, Version = 2 }', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-enums'),
+          lesson('cs-properties', 'Properties & Encapsulation', 20, ['Define a class', 'Add a property', 'Read the property'], `class Agent { /* TODO */ }`, ['class Agent', 'public string Name', 'Name'], ['Sentinel', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-class'),
+          lesson('cs-inheritance', 'Inheritance & Polymorphism', 25, ['Create a base type', 'Derive a type', 'Override behavior'], `class Agent { public virtual string Run() => "base"; }\nclass Sentinel : Agent { /* TODO */ }`, ['virtual', 'class Sentinel : Agent', 'override'], ['sentinel', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-properties'),
+          lesson('cs-interfaces', 'Interfaces & Contracts', 25, ['Define an interface', 'Implement it', 'Call the contract'], `interface IRunner { string Run(); }\nclass Agent { /* TODO */ }`, ['interface IRunner', 'IRunner', 'Run()'], ['running', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-inheritance'),
+          lesson('cs-delegates', 'Delegates & Events', 25, ['Declare a delegate', 'Assign a method', 'Invoke it'], `using System;\nclass Program { delegate int Operation(int a, int b); static void Main() { /* TODO */ } }`, ['delegate', 'Operation', 'Console.WriteLine'], ['42', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-interfaces'),
         ],
       },
       {
         id: 'cs-advanced', title: 'Advanced C#', lessons: [
-          lesson('cs-linq', 'LINQ Queries', 25, ['Create a collection', 'Filter it with LINQ', 'Print the result'], `using System;\nusing System.Linq;\nclass Program { static void Main() { /* TODO */ } }`, ['using System.Linq', '.Where(', 'Console.WriteLine'], ['20', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-async', 'Async & Await', 30, ['Define an async method', 'Await a Task', 'Return a result'], `using System.Threading.Tasks;\nclass Program { /* TODO */ }`, ['async', 'await', 'Task'], ['42', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-files', 'Files & Streams', 25, ['Use a file API', 'Write text', 'Read text'], `using System.IO;\nclass Program { static void Main() { /* TODO */ } }`, ['File.WriteAllText', 'File.ReadAllText'], ['Zenith', 'VERIFICATION PASSED — 2/2 assertions green']),
-          lesson('cs-generics', 'Generic Design', 30, ['Define a generic type', 'Use a type parameter', 'Instantiate it'], `class Box<T> { /* TODO */ }\nclass Program { static void Main() { /* TODO */ } }`, ['class Box<T>', 'T', 'new Box<'], ['generic ok', 'VERIFICATION PASSED — 3/3 assertions green']),
-          lesson('cs-testing', 'Testing & Production Habits', 35, ['Define a deterministic unit test', 'Assert expected behavior', 'Keep the test isolated'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['Assert', 'Expected', 'Actual'], ['PASS', 'VERIFICATION PASSED — 3/3 assertions green']),
+          lesson('cs-linq', 'LINQ Queries', 25, ['Create a collection', 'Filter it with LINQ', 'Print the result'], `using System;\nusing System.Linq;\nclass Program { static void Main() { /* TODO */ } }`, ['using System.Linq', '.Where(', 'Console.WriteLine'], ['20', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-delegates'),
+          lesson('cs-async', 'Async & Await', 30, ['Define an async method', 'Await a Task', 'Return a result'], `using System.Threading.Tasks;\nclass Program { /* TODO */ }`, ['async', 'await', 'Task'], ['42', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-linq'),
+          lesson('cs-files', 'Files & Streams', 25, ['Use a file API', 'Write text', 'Read text'], `using System.IO;\nclass Program { static void Main() { /* TODO */ } }`, ['File.WriteAllText', 'File.ReadAllText'], ['Zenith', 'VERIFICATION PASSED — 2/2 assertions green'], 'cs-async'),
+          lesson('cs-generics', 'Generic Design', 30, ['Define a generic type', 'Use a type parameter', 'Instantiate it'], `class Box<T> { /* TODO */ }\nclass Program { static void Main() { /* TODO */ } }`, ['class Box<T>', 'T', 'new Box<'], ['generic ok', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-files'),
+          lesson('cs-testing', 'Testing & Production Habits', 35, ['Define a deterministic unit test', 'Assert expected behavior', 'Keep the test isolated'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['Assert', 'Expected', 'Actual'], ['PASS', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-generics'),
         ],
       },
     ],
