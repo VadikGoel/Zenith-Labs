@@ -147,6 +147,12 @@ test('Academy persistence ref is synchronized after commit, not mutated during r
   assert.doesNotMatch(dashboard, /\}, \[activeLessonId, completedIds, hydrated, codeByLesson\]\)/)
 })
 
+test('Academy describes its current deterministic verification model accurately', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /Every lesson is verified against a deterministic\s+assertion engine\./)
+  assert.doesNotMatch(dashboard, /Every lesson is verified against a live\s+assertion engine\./)
+})
+
 test('Academy syllabus exposes keyboard-friendly semantic controls and locked-lesson context', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
   assert.match(syllabus, /<nav aria-label="Course syllabus"/)
