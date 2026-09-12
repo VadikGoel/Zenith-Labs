@@ -98,6 +98,14 @@ test('Academy progress survives reloads through local storage', async () => {
   assert.match(dashboard, /lessonIndex\.has\(value\.activeLessonId\)/)
 })
 
+test('Academy code persistence is debounced to avoid a storage write on every keystroke', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const CODE_PERSIST_DEBOUNCE_MS = 250/)
+  assert.match(dashboard, /window\.setTimeout\(\(\) => \{[\s\S]*?persistProgress\(/)
+  assert.match(dashboard, /return \(\) => window\.clearTimeout\(timeoutId\)/)
+  assert.match(dashboard, /\[codeByLesson, hydrated, activeLessonId, completedIds\]/)
+})
+
 test('Academy syllabus exposes keyboard-friendly semantic controls and locked-lesson context', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
   assert.match(syllabus, /<nav aria-label="Course syllabus"/)
