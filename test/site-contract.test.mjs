@@ -147,6 +147,14 @@ test('Academy persistence ref is synchronized after commit, not mutated during r
   assert.doesNotMatch(dashboard, /\}, \[activeLessonId, completedIds, hydrated, codeByLesson\]\)/)
 })
 
+test('Academy flushes the latest committed progress when the page is hidden', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const flushProgress = \(\) => \{\n      const snapshot = progressRef\.current/)
+  assert.match(dashboard, /window\.addEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /window\.removeEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /persistProgress\(\{\n        activeLessonId: snapshot\.activeLessonId,[\s\S]*?codeByLesson: snapshot\.codeByLesson,/)
+})
+
 test('Academy describes its current deterministic verification model accurately', async () => {
   const dashboard = await read('components/academy/academy-dashboard.tsx')
   assert.match(dashboard, /Every lesson is verified against a deterministic\s+assertion engine\./)
