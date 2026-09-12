@@ -109,3 +109,17 @@ test('Academy syllabus exposes keyboard-friendly semantic controls and locked-le
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
   assert.match(syllabus, /Complete “\$\{prerequisiteTitle\}” to unlock this lesson/)
 })
+
+test('Academy lesson workspace exposes uniquely associated editor and live verification output', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  assert.match(workspace, /const editorId = `code-editor-\$\{lesson\.id\}`/)
+  assert.match(workspace, /const requirementsId = `verification-requirements-\$\{lesson\.id\}`/)
+  assert.match(workspace, /const outputId = `verification-output-\$\{lesson\.id\}`/)
+  assert.match(workspace, /<label htmlFor=\{editorId\}/)
+  assert.match(workspace, /id=\{editorId\}/)
+  assert.match(workspace, /aria-describedby=\{`\$\{requirementsId\} \$\{outputId\}`\}/)
+  assert.match(workspace, /id=\{requirementsId\}/)
+  assert.match(workspace, /id=\{outputId\}/)
+  assert.match(workspace, /role="log" aria-live="polite"/)
+  assert.match(workspace, /aria-busy=\{running\}/)
+})
