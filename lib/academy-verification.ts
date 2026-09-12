@@ -78,6 +78,41 @@ function maskLiteralContents(code: string): string {
   return result
 }
 
+/**
+ * Match a quoted-output requirement only when the expression begins in real
+ * source code, rather than inside a larger string literal that happens to
+ * contain the same text.
+ */
+function containsQuotedRequirement(code: string, requirement: string): boolean {
+  if (requirement.startsWith('"') || requirement.startsWith("'")) return code.includes(requirement)
+
+  let searchFrom = 0
+  let quote: '"' | "'" | null = null
+  let escaped = false
+
+  while (searchFrom <= code.length - requirement.length) {
+    const index = code.indexOf(requirement, searchFrom)
+    if (index === -1) return false
+
+    quote = null
+    escaped = false
+    for (let i = 0; i < index; i += 1) {
+      const current = code[i]
+      if (quote) {
+        if (escaped) escaped = false
+        else if (current === '\\') escaped = true
+        else if (current === quote) quote = null
+      } else if (current === '"' || current === "'") {
+        quote = current
+      }
+    }
+    if (!quote) return true
+    searchFrom = index + 1
+  }
+
+  return false
+}
+
 /** Deterministic verifier used until the Academy gains compiler-backed execution. */
 export function verifyLessonCode(lesson: Lesson, code: string): VerificationResult {
   if (lesson.checks.length === 0) {
@@ -88,11 +123,13 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
   const structuralCode = maskLiteralContents(executableCode)
   const passedChecks = lesson.checks.map((check) => {
     const requirement = check.trim()
-    const executableMatch = requirement.length > 0 && executableCode.includes(requirement)
-    const source = requirement.includes('"') || requirement.includes("'")
-      ? executableCode
-      : structuralCode
-    return executableMatch && source.includes(requirement)
+    if (requirement.length === 0) return false
+
+    if (requirement.includes('"') || requirement.includes("'")) {
+      return containsQuotedRequirement(executableCode, requirement)
+    }
+
+    return structuralCode.includes(requirement)
   })
   const failedIndex = passedChecks.findIndex((passed) => !passed)
   return {
