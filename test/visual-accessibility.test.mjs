@@ -14,3 +14,9 @@ test('Zenith UI animations respect prefers-reduced-motion', async () => {
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/)
   assert.match(css, /\.animate-zenith-float,\s*\.animate-zenith-blip,\s*\.animate-zenith-caret\s*\{\s*animation: none;/)
 })
+
+test('mobile navigation toggle exposes its controlled menu region', async () => {
+  const header = await read('components/site-header.tsx')
+  assert.match(header, /<button[\s\S]*?aria-expanded=\{open\}[\s\S]*?aria-controls="mobile-main-menu"/)
+  assert.match(header, /<div[\s\S]*?id="mobile-main-menu"/)
+})
