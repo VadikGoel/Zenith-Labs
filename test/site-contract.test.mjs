@@ -154,3 +154,10 @@ test('Academy lesson workspace exposes uniquely associated editor and live verif
   assert.match(workspace, /focus-visible:outline-primary/)
   assert.match(workspace, /role="status" aria-live="polite"[\s\S]*?>\s*Completed/)
 })
+
+test('Academy editor cannot change while verification is running', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  assert.match(workspace, /disabled=\{running\}/)
+  assert.match(workspace, /aria-busy=\{running\}/)
+  assert.match(workspace, /disabled:cursor-wait/)
+})
