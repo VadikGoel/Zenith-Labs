@@ -26,13 +26,28 @@ function assertExplicitChain(track, expectedPrerequisites) {
   }
 }
 
-test('production C# Foundations progression is defined by explicit prerequisite metadata', () => {
+test('production C# progression is defined by explicit prerequisite metadata', () => {
   assertExplicitChain(csharp, [
     ['cs-hello', undefined],
     ['cs-vars', 'cs-hello'],
     ['cs-branching', 'cs-vars'],
     ['cs-methods', 'cs-branching'],
     ['cs-loops', 'cs-methods'],
+    ['cs-arrays', 'cs-loops'],
+    ['cs-lists', 'cs-arrays'],
+    ['cs-dictionary', 'cs-lists'],
+    ['cs-exceptions', 'cs-dictionary'],
+    ['cs-enums', 'cs-exceptions'],
+    ['cs-class', 'cs-enums'],
+    ['cs-properties', 'cs-class'],
+    ['cs-inheritance', 'cs-properties'],
+    ['cs-interfaces', 'cs-inheritance'],
+    ['cs-delegates', 'cs-interfaces'],
+    ['cs-linq', 'cs-delegates'],
+    ['cs-async', 'cs-linq'],
+    ['cs-files', 'cs-async'],
+    ['cs-generics', 'cs-files'],
+    ['cs-testing', 'cs-generics'],
   ])
 })
 
@@ -61,13 +76,16 @@ test('production C++ progression is defined by explicit prerequisite metadata', 
   ])
 })
 
-test('production C# Foundations unlock and restore behavior stays sequentially safe', () => {
+test('production C# progression unlock and restore behavior stays explicit', () => {
   assert.ok(csharp)
 
   assert.equal(isLessonUnlocked(csharp, 'cs-hello', new Set()), true)
   assert.equal(isLessonUnlocked(csharp, 'cs-vars', new Set()), false)
   assert.equal(isLessonUnlocked(csharp, 'cs-vars', new Set(['cs-hello'])), true)
-  assert.equal(isLessonUnlocked(csharp, 'cs-branching', new Set(['cs-hello'])), false)
+  assert.equal(isLessonUnlocked(csharp, 'cs-arrays', new Set(['cs-loops'])), true)
+  assert.equal(isLessonUnlocked(csharp, 'cs-arrays', new Set()), false)
+  assert.equal(isLessonUnlocked(csharp, 'cs-testing', new Set(['cs-generics'])), true)
+  assert.equal(isLessonUnlocked(csharp, 'cs-testing', new Set(['cs-loops'])), false)
 
   const restored = sanitizeCompletedLessonIds(
     [csharp],
