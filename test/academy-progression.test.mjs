@@ -73,7 +73,8 @@ test('Academy dashboard starts from the first lesson of the first available trac
   const dashboard = await read('components/academy/academy-dashboard.tsx')
 
   assert.match(dashboard, /const firstAvailableTrack = tracks\.find\(\(track\) => track\.available\)/)
-  assert.match(dashboard, /firstAvailableTrack\?\.modules\[0\]\?\.lessons\[0\]\?\.id/)
+  assert.match(dashboard, /firstAvailableTrack\?\.modules\n  \.flatMap\(\(module\) => module\.lessons\)/)
+  assert.match(dashboard, /\.find\(\(lesson\) => lesson !== undefined\)\?\.id/)
   assert.match(dashboard, /Academy curriculum must contain an available track with at least one lesson/)
   assert.doesNotMatch(dashboard, /const firstLessonId = tracks\[0\]\.modules\[0\]\.lessons\[0\]\.id/)
 })
