@@ -112,7 +112,8 @@ test('Academy code persistence is debounced to avoid a storage write on every ke
   assert.match(dashboard, /const CODE_PERSIST_DEBOUNCE_MS = 250/)
   assert.match(dashboard, /window\.setTimeout\(\(\) => \{[\s\S]*?persistProgress\(/)
   assert.match(dashboard, /return \(\) => window\.clearTimeout\(timeoutId\)/)
-  assert.match(dashboard, /\[codeByLesson, hydrated, activeLessonId, completedIds\]/)
+  assert.match(dashboard, /\[codeByLesson, hydrated\]/)
+  assert.doesNotMatch(dashboard, /\[codeByLesson, hydrated, activeLessonId, completedIds\]/)
 })
 
 test('Academy progress writes stay within a bounded serialized storage budget', async () => {
