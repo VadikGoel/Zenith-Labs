@@ -189,8 +189,16 @@ export function AcademyDashboard() {
       })
     }
 
+    const flushWhenHidden = () => {
+      if (document.visibilityState === 'hidden') flushProgress()
+    }
+
     window.addEventListener('pagehide', flushProgress)
-    return () => window.removeEventListener('pagehide', flushProgress)
+    document.addEventListener('visibilitychange', flushWhenHidden)
+    return () => {
+      window.removeEventListener('pagehide', flushProgress)
+      document.removeEventListener('visibilitychange', flushWhenHidden)
+    }
   }, [hydrated])
 
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
