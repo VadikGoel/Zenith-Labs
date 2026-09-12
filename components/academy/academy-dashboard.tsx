@@ -158,7 +158,7 @@ export function AcademyDashboard() {
       completedIds: [...completedIds],
       codeByLesson,
     })
-  }, [activeLessonId, completedIds, hydrated, codeByLesson])
+  }, [activeLessonId, completedIds, hydrated])
 
   useEffect(() => {
     if (!hydrated) return
@@ -208,7 +208,7 @@ export function AcademyDashboard() {
           <div className="hidden flex-col gap-1 border-l border-white/10 pl-8 lg:flex">
             <p className="font-mono text-xs uppercase tracking-tight text-muted-foreground">
               Lessons cleared
-            </p>
+n            </p>
             <p className="text-lg font-semibold tracking-tighter">
               {completedIds.size}
               <span className="text-sm text-muted-foreground">
