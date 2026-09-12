@@ -87,7 +87,11 @@ export function LessonWorkspace({
             +{lesson.points} pts
           </span>
           {isCompleted && (
-            <span className="rounded-full border border-success/30 bg-success/10 px-3 py-0.5 font-mono text-xs text-success">
+            <span
+              role="status"
+              aria-live="polite"
+              className="rounded-full border border-success/30 bg-success/10 px-3 py-0.5 font-mono text-xs text-success"
+            >
               Completed
             </span>
           )}
