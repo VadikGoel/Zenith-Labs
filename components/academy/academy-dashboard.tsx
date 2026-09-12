@@ -27,7 +27,9 @@ for (const track of tracks) {
 }
 
 const firstAvailableTrack = tracks.find((track) => track.available)
-const firstLessonId = firstAvailableTrack?.modules[0]?.lessons[0]?.id ?? (() => {
+const firstLessonId = firstAvailableTrack?.modules
+  .flatMap((module) => module.lessons)
+  .find((lesson) => lesson !== undefined)?.id ?? (() => {
   throw new Error('Academy curriculum must contain an available track with at least one lesson')
 })()
 
@@ -167,7 +169,6 @@ export function AcademyDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 lg:px-10">
-      {/* Top header metrics */}
       <header className="mb-8 flex flex-col gap-6 rounded-2xl border border-white/5 bg-neutral-900/40 p-6 shadow-2xl backdrop-blur-md md:flex-row md:items-center md:justify-between lg:p-8">
         <div>
           <p className="font-mono text-xs uppercase tracking-tight text-primary">
@@ -198,7 +199,6 @@ export function AcademyDashboard() {
         </div>
       </header>
 
-      {/* 30 / 70 split */}
       <div className="grid gap-6 lg:grid-cols-[3fr_7fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
           <SyllabusTree
