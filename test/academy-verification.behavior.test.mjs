@@ -64,6 +64,15 @@ test('verifier does not satisfy structural checks from inside string literals', 
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier does not satisfy quoted expressions from inside a larger string literal', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'const char* note = "cout << \\"Hello\\"";')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier still supports requirements that intentionally include quoted output', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'cout << "Hello";')
