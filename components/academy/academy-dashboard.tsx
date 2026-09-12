@@ -149,7 +149,9 @@ export function AcademyDashboard() {
     setHydrated(true)
   }, [])
 
-  progressRef.current = { activeLessonId, completedIds, codeByLesson }
+  useEffect(() => {
+    progressRef.current = { activeLessonId, completedIds, codeByLesson }
+  }, [activeLessonId, completedIds, codeByLesson])
 
   useEffect(() => {
     if (!hydrated) return
