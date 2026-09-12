@@ -143,7 +143,7 @@ export function LessonWorkspace({
             onChange={(e) => onCodeChange(e.target.value)}
             spellCheck={false}
             aria-describedby={`${requirementsId} ${outputId}`}
-            className="h-72 w-full resize-none bg-transparent p-5 font-mono text-sm leading-relaxed text-[oklch(0.9_0.05_195)] caret-primary outline-none placeholder:text-muted-foreground/40"
+            className="h-72 w-full resize-none bg-transparent p-5 font-mono text-sm leading-relaxed text-[oklch(0.9_0.05_195)] caret-primary outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/70 placeholder:text-muted-foreground/40"
           />
           <span
             aria-hidden="true"
@@ -160,7 +160,7 @@ export function LessonWorkspace({
         disabled={running}
         aria-busy={running}
         aria-describedby={requirementsId}
-        className="group inline-flex items-center justify-center gap-2 self-start rounded-md rounded-tr-3xl bg-primary px-6 py-3 text-sm font-medium tracking-tight text-primary-foreground shadow-[0_0_28px_-8px_var(--color-primary)] transition-all hover:shadow-[0_0_44px_-8px_var(--color-primary)] active:scale-[0.98] disabled:opacity-60"
+        className="group inline-flex items-center justify-center gap-2 self-start rounded-md rounded-tr-3xl bg-primary px-6 py-3 text-sm font-medium tracking-tight text-primary-foreground shadow-[0_0_28px_-8px_var(--color-primary)] transition-all hover:shadow-[0_0_44px_-8px_var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
       >
         <Play className="size-4" aria-hidden="true" />
         {running ? 'Verifying…' : 'Run Verification Engine'}
