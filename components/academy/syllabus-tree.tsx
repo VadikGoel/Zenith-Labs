@@ -13,6 +13,10 @@ type SyllabusTreeProps = {
   onSelectLesson: (lessonId: string) => void
 }
 
+function getModuleKey(trackId: string, moduleId: string) {
+  return `${trackId}:${moduleId}`
+}
+
 export function SyllabusTree({
   tracks,
   activeLessonId,
@@ -20,16 +24,17 @@ export function SyllabusTree({
   onSelectLesson,
 }: SyllabusTreeProps) {
   const [openModules, setOpenModules] = useState<Set<string>>(
-    () => new Set(tracks.flatMap((t) => t.modules.map((m) => m.id))),
+    () => new Set(tracks.flatMap((t) => t.modules.map((m) => getModuleKey(t.id, m.id)))),
   )
 
-  function toggleModule(id: string) {
+  function toggleModule(trackId: string, moduleId: string) {
+    const key = getModuleKey(trackId, moduleId)
     setOpenModules((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
+      if (next.has(key)) {
+        next.delete(key)
       } else {
-        next.add(id)
+        next.add(key)
       }
       return next
     })
@@ -76,16 +81,17 @@ export function SyllabusTree({
             </div>
             <div className="flex flex-col gap-1.5">
               {track.modules.map((module) => {
-                const isOpen = openModules.has(module.id)
+                const moduleKey = getModuleKey(track.id, module.id)
+                const isOpen = openModules.has(moduleKey)
                 const lessonListId = `academy-${track.id}-module-${module.id}`
                 return (
                   <div
-                    key={module.id}
+                    key={moduleKey}
                     className="overflow-hidden rounded-xl border border-white/5 bg-[#060608]/50"
                   >
                     <button
                       type="button"
-                      onClick={() => toggleModule(module.id)}
+                      onClick={() => toggleModule(track.id, module.id)}
                       aria-expanded={isOpen}
                       aria-controls={lessonListId}
                       className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-white/5"
