@@ -130,6 +130,7 @@ export function SyllabusTree({
                                 disabled={!unlocked}
                                 aria-current={active ? 'true' : undefined}
                                 aria-disabled={!unlocked}
+                                aria-label={unlocked ? lesson.title : `${lesson.title}. ${lockedReason}`}
                                 title={unlocked ? undefined : lockedReason}
                                 className={cn(
                                   'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors',
