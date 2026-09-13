@@ -29,9 +29,10 @@ test('home hero retains the core conversion paths', async () => {
   assert.match(hero, /Enter the Academy/)
 })
 
-test('package scripts match the CI validation contract', async () => {
+test('package scripts and package-manager declaration match the CI contract', async () => {
   const packageJson = JSON.parse(await read('package.json'))
   assert.equal(packageJson.name, 'zenith-labs')
+  assert.equal(packageJson.packageManager, 'npm@10.9.8')
   assert.equal(typeof packageJson.scripts.build, 'string')
   assert.equal(typeof packageJson.scripts.test, 'string')
 })
