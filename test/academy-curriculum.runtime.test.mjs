@@ -140,3 +140,17 @@ test('Academy curriculum validator rejects blank verification assertions', () =>
   ])
   assert.equal(issues.filter((issue) => issue.code === 'empty-check-assertion').length, 1)
 })
+
+test('Academy curriculum validator rejects whitespace-only instructions and success messages', () => {
+  const issues = validateCurriculum([
+    track('blank-content', [
+      lesson('root', undefined, {
+        instructions: ['Explain the task', '  '],
+        successOutput: ['passed', '\t'],
+      }),
+    ]),
+  ])
+  const codes = issues.map((issue) => issue.code)
+  assert.equal(codes.filter((code) => code === 'empty-instruction').length, 1)
+  assert.equal(codes.filter((code) => code === 'empty-success-message').length, 1)
+})
