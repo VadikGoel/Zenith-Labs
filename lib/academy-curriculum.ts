@@ -12,6 +12,7 @@ export type CurriculumIssue = {
     | 'empty-module-title'
     | 'empty-lesson-title'
     | 'non-positive-points'
+    | 'non-finite-points'
     | 'missing-prerequisite'
     | 'implicit-prerequisite'
     | 'cross-track-prerequisite'
@@ -55,7 +56,8 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
     for (const lesson of flattenLessons(track)) {
       if (!lesson.id.trim()) issues.push({ code: 'empty-lesson-id', trackId: track.id, lessonId: lesson.id })
       if (!lesson.title.trim()) issues.push({ code: 'empty-lesson-title', trackId: track.id, lessonId: lesson.id })
-      if (lesson.points <= 0) issues.push({ code: 'non-positive-points', trackId: track.id, lessonId: lesson.id })
+      if (!Number.isFinite(lesson.points)) issues.push({ code: 'non-finite-points', trackId: track.id, lessonId: lesson.id })
+      else if (lesson.points <= 0) issues.push({ code: 'non-positive-points', trackId: track.id, lessonId: lesson.id })
       if (lessonOwners.has(lesson.id)) issues.push({ code: 'duplicate-lesson-id', trackId: track.id, lessonId: lesson.id })
       else lessonOwners.set(lesson.id, track.id)
     }
