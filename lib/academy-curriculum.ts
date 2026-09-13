@@ -23,9 +23,11 @@ export type CurriculumIssue = {
     | 'empty-track'
     | 'empty-module'
     | 'empty-instructions'
+    | 'empty-instruction'
     | 'empty-checks'
     | 'empty-check-assertion'
     | 'empty-success-output'
+    | 'empty-success-message'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -72,11 +74,17 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
     let rootCount = 0
     for (const [index, lesson] of lessons.entries()) {
       if (lesson.instructions.length === 0) issues.push({ code: 'empty-instructions', trackId: track.id, lessonId: lesson.id })
+      for (const instruction of lesson.instructions) {
+        if (!instruction.trim()) issues.push({ code: 'empty-instruction', trackId: track.id, lessonId: lesson.id })
+      }
       if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
       for (const check of lesson.checks) {
         if (!check.trim()) issues.push({ code: 'empty-check-assertion', trackId: track.id, lessonId: lesson.id })
       }
       if (lesson.successOutput.length === 0) issues.push({ code: 'empty-success-output', trackId: track.id, lessonId: lesson.id })
+      for (const message of lesson.successOutput) {
+        if (!message.trim()) issues.push({ code: 'empty-success-message', trackId: track.id, lessonId: lesson.id })
+      }
       const prerequisiteId = lesson.prerequisiteId
       if (!prerequisiteId) {
         rootCount += 1
