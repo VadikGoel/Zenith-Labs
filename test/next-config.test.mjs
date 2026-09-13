@@ -28,3 +28,9 @@ test('Node module semantics are explicit for TypeScript Academy sources', async 
 
   assert.equal(packageJson.type, 'module')
 })
+
+test('Supported Node runtime matches the Next.js 16 baseline', async () => {
+  const packageJson = JSON.parse(await read('package.json'))
+
+  assert.equal(packageJson.engines?.node, '>=20.9.0')
+})
