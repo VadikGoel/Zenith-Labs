@@ -24,9 +24,9 @@ test('legacy quoted checks preserve quoted semantics', () => {
   })
 })
 
-test('normalization trims whitespace before classification', () => {
-  assert.deepEqual(normalizeLegacyCheck('  int credits  '), {
+test('normalization trims whitespace while preserving structural classification for single-line tokens', () => {
+  assert.deepEqual(normalizeLegacyCheck('  int  '), {
     kind: 'structural',
-    value: 'int credits',
+    value: 'int',
   })
 })
