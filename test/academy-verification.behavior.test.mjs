@@ -73,11 +73,11 @@ test('verifier accepts plain output requirements from inside string literals', a
   assert.equal(result.failedIndex, -1)
 })
 
-test('verifier normalizes escaped output text inside string literals', async () => {
+test('verifier normalizes escaped newline output inside string literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const escapedQuote = String.fromCharCode(92) + '"'
-  const source = `Console.WriteLine("Hello ${escapedQuote}Zenith${escapedQuote}");`
-  const result = verifyLessonCode({ ...lesson, checks: ['Hello "Zenith"'] }, source)
+  const escapedNewline = String.fromCharCode(92) + 'n'
+  const source = `Console.WriteLine("Hello${escapedNewline}Zenith");`
+  const result = verifyLessonCode({ ...lesson, checks: ['Hello\nZenith'] }, source)
   assert.deepEqual(checks(result), [true])
   assert.equal(result.passedCount, 1)
   assert.equal(result.complete, true)
