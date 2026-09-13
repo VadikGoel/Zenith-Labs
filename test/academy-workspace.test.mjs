@@ -37,7 +37,9 @@ test('Academy verification service strips comments before evaluating requirement
   assert.match(verifier, /current === '\/' && next === '\/'/)
   assert.match(verifier, /current === '\/' && next === '\*'/)
   assert.match(verifier, /const executableCode = stripComments\(code\)/)
-  assert.match(verifier, /const executableMatch = requirement\.length > 0 && executableCode\.includes\(requirement\)/)
+  assert.match(verifier, /const requirement = check\.trim\(\)/)
+  assert.match(verifier, /const structuralCode = maskLiteralContents\(executableCode\)/)
+  assert.match(verifier, /return structuralCode\.includes\(requirement\)/)
 })
 
 test('Academy verification preserves quoted source text while stripping comments', async () => {
@@ -45,12 +47,13 @@ test('Academy verification preserves quoted source text while stripping comments
   assert.match(verifier, /if \(quote\)/)
   assert.match(verifier, /current === '\\\\'/)
   assert.match(verifier, /current === quote/)
+  assert.match(verifier, /containsQuotedRequirement\(executableCode, requirement\)/)
 })
 
 test('Academy verification rejects blank requirements instead of passing them implicitly', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /const requirement = check\.trim\(\)/)
-  assert.match(verifier, /const executableMatch = requirement\.length > 0 && executableCode\.includes\(requirement\)/)
+  assert.match(verifier, /if \(requirement\.length === 0\) return false/)
 })
 
 test('Academy verification service owns deterministic requirement evaluation', async () => {
