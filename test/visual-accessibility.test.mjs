@@ -26,3 +26,11 @@ test('navigation links expose the active page semantically', async () => {
   const activePageBindings = header.match(/aria-current=\{pathname === link\.href \? 'page' : undefined\}/g) ?? []
   assert.equal(activePageBindings.length, 2)
 })
+
+test('locked Academy lessons remain keyboard discoverable with an accessible reason', async () => {
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
+  assert.doesNotMatch(syllabus, /disabled=\{!unlocked\}/)
+  assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
+  assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
+  assert.match(syllabus, /if \(unlocked\) onSelectLesson\(lesson\.id\)/)
+})
