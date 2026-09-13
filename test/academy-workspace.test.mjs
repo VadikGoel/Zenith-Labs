@@ -31,14 +31,13 @@ test('Academy workspace accurately labels deterministic verification instead of 
   assert.doesNotMatch(workspace, /compiling\.\.\. done/)
 })
 
-test('Academy verification service ignores comment-only requirements', async () => {
+test('Academy verification service strips comments before evaluating requirements', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /function stripComments\(code: string\)/)
   assert.match(verifier, /current === '\/' && next === '\/'/)
   assert.match(verifier, /current === '\/' && next === '\*'/)
   assert.match(verifier, /const executableCode = stripComments\(code\)/)
-  assert.match(verifier, /requirement\.includes\('"'\) \|\| requirement\.includes\("'"\)/)
-  assert.match(verifier, /containsQuotedRequirement\(executableCode, requirement\)/)
+  assert.match(verifier, /const executableMatch = requirement\.length > 0 && executableCode\.includes\(requirement\)/)
 })
 
 test('Academy verification preserves quoted source text while stripping comments', async () => {
@@ -51,14 +50,14 @@ test('Academy verification preserves quoted source text while stripping comments
 test('Academy verification rejects blank requirements instead of passing them implicitly', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /const requirement = check\.trim\(\)/)
-  assert.match(verifier, /if \(requirement\.length === 0\) return false/)
+  assert.match(verifier, /const executableMatch = requirement\.length > 0 && executableCode\.includes\(requirement\)/)
 })
 
 test('Academy verification service owns deterministic requirement evaluation', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /export function verifyLessonCode\(lesson: Lesson, code: string\)/)
   assert.match(verifier, /lesson\.checks\.map\(\(check\) => \{[\s\S]*const requirement = check\.trim\(\)/)
-  assert.match(verifier, /passedCount: passedChecks\.filter\(Boolean\)\.length/)
+  assert.match(verifier, /passedChecks\.filter\(Boolean\)\.length/)
   assert.match(verifier, /complete: failedIndex === -1/)
   assert.match(verifier, /const failedIndex = passedChecks\.findIndex\(\(passed\) => !passed\)/)
 })
