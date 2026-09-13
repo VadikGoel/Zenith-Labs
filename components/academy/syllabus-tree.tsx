@@ -107,70 +107,68 @@ export function SyllabusTree({
                         )}
                       />
                     </button>
-                    {isOpen && (
-                      <ul id={lessonListId} className="border-t border-white/5 py-1">
-                        {module.lessons.map((lesson) => {
-                          const done = completedIds.has(lesson.id)
-                          const unlocked = isLessonUnlocked(track, lesson.id, completedIds)
-                          const active = lesson.id === activeLessonId
-                          const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
-                          const prerequisiteTitle = prerequisiteId
-                            ? track.modules
-                                .flatMap((m) => m.lessons)
-                                .find((candidate) => candidate.id === prerequisiteId)?.title
-                            : undefined
-                          const lockedReason = prerequisiteTitle
-                            ? `Complete “${prerequisiteTitle}” to unlock this lesson`
-                            : 'Complete the prerequisite lesson to unlock this lesson'
-                          return (
-                            <li key={lesson.id}>
-                              <button
-                                type="button"
-                                onClick={() => onSelectLesson(lesson.id)}
-                                disabled={!unlocked}
-                                aria-current={active ? 'page' : undefined}
-                                aria-disabled={!unlocked}
-                                aria-label={unlocked ? lesson.title : `${lesson.title}. ${lockedReason}`}
-                                title={unlocked ? undefined : lockedReason}
-                                className={cn(
-                                  'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary',
-                                  active
-                                    ? 'bg-primary/10 text-primary'
-                                    : unlocked
-                                      ? 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
-                                      : 'cursor-not-allowed text-muted-foreground/35',
+                    <ul id={lessonListId} hidden={!isOpen} className="border-t border-white/5 py-1">
+                      {module.lessons.map((lesson) => {
+                        const done = completedIds.has(lesson.id)
+                        const unlocked = isLessonUnlocked(track, lesson.id, completedIds)
+                        const active = lesson.id === activeLessonId
+                        const prerequisiteId = getLessonPrerequisiteId(track, lesson.id)
+                        const prerequisiteTitle = prerequisiteId
+                          ? track.modules
+                              .flatMap((m) => m.lessons)
+                              .find((candidate) => candidate.id === prerequisiteId)?.title
+                          : undefined
+                        const lockedReason = prerequisiteTitle
+                          ? `Complete “${prerequisiteTitle}” to unlock this lesson`
+                          : 'Complete the prerequisite lesson to unlock this lesson'
+                        return (
+                          <li key={lesson.id}>
+                            <button
+                              type="button"
+                              onClick={() => onSelectLesson(lesson.id)}
+                              disabled={!unlocked}
+                              aria-current={active ? 'page' : undefined}
+                              aria-disabled={!unlocked}
+                              aria-label={unlocked ? lesson.title : `${lesson.title}. ${lockedReason}`}
+                              title={unlocked ? undefined : lockedReason}
+                              className={cn(
+                                'flex w-full items-center justify-between gap-2 px-4 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary',
+                                active
+                                  ? 'bg-primary/10 text-primary'
+                                  : unlocked
+                                    ? 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                                    : 'cursor-not-allowed text-muted-foreground/35',
+                              )}
+                            >
+                              <span className="flex items-center gap-2.5">
+                                {done ? (
+                                  <CheckCircle2
+                                    className="size-4 shrink-0 text-success"
+                                    aria-hidden="true"
+                                  />
+                                ) : unlocked ? (
+                                  <Circle
+                                    className="size-4 shrink-0 opacity-40"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <Lock
+                                    className="size-4 shrink-0 opacity-40"
+                                    aria-hidden="true"
+                                  />
                                 )}
-                              >
-                                <span className="flex items-center gap-2.5">
-                                  {done ? (
-                                    <CheckCircle2
-                                      className="size-4 shrink-0 text-success"
-                                      aria-hidden="true"
-                                    />
-                                  ) : unlocked ? (
-                                    <Circle
-                                      className="size-4 shrink-0 opacity-40"
-                                      aria-hidden="true"
-                                    />
-                                  ) : (
-                                    <Lock
-                                      className="size-4 shrink-0 opacity-40"
-                                      aria-hidden="true"
-                                    />
-                                  )}
-                                  <span className="text-sm tracking-tight">
-                                    {lesson.title}
-                                  </span>
+                                <span className="text-sm tracking-tight">
+                                  {lesson.title}
                                 </span>
-                                <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                                  +{lesson.points}
-                                </span>
-                              </button>
-                            </li>
-                          )
-                        })}
-                      </ul>
-                    )}
+                              </span>
+                              <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                                +{lesson.points}
+                              </span>
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
                   </div>
                 )
               })}
