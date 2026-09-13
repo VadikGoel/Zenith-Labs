@@ -149,6 +149,7 @@ export function LessonWorkspace({
             disabled={running}
             aria-busy={running}
             aria-describedby={`${requirementsId} ${outputId}`}
+            maxLength={100_000}
             className="h-72 w-full resize-none bg-transparent p-5 font-mono text-sm leading-relaxed text-[oklch(0.9_0.05_195)] caret-primary outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/70 placeholder:text-muted-foreground/40 disabled:cursor-wait disabled:opacity-80"
           />
           <span
