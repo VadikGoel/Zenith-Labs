@@ -1,4 +1,5 @@
 import type { Lesson } from '@/lib/academy-data'
+import { normalizeLegacyCheck } from '@/lib/academy-checks'
 
 export type VerificationResult = {
   passedChecks: boolean[]
@@ -167,15 +168,19 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
 
   const executableCode = stripComments(code)
   const structuralCode = maskLiteralContents(executableCode)
-  const passedChecks = lesson.checks.map((check) => {
-    const requirement = check.trim()
-    if (requirement.length === 0) return false
+  const passedChecks = lesson.checks.map((rawCheck) => {
+    const check = normalizeLegacyCheck(rawCheck)
+    if (check.value.length === 0) return false
 
-    if (requirement.includes('"') || requirement.includes("'")) {
-      return containsQuotedRequirement(executableCode, requirement)
+    if (check.kind === 'quoted') {
+      return containsQuotedRequirement(executableCode, check.value)
     }
 
-    return structuralCode.includes(requirement) || containsLiteralContent(executableCode, requirement)
+    if (check.kind === 'output') {
+      return structuralCode.includes(check.value) || containsLiteralContent(executableCode, check.value)
+    }
+
+    return structuralCode.includes(check.value)
   })
   const failedIndex = passedChecks.findIndex((passed) => !passed)
   return {
