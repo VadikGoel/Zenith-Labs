@@ -1,5 +1,5 @@
-import type { Lesson } from '@/lib/academy-data'
-import { normalizeLegacyCheck } from '@/lib/academy-checks'
+import type { Lesson } from './academy-data'
+import { normalizeLegacyCheck } from './academy-checks'
 
 export type VerificationResult = {
   passedChecks: boolean[]
