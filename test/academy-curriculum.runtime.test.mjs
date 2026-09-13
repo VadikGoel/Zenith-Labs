@@ -131,3 +131,12 @@ test('Academy curriculum validator rejects non-finite lesson points', () => {
   ])
   assert.equal(issues.filter((issue) => issue.code === 'non-finite-points').length, 2)
 })
+
+test('Academy curriculum validator rejects blank verification assertions', () => {
+  const issues = validateCurriculum([
+    track('blank-checks', [
+      lesson('root', undefined, { checks: ['Console.WriteLine', '  '] }),
+    ]),
+  ])
+  assert.equal(issues.filter((issue) => issue.code === 'empty-check-assertion').length, 1)
+})
