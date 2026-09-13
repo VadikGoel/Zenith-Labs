@@ -110,7 +110,7 @@ test('Academy syllabus uses accessible semantic lesson controls', async () => {
   assert.match(syllabus, /aria-expanded=\{isOpen\}/)
   assert.match(syllabus, /aria-controls=\{lessonListId\}/)
   assert.match(syllabus, /<ul id=\{lessonListId\}/)
-  assert.doesNotMatch(syllabus, /disabled=\{!unlocked\}/)
+  assert.doesNotMatch(syllabus, /\n\s+disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
   assert.match(syllabus, /Complete “\$\{prerequisiteTitle\}” to unlock this lesson/)
