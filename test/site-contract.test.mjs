@@ -180,7 +180,7 @@ test('Academy syllabus exposes keyboard-friendly semantic controls and locked-le
   assert.match(syllabus, /<ul id=\{lessonListId\}/)
   assert.match(syllabus, /disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
-  assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
+  assert.match(syllabus, /aria-current=\{active \? 'page' : undefined\}/)
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
   assert.match(syllabus, /Complete “\$\{prerequisiteTitle\}” to unlock this lesson/)
   assert.match(syllabus, /focus-visible:outline-primary/)
