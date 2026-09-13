@@ -80,6 +80,15 @@ function maskLiteralContents(code: string): string {
   return result
 }
 
+/** Normalize the common escape sequences used when source code prints text. */
+function normalizeLiteralContent(value: string): string {
+  return value
+    .replace(/\\(["'`\\])/g, '$1')
+    .replace(/\\n/g, '\n')
+    .replace(/\\r/g, '\r')
+    .replace(/\\t/g, '\t')
+}
+
 /** Match a human-readable output requirement inside a quoted literal. */
 function containsLiteralContent(code: string, requirement: string): boolean {
   // Single-token assertions are structural by default. Allowing them to match
@@ -102,7 +111,7 @@ function containsLiteralContent(code: string, requirement: string): boolean {
         literal += current
         escaped = true
       } else if (current === quote) {
-        if (literal.includes(requirement)) return true
+        if (normalizeLiteralContent(literal).includes(requirement)) return true
         quote = null
         literal = ''
       } else {
