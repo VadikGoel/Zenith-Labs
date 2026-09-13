@@ -64,6 +64,15 @@ test('verifier does not satisfy structural checks from inside string literals', 
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier accepts plain output requirements from inside string literals', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: ['Hello, Zenith'] }, 'Console.WriteLine("Hello, Zenith");')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+  assert.equal(result.failedIndex, -1)
+})
+
 test('verifier does not satisfy quoted expressions from inside a larger string literal', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'const char* note = "cout << \\"Hello\\"";')
