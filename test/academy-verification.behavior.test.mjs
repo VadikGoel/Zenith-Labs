@@ -1,45 +1,36 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { readFile } from 'node:fs/promises'
-import { resolve } from 'node:path'
-import vm from 'node:vm'
-import ts from 'typescript'
-
-const root = resolve(import.meta.dirname, '..')
-
-async function loadVerifier() {
-  const source = await readFile(resolve(root, 'lib/academy-verification.ts'), 'utf8')
-  const transpiled = ts.transpileModule(source, {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-  }).outputText
-  const module = { exports: {} }
-  const context = vm.createContext({ module, exports: module.exports })
-  vm.runInContext(transpiled, context, { filename: 'academy-verification.ts' })
-  return module.exports.verifyLessonCode
-}
 
 const lesson = {
-  id: 'behavior-test',
-  title: 'Behavior test',
-  checks: ['int main', 'cout << "Hello"', 'return 0'],
+  id: 'test',
+  title: 'Test',
+  points: 10,
+  instructions: 'Test',
+  starterCode: '',
+  checks: ['Console.WriteLine'],
+  successOutput: 'Success',
+}
+
+async function loadVerifier() {
+  return (await import('../lib/academy-verification.ts')).verifyLessonCode
 }
 
 function checks(result) {
-  return Array.from(result.passedChecks)
+  return result.passedChecks
 }
 
 test('verifier reports complete only when every requirement is present in executable source', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode(lesson, `// int main\nint main() {\n  cout << "Hello";\n  return 0;\n}`)
-  assert.deepEqual(checks(result), [true, true, true])
-  assert.equal(result.passedCount, 3)
+  const result = verifyLessonCode(lesson, 'Console.WriteLine("Hello");')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
   assert.equal(result.complete, true)
   assert.equal(result.failedIndex, -1)
 })
 
 test('verifier identifies the first missing requirement and preserves later failures', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode(lesson, `int main() {\n  cout << "Hello";\n}`)
+  const result = verifyLessonCode({ ...lesson, checks: ['Console.WriteLine', 'return', 'missing'] }, 'Console.WriteLine("Hello"); return;')
   assert.deepEqual(checks(result), [true, true, false])
   assert.equal(result.passedCount, 2)
   assert.equal(result.complete, false)
@@ -48,16 +39,16 @@ test('verifier identifies the first missing requirement and preserves later fail
 
 test('verifier ignores requirements that appear only inside comments', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['int main', 'return 0'] }, `int main() {\n  // return 0\n}`)
-  assert.deepEqual(checks(result), [true, false])
-  assert.equal(result.passedCount, 1)
+  const result = verifyLessonCode({ ...lesson, checks: ['Console.WriteLine'] }, '// Console.WriteLine("Hello");')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
-  assert.equal(result.failedIndex, 1)
+  assert.equal(result.failedIndex, 0)
 })
 
 test('verifier does not satisfy structural checks from inside string literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['std::cout'] }, 'const char* note = "std::cout";')
+  const result = verifyLessonCode({ ...lesson, checks: ['Console.WriteLine'] }, 'const note = "Console.WriteLine";')
   assert.deepEqual(checks(result), [false])
   assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
@@ -66,7 +57,7 @@ test('verifier does not satisfy structural checks from inside string literals', 
 
 test('verifier does not satisfy single-token structural checks from inside literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['return'] }, 'const char* note = "return";')
+  const result = verifyLessonCode({ ...lesson, checks: ['return'] }, 'const note = "return";')
   assert.deepEqual(checks(result), [false])
   assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
@@ -84,7 +75,7 @@ test('verifier accepts plain output requirements from inside string literals', a
 
 test('verifier normalizes escaped output text inside string literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['Hello "Zenith"'] }, 'Console.WriteLine("Hello \\"Zenith\\"");')
+  const result = verifyLessonCode({ ...lesson, checks: ['Hello "Zenith"'] }, String.raw`Console.WriteLine("Hello \"Zenith\"");`)
   assert.deepEqual(checks(result), [true])
   assert.equal(result.passedCount, 1)
   assert.equal(result.complete, true)
@@ -102,7 +93,7 @@ test('verifier does not satisfy quoted expressions from inside a larger string l
 
 test('verifier rejects a quoted requirement nested inside an escaped string literal', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['"Hello"'] }, 'const char* note = "nested \\"Hello\\" text";')
+  const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'const char* note = "prefix \\"cout << \\\"Hello\\\"\\" suffix";')
   assert.deepEqual(checks(result), [false])
   assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
@@ -111,17 +102,16 @@ test('verifier rejects a quoted requirement nested inside an escaped string lite
 
 test('verifier does not satisfy structural or quoted expressions from inside template literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const structural = verifyLessonCode({ ...lesson, checks: ['std::cout'] }, 'const note = `std::cout`;')
-  const quoted = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'const note = `cout << "Hello"`;')
-  assert.deepEqual(checks(structural), [false])
-  assert.deepEqual(checks(quoted), [false])
-  assert.equal(structural.complete, false)
-  assert.equal(quoted.complete, false)
+  const result = verifyLessonCode({ ...lesson, checks: ['return', 'cout << "Hello"'] }, 'const note = `return cout << "Hello"`;')
+  assert.deepEqual(checks(result), [false, false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
 })
 
 test('verifier still supports requirements that intentionally include quoted output', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['cout << "Hello"'] }, 'cout << "Hello";')
+  const result = verifyLessonCode({ ...lesson, checks: ['Console.WriteLine("Hello")'] }, 'Console.WriteLine("Hello");')
   assert.deepEqual(checks(result), [true])
   assert.equal(result.passedCount, 1)
   assert.equal(result.complete, true)
@@ -130,7 +120,7 @@ test('verifier still supports requirements that intentionally include quoted out
 
 test('verifier rejects blank requirements', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ checks: ['   '] }, 'anything')
+  const result = verifyLessonCode({ ...lesson, checks: ['  '] }, 'anything')
   assert.deepEqual(checks(result), [false])
   assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
@@ -139,7 +129,7 @@ test('verifier rejects blank requirements', async () => {
 
 test('verifier fails closed when a malformed lesson has no checks', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ checks: [] }, 'anything that would otherwise look valid')
+  const result = verifyLessonCode({ ...lesson, checks: [] }, 'Console.WriteLine("Hello");')
   assert.deepEqual(checks(result), [])
   assert.equal(result.passedCount, 0)
   assert.equal(result.complete, false)
