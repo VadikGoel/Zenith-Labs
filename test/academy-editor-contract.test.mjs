@@ -11,6 +11,7 @@ async function read(path) {
 
 test('Academy editor bounds input to the persisted code budget', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /const MAX_SAVED_CODE_LENGTH = 100_000/)
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const MAX_SAVED_CODE_LENGTH = 100_000/)
   assert.match(workspace, /maxLength=\{100_000\}/)
 })
