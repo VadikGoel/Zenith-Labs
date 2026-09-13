@@ -29,7 +29,7 @@ test('navigation links expose the active page semantically', async () => {
 
 test('locked Academy lessons remain keyboard discoverable with an accessible reason', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
-  assert.doesNotMatch(syllabus, /disabled=\{!unlocked\}/)
+  assert.doesNotMatch(syllabus, /\n\s+disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
   assert.match(syllabus, /if \(unlocked\) onSelectLesson\(lesson\.id\)/)
