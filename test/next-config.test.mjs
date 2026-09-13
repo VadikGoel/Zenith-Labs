@@ -22,3 +22,9 @@ test('Next.js uses one typed configuration with release-safe build validation', 
   assert.match(config, /Strict-Transport-Security.*max-age=31536000; includeSubDomains/)
   assert.doesNotMatch(config, /ignoreBuildErrors\s*:\s*true/)
 })
+
+test('Node module semantics are explicit for TypeScript Academy sources', async () => {
+  const packageJson = JSON.parse(await read('package.json'))
+
+  assert.equal(packageJson.type, 'module')
+})
