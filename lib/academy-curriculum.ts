@@ -1,7 +1,29 @@
 import type { Lesson, Track } from './academy-data'
 
 export type CurriculumIssue = {
-  code: 'duplicate-track-id' | 'duplicate-module-id' | 'duplicate-lesson-id' | 'missing-prerequisite' | 'implicit-prerequisite' | 'cross-track-prerequisite' | 'prerequisite-cycle' | 'first-lesson-prerequisite' | 'forward-prerequisite' | 'root-count' | 'empty-track' | 'empty-module' | 'empty-instructions' | 'empty-checks' | 'empty-success-output'
+  code:
+    | 'duplicate-track-id'
+    | 'duplicate-module-id'
+    | 'duplicate-lesson-id'
+    | 'empty-track-id'
+    | 'empty-module-id'
+    | 'empty-lesson-id'
+    | 'empty-track-name'
+    | 'empty-module-title'
+    | 'empty-lesson-title'
+    | 'non-positive-points'
+    | 'missing-prerequisite'
+    | 'implicit-prerequisite'
+    | 'cross-track-prerequisite'
+    | 'prerequisite-cycle'
+    | 'first-lesson-prerequisite'
+    | 'forward-prerequisite'
+    | 'root-count'
+    | 'empty-track'
+    | 'empty-module'
+    | 'empty-instructions'
+    | 'empty-checks'
+    | 'empty-success-output'
   trackId: string
   lessonId?: string
   prerequisiteId?: string
@@ -17,16 +39,23 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
   const lessonOwners = new Map<string, string>()
 
   for (const track of tracks) {
+    if (!track.id.trim()) issues.push({ code: 'empty-track-id', trackId: track.id })
+    if (!track.name.trim()) issues.push({ code: 'empty-track-name', trackId: track.id })
     if (trackIds.has(track.id)) issues.push({ code: 'duplicate-track-id', trackId: track.id })
     trackIds.add(track.id)
     if (track.available && track.modules.length === 0) issues.push({ code: 'empty-track', trackId: track.id })
     const moduleIds = new Set<string>()
     for (const module of track.modules) {
+      if (!module.id.trim()) issues.push({ code: 'empty-module-id', trackId: track.id })
+      if (!module.title.trim()) issues.push({ code: 'empty-module-title', trackId: track.id })
       if (moduleIds.has(module.id)) issues.push({ code: 'duplicate-module-id', trackId: track.id })
       moduleIds.add(module.id)
       if (track.available && module.lessons.length === 0) issues.push({ code: 'empty-module', trackId: track.id })
     }
     for (const lesson of flattenLessons(track)) {
+      if (!lesson.id.trim()) issues.push({ code: 'empty-lesson-id', trackId: track.id, lessonId: lesson.id })
+      if (!lesson.title.trim()) issues.push({ code: 'empty-lesson-title', trackId: track.id, lessonId: lesson.id })
+      if (lesson.points <= 0) issues.push({ code: 'non-positive-points', trackId: track.id, lessonId: lesson.id })
       if (lessonOwners.has(lesson.id)) issues.push({ code: 'duplicate-lesson-id', trackId: track.id, lessonId: lesson.id })
       else lessonOwners.set(lesson.id, track.id)
     }
