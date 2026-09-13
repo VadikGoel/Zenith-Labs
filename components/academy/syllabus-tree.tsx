@@ -128,7 +128,7 @@ export function SyllabusTree({
                               onClick={() => {
                                 if (unlocked) onSelectLesson(lesson.id)
                               }}
-                              aria-current={active ? 'page' : undefined}
+                              aria-current={active ? 'true' : undefined}
                               aria-disabled={!unlocked}
                               aria-label={unlocked ? lesson.title : `${lesson.title}. ${lockedReason}`}
                               title={unlocked ? undefined : lockedReason}
