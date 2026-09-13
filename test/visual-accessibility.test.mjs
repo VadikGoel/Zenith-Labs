@@ -34,3 +34,9 @@ test('locked Academy lessons remain keyboard discoverable with an accessible rea
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
   assert.match(syllabus, /if \(unlocked\) onSelectLesson\(lesson\.id\)/)
 })
+
+test('active Academy lesson buttons use boolean aria-current state', async () => {
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
+  assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
+  assert.doesNotMatch(syllabus, /aria-current=\{active \? 'page' : undefined\}/)
+})
