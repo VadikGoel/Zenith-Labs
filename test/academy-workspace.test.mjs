@@ -81,7 +81,7 @@ test('Academy syllabus enforces centralized sequential progression accessibly', 
   assert.match(syllabus, /const unlocked = isLessonUnlocked\(track, lesson\.id, completedIds\)/)
   assert.doesNotMatch(syllabus, /function isUnlocked\(track: Track, lessonId: string\)/)
   assert.doesNotMatch(syllabus, /completedIds\.has\(lessons\[index - 1\]\?\.id \?\? ''\)/)
-  assert.doesNotMatch(syllabus, /disabled=\{!unlocked\}/)
+  assert.doesNotMatch(syllabus, /\n\s+disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-disabled=\{!unlocked\}/)
   assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
   assert.match(syllabus, /aria-label=\{unlocked \? lesson\.title : `\$\{lesson\.title\}\. \$\{lockedReason\}`\}/)
