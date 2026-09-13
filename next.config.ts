@@ -1,5 +1,7 @@
 import type { NextConfig } from 'next'
 
+type SecurityHeader = { key: string; value: string }
+
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -7,7 +9,7 @@ const securityHeaders = [
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
   { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
   { key: 'Content-Security-Policy', value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'" },
-] as const
+] satisfies SecurityHeader[]
 
 const nextConfig: NextConfig = {
   images: {
