@@ -80,6 +80,39 @@ function maskLiteralContents(code: string): string {
   return result
 }
 
+/** Match a requirement that appears in the contents of a quoted literal. */
+function containsLiteralContent(code: string, requirement: string): boolean {
+  let quote: Quote | null = null
+  let escaped = false
+  let literal = ''
+
+  for (let i = 0; i < code.length; i += 1) {
+    const current = code[i]
+    if (quote) {
+      if (escaped) {
+        literal += current
+        escaped = false
+      } else if (current === '\\') {
+        literal += current
+        escaped = true
+      } else if (current === quote) {
+        if (literal.includes(requirement)) return true
+        quote = null
+        literal = ''
+      } else {
+        literal += current
+      }
+      continue
+    }
+    if (current === '"' || current === "'" || current === '`') {
+      quote = current
+      literal = ''
+    }
+  }
+
+  return false
+}
+
 /**
  * Match a quoted-output requirement only when its occurrence begins in real
  * source code, rather than inside a larger string or template literal.
@@ -127,7 +160,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
       return containsQuotedRequirement(executableCode, requirement)
     }
 
-    return structuralCode.includes(requirement)
+    return structuralCode.includes(requirement) || containsLiteralContent(executableCode, requirement)
   })
   const failedIndex = passedChecks.findIndex((passed) => !passed)
   return {
