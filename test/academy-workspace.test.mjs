@@ -118,3 +118,9 @@ test('Academy persistence bounds untrusted localStorage payloads', async () => {
   assert.match(dashboard, /const MAX_SAVED_CODE_LENGTH = 100_000/)
   assert.match(dashboard, /typeof code === 'string' && code\.length <= MAX_SAVED_CODE_LENGTH/)
 })
+
+test('TypeScript permits the explicit .ts imports required by the native Node Academy test runtime', async () => {
+  const tsconfig = await read('tsconfig.json')
+  assert.match(tsconfig, /"noEmit": true/)
+  assert.match(tsconfig, /"allowImportingTsExtensions": true/)
+})
