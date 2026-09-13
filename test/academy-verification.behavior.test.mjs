@@ -64,6 +64,15 @@ test('verifier does not satisfy structural checks from inside string literals', 
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier does not satisfy single-token structural checks from inside literals', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: ['return'] }, 'const char* note = "return";')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier accepts plain output requirements from inside string literals', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: ['Hello, Zenith'] }, 'Console.WriteLine("Hello, Zenith");')
