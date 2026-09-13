@@ -75,7 +75,8 @@ test('verifier accepts plain output requirements from inside string literals', a
 
 test('verifier normalizes escaped output text inside string literals', async () => {
   const verifyLessonCode = await loadVerifier()
-  const result = verifyLessonCode({ ...lesson, checks: ['Hello "Zenith"'] }, String.raw`Console.WriteLine("Hello \"Zenith\"");`)
+  const source = 'Console.WriteLine("Hello \\"Zenith\\"");'
+  const result = verifyLessonCode({ ...lesson, checks: ['Hello "Zenith"'] }, source)
   assert.deepEqual(checks(result), [true])
   assert.equal(result.passedCount, 1)
   assert.equal(result.complete, true)
