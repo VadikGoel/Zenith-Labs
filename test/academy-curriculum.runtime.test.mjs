@@ -120,3 +120,14 @@ test('Academy curriculum validator rejects empty metadata and non-positive lesso
   assert.ok(codes.includes('empty-lesson-title'))
   assert.ok(codes.includes('non-positive-points'))
 })
+
+test('Academy curriculum validator rejects non-finite lesson points', () => {
+  const issues = validateCurriculum([
+    track('invalid-points', [
+      lesson('root'),
+      lesson('nan-points', 'root', { points: Number.NaN }),
+      lesson('infinite-points', 'nan-points', { points: Number.POSITIVE_INFINITY }),
+    ]),
+  ])
+  assert.equal(issues.filter((issue) => issue.code === 'non-finite-points').length, 2)
+})
