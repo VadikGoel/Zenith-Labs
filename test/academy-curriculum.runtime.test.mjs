@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { tracks } from '../lib/academy-data.ts'
 import { validateCurriculum } from '../lib/academy-curriculum.ts'
 
-function lesson(id, prerequisiteId) {
+function lesson(id, prerequisiteId, overrides = {}) {
   return {
     id,
     title: id,
@@ -13,6 +13,7 @@ function lesson(id, prerequisiteId) {
     checks: ['task'],
     successOutput: ['passed'],
     ...(prerequisiteId ? { prerequisiteId } : {}),
+    ...overrides,
   }
 }
 
@@ -98,4 +99,24 @@ test('Academy curriculum validator catches a prerequisite on the first lesson', 
   ])
   assert.ok(issues.some((issue) => issue.code === 'first-lesson-prerequisite'))
   assert.ok(issues.some((issue) => issue.code === 'forward-prerequisite'))
+})
+
+test('Academy curriculum validator rejects empty metadata and non-positive lesson points', () => {
+  const issues = validateCurriculum([
+    {
+      id: '',
+      name: '',
+      language: 'test',
+      available: true,
+      modules: [{ id: '', title: '', lessons: [lesson('', undefined, { title: '', points: 0 })] }],
+    },
+  ])
+  const codes = issues.map((issue) => issue.code)
+  assert.ok(codes.includes('empty-track-id'))
+  assert.ok(codes.includes('empty-track-name'))
+  assert.ok(codes.includes('empty-module-id'))
+  assert.ok(codes.includes('empty-module-title'))
+  assert.ok(codes.includes('empty-lesson-id'))
+  assert.ok(codes.includes('empty-lesson-title'))
+  assert.ok(codes.includes('non-positive-points'))
 })
