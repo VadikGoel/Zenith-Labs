@@ -20,6 +20,9 @@ test('Next.js uses one typed configuration with release-safe build validation', 
   assert.match(config, /import type \{ NextConfig \} from 'next'/)
   assert.match(config, /images:\s*\{\s*unoptimized: true,\s*\}/)
   assert.match(config, /Strict-Transport-Security.*max-age=31536000; includeSubDomains/)
+  assert.match(config, /Content-Security-Policy.*base-uri 'self'/)
+  assert.match(config, /Content-Security-Policy.*object-src 'none'/)
+  assert.match(config, /Content-Security-Policy.*frame-ancestors 'self'/)
   assert.doesNotMatch(config, /ignoreBuildErrors\s*:\s*true/)
 })
 
