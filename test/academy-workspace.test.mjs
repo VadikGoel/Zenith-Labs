@@ -18,6 +18,14 @@ test('Academy workspace keeps learning instructions independent from verificatio
   assert.doesNotMatch(workspace, /const passedChecks = lesson\.checks\.map/)
 })
 
+test('Academy workspace blocks malformed lessons without verification checks', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  assert.match(workspace, /if \(lesson\.checks\.length === 0\)/)
+  assert.match(workspace, /NO VERIFICATION CHECKS CONFIGURED — submission blocked/)
+  assert.match(workspace, /setRunning\(false\)/)
+  assert.doesNotMatch(workspace, /failedIndex \+ 1\}\/\$\{lesson\.checks\.length\}/)
+})
+
 test('Academy workspace accurately labels deterministic verification instead of simulated compilation', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
   assert.match(workspace, /checking requirements\.\.\./)
