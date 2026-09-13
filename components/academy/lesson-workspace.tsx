@@ -48,6 +48,15 @@ export function LessonWorkspace({
     setRunning(true)
     setTerminalLines(['> zenith verify --lesson ' + lesson.id, 'checking requirements...'])
 
+    if (lesson.checks.length === 0) {
+      setTerminalLines([
+        '> zenith verify --lesson ' + lesson.id,
+        'NO VERIFICATION CHECKS CONFIGURED — submission blocked',
+      ])
+      setRunning(false)
+      return
+    }
+
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     timeoutRef.current = setTimeout(() => {
       if (verification.complete) {
