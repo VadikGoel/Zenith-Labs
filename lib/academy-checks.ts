@@ -23,8 +23,16 @@ export function normalizeLegacyCheck(value: string): VerificationCheck {
   return { kind: 'structural', value: normalized }
 }
 
-/** Normalize either a legacy string or an explicitly typed lesson check. */
+function isVerificationCheckKind(value: unknown): value is VerificationCheckKind {
+  return value === 'structural' || value === 'output' || value === 'quoted'
+}
+
+/** Normalize legacy or typed checks and fail closed on malformed runtime data. */
 export function normalizeCheck(value: string | VerificationCheck): VerificationCheck {
   if (typeof value === 'string') return normalizeLegacyCheck(value)
+  if (!value || typeof value !== 'object') return { kind: 'structural', value: '' }
+  if (!isVerificationCheckKind(value.kind) || typeof value.value !== 'string') {
+    return { kind: 'structural', value: '' }
+  }
   return { kind: value.kind, value: value.value.trim() }
 }
