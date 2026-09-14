@@ -41,6 +41,21 @@ test('Academy production tracks require exactly one root and explicit prerequisi
   }
 })
 
+test('Academy production root lessons use explicit verification kinds', () => {
+  const roots = tracks
+    .filter((track) => track.available)
+    .flatMap((track) => track.modules.flatMap((module) => module.lessons))
+    .filter((lesson) => !lesson.prerequisiteId)
+
+  assert.equal(roots.length, 2)
+  for (const root of roots) {
+    assert.equal(root.checks.length, 2, `${root.id} should keep its two verification assertions`)
+    assert.ok(root.checks.every((check) => typeof check === 'object'), `${root.id} should use typed checks`)
+    assert.deepEqual(root.checks.map((check) => check.kind), ['structural', 'output'])
+    assert.ok(root.checks.every((check) => check.value.trim().length > 0))
+  }
+})
+
 test('Academy curriculum validator catches implicit prerequisites in active tracks', () => {
   const issues = validateCurriculum([
     track('active', [lesson('root'), lesson('implicit')], undefined, true),
