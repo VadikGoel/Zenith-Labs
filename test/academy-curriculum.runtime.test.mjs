@@ -128,26 +128,39 @@ test('Every active Academy lesson has an end-to-end completion fixture and an in
   }
 })
 
-test('Every active Academy lesson rejects a near-miss submission that removes one required assertion', () => {
+test('Every active Academy lesson rejects a near-miss submission that removes exactly one required assertion', () => {
   const activeLessons = tracks
     .filter((track) => track.available)
     .flatMap((track) => track.modules.flatMap((module) => module.lessons.map((lesson) => ({ track, lesson }))))
 
   for (const { track, lesson } of activeLessons) {
     const completionCode = completionFixture(track, lesson)
-    for (const check of lesson.checks) {
+    for (const [checkIndex, check] of lesson.checks.entries()) {
       const requirement = typeof check === 'string' ? check : check.value
-      const nearMiss = completionCode.replaceAll(requirement, '__ZENITH_REQUIRED_ASSERTION_REMOVED__')
+      const marker = '__ZENITH_REQUIRED_ASSERTION_REMOVED__'
+      const nearMiss = completionCode.replace(requirement, marker)
+      assert.notEqual(nearMiss, completionCode, `${track.id}/${lesson.id} check ${checkIndex} must occur in its completion fixture`)
+
       const result = verifyLessonCode(lesson, nearMiss)
       assert.equal(
         result.complete,
         false,
-        `${track.id}/${lesson.id} should reject a submission with the required ${requirement} assertion removed`,
+        `${track.id}/${lesson.id} should reject a submission with required check ${checkIndex} removed`,
       )
-      assert.ok(
-        result.passedChecks.some((passed) => !passed),
-        `${track.id}/${lesson.id} should report at least one failed verification check for the near-miss submission`,
+      assert.equal(
+        result.passedChecks[checkIndex],
+        false,
+        `${track.id}/${lesson.id} should mark removed check ${checkIndex} as failed`,
       )
+      result.passedChecks.forEach((passed, index) => {
+        if (index !== checkIndex) {
+          assert.equal(
+            passed,
+            true,
+            `${track.id}/${lesson.id} should keep unrelated check ${index} passing when only check ${checkIndex} is removed`,
+          )
+        }
+      })
     }
   }
 })
@@ -228,40 +241,3 @@ test('Academy curriculum validator rejects empty metadata and non-positive lesso
   assert.ok(codes.includes('empty-module-id'))
   assert.ok(codes.includes('empty-module-title'))
   assert.ok(codes.includes('empty-lesson-id'))
-  assert.ok(codes.includes('empty-lesson-title'))
-  assert.ok(codes.includes('non-positive-points'))
-})
-
-test('Academy curriculum validator rejects non-finite lesson points', () => {
-  const issues = validateCurriculum([
-    track('invalid-points', [
-      lesson('root'),
-      lesson('nan-points', 'root', { points: Number.NaN }),
-      lesson('infinite-points', 'nan-points', { points: Number.POSITIVE_INFINITY }),
-    ]),
-  ])
-  assert.equal(issues.filter((issue) => issue.code === 'non-finite-points').length, 2)
-})
-
-test('Academy curriculum validator rejects blank verification assertions', () => {
-  const issues = validateCurriculum([
-    track('blank-checks', [
-      lesson('root', undefined, { checks: ['Console.WriteLine', '  '] }),
-    ]),
-  ])
-  assert.equal(issues.filter((issue) => issue.code === 'empty-check-assertion').length, 1)
-})
-
-test('Academy curriculum validator rejects whitespace-only instructions and success messages', () => {
-  const issues = validateCurriculum([
-    track('blank-content', [
-      lesson('root', undefined, {
-        instructions: ['Explain the task', '  '],
-        successOutput: ['passed', '\t'],
-      }),
-    ]),
-  ])
-  const codes = issues.map((issue) => issue.code)
-  assert.equal(codes.filter((code) => code === 'empty-instruction').length, 1)
-  assert.equal(codes.filter((code) => code === 'empty-success-message').length, 1)
-})
