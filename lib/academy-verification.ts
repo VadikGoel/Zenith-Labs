@@ -90,6 +90,11 @@ function normalizeLiteralContent(value: string): string {
     .replace(/\\t/g, '\t')
 }
 
+/** Normalize source whitespace so structural checks are not formatting-sensitive. */
+function normalizeStructuralSyntax(value: string): string {
+  return value.replace(/\s+/g, '')
+}
+
 /** Match a human-readable output requirement inside a quoted literal. */
 function containsLiteralContent(code: string, requirement: string): boolean {
   let quote: Quote | null = null
@@ -161,7 +166,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
   }
 
   const executableCode = stripComments(code)
-  const structuralCode = maskLiteralContents(executableCode)
+  const structuralCode = normalizeStructuralSyntax(maskLiteralContents(executableCode))
   const passedChecks = lesson.checks.map((rawCheck) => {
     const check = normalizeCheck(rawCheck)
     if (check.value.length === 0) return false
@@ -174,7 +179,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
       return containsLiteralContent(executableCode, check.value)
     }
 
-    return structuralCode.includes(check.value)
+    return structuralCode.includes(normalizeStructuralSyntax(check.value))
   })
   const failedIndex = passedChecks.findIndex((passed) => !passed)
   return {
