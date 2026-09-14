@@ -31,6 +31,16 @@ test('Academy workspace accurately labels deterministic verification instead of 
   assert.doesNotMatch(workspace, /compiling\.\.\. done/)
 })
 
+test('Academy workspace renders typed failed checks instead of object coercion', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  assert.match(workspace, /function formatVerificationCheck\(check: CurriculumCheck\): string/)
+  assert.match(workspace, /if \(typeof check === 'string'\) return check/)
+  assert.match(workspace, /return `\$\{check\.kind\}: \$\{check\.value\}`/)
+  assert.match(workspace, /const failedCheck = lesson\.checks\[failedIndex\]/)
+  assert.match(workspace, /expected: \$\{formatVerificationCheck\(failedCheck\)\}/)
+  assert.doesNotMatch(workspace, /expected code to contain: \$\{lesson\.checks\[failedIndex\]\}/)
+})
+
 test('Academy verification service strips comments before evaluating typed requirements', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /function stripComments\(code: string\)/)
