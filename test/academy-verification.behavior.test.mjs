@@ -50,6 +50,21 @@ test('verifier preserves identifier boundaries while normalizing structural whit
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier rejects structural checks that end inside a longer identifier', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'structural', value: 'return' }] }, 'returning = true;')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
+test('verifier accepts structural checks when identifier boundaries are exact', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'structural', value: 'return' }] }, 'return value;')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.complete, true)
+})
+
 test('verifier accepts an explicit output check with a multi-word requirement', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'Console.WriteLine("Hello, Zenith");')
