@@ -62,6 +62,14 @@ test('Academy curriculum validation normalizes check values before rejecting emp
   assert.match(validator, /if \(!check\.value\) issues\.push\(\{ code: 'empty-check-assertion'/)
 })
 
+test('Academy curriculum validation rejects malformed typed check definitions', async () => {
+  const validator = await read('lib/academy-curriculum.ts')
+
+  assert.match(validator, /invalid-check-definition/)
+  assert.match(validator, /typeof rawCheck !== 'string' && !isVerificationCheck\(rawCheck\)/)
+  assert.match(validator, /import \{ isVerificationCheck, normalizeCheck \} from '\.\/academy-checks\.ts'/)
+})
+
 test('Academy syllabus scopes ARIA module ids by track', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
 
