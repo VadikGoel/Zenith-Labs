@@ -53,6 +53,15 @@ test('Academy curriculum validator rejects lessons that could auto-pass without 
   assert.match(validator, /if \(lesson\.successOutput\.length === 0\) issues\.push\(\{ code: 'empty-success-output'/)
 })
 
+test('Academy curriculum validation normalizes check values before rejecting empties', async () => {
+  const validator = await read('lib/academy-curriculum.ts')
+
+  assert.match(validator, /import \{ normalizeCheck \} from '\.\/academy-checks\.ts'/)
+  assert.match(validator, /for \(const rawCheck of lesson\.checks as unknown\[\]\)/)
+  assert.match(validator, /const check = normalizeCheck\(rawCheck\)/)
+  assert.match(validator, /if \(!check\.value\) issues\.push\(\{ code: 'empty-check-assertion'/)
+})
+
 test('Academy syllabus scopes ARIA module ids by track', async () => {
   const syllabus = await read('components/academy/syllabus-tree.tsx')
 
