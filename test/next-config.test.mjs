@@ -41,6 +41,14 @@ test('Supported Node runtime matches the Next.js 16 baseline', async () => {
   assert.equal(packageJson.engines?.node, '>=20.9.0')
 })
 
+test('Next.js stays on the patched 16.3.3 security floor', async () => {
+  const packageJson = JSON.parse(await read('package.json'))
+  const lockfile = JSON.parse(await read('package-lock.json'))
+
+  assert.equal(packageJson.dependencies?.next, '16.3.3')
+  assert.equal(lockfile.packages?.['node_modules/next']?.version, '16.3.3')
+})
+
 test('npm lockfile root metadata matches the project manifest', async () => {
   const packageJson = JSON.parse(await read('package.json'))
   const lockfile = JSON.parse(await read('package-lock.json'))
