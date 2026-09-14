@@ -201,6 +201,14 @@ export function AcademyDashboard() {
     }
   }, [hydrated])
 
+  const resetProgress = () => {
+    if (!window.confirm('Reset all Zenith Academy progress and saved code? This cannot be undone.')) return
+    window.localStorage.removeItem(STORAGE_KEY)
+    setActiveLessonId(firstLessonId)
+    setCompletedIds(new Set())
+    setCodeByLesson({})
+  }
+
   const active = lessonIndex.get(activeLessonId) ?? lessonIndex.get(firstLessonId)!
 
   const totalScore = useMemo(
@@ -245,6 +253,17 @@ export function AcademyDashboard() {
           </div>
         </div>
       </header>
+
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={resetProgress}
+          className="rounded-md border border-white/10 px-3 py-2 text-xs font-medium text-muted-foreground transition hover:border-white/20 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          aria-label="Reset all Academy progress and saved code"
+        >
+          Reset progress
+        </button>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[3fr_7fr]">
         <aside className="lg:sticky lg:top-24 lg:self-start">
