@@ -38,7 +38,7 @@ export const tracks: Track[] = [
     modules: [
       {
         id: 'cs-foundations', title: 'Foundations', lessons: [
-          lesson('cs-hello', 'Hello, Zenith', 10, ['Declare Program', 'Add static Main', 'Print Hello, Zenith'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['Console.WriteLine', 'Hello, Zenith'], ['Hello, Zenith', 'VERIFICATION PASSED — 2/2 assertions green']),
+          lesson('cs-hello', 'Hello, Zenith', 10, ['Declare Program', 'Add static Main', 'Print Hello, Zenith'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, [{ kind: 'structural', value: 'Console.WriteLine' }, { kind: 'output', value: 'Hello, Zenith' }], ['Hello, Zenith', 'VERIFICATION PASSED — 2/2 assertions green']),
           lesson('cs-vars', 'Variables & Types', 15, ['Declare an int credits', 'Declare a string studio', 'Use interpolation'], `using System;\nclass Program { static void Main() { /* TODO */ } }`, ['int credits', 'string studio', '$"'], ['Zenith grants 42 credits', 'VERIFICATION PASSED — 3/3 assertions green'], 'cs-hello'),
           lesson('cs-branching', 'Decisions & Branching', 15, ['Declare score', 'Use if/else', 'Print the result'], `using System;\nclass Program { static void Main() { int score = 80; /* TODO */ } }`, ['int score', 'if (', 'else', 'Console.WriteLine'], ['PASS', 'VERIFICATION PASSED — 4/4 assertions green'], 'cs-vars'),
           lesson('cs-methods', 'Methods & Return Values', 20, ['Define Add', 'Use two int parameters', 'Return and print the sum'], `using System;\nclass Program { /* TODO Add */ static void Main() { /* TODO */ } }`, ['static int Add', 'return', 'Add(', 'Console.WriteLine'], ['42', 'VERIFICATION PASSED — 4/4 assertions green'], 'cs-branching'),
@@ -79,7 +79,7 @@ export const tracks: Track[] = [
     modules: [
       {
         id: 'cpp-core', title: 'Core Language', lessons: [
-          lesson('cpp-hello', 'Streams & Output', 10, ['Include iostream', 'Define main', 'Print Zenith Systems Online'], `#include <iostream>\nint main() { /* TODO */ return 0; }`, ['std::cout', 'Zenith Systems Online'], ['Zenith Systems Online', 'VERIFICATION PASSED — 2/2 assertions green']),
+          lesson('cpp-hello', 'Streams & Output', 10, ['Include iostream', 'Define main', 'Print Zenith Systems Online'], `#include <iostream>\nint main() { /* TODO */ return 0; }`, [{ kind: 'structural', value: 'std::cout' }, { kind: 'output', value: 'Zenith Systems Online' }], ['Zenith Systems Online', 'VERIFICATION PASSED — 2/2 assertions green']),
           lesson('cpp-refs', 'References & Const', 20, ['Write boost(int&)', 'Double the value', 'Call it from main'], `#include <iostream>\n// TODO: void boost(int& power)\nint main() { int power = 100; /* TODO */ return 0; }`, ['int& power', 'boost(power)', 'std::cout'], ['power = 200', 'VERIFICATION PASSED — 3/3 assertions green'], 'cpp-hello'),
           lesson('cpp-vectors', 'Vectors & Iteration', 20, ['Include vector', 'Create vector<int>', 'Iterate and print'], `#include <iostream>\n#include <vector>\nint main() { /* TODO */ return 0; }`, ['std::vector', 'for (', 'std::cout'], ['10 20 30', 'VERIFICATION PASSED — 3/3 assertions green'], 'cpp-refs'),
           lesson('cpp-structs', 'Structs & Value Types', 15, ['Define a struct', 'Create an instance', 'Print a member'], `#include <iostream>\nstruct Agent { /* TODO */ };\nint main() { /* TODO */ return 0; }`, ['struct Agent', 'Agent', 'std::cout'], ['Sentinel', 'VERIFICATION PASSED — 3/3 assertions green'], 'cpp-vectors'),
