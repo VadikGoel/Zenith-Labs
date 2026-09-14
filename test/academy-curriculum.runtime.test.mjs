@@ -142,23 +142,11 @@ test('Every active Academy lesson rejects a near-miss submission that removes ex
       assert.notEqual(nearMiss, completionCode, `${track.id}/${lesson.id} check ${checkIndex} must occur in its completion fixture`)
 
       const result = verifyLessonCode(lesson, nearMiss)
-      assert.equal(
-        result.complete,
-        false,
-        `${track.id}/${lesson.id} should reject a submission with required check ${checkIndex} removed`,
-      )
-      assert.equal(
-        result.passedChecks[checkIndex],
-        false,
-        `${track.id}/${lesson.id} should mark removed check ${checkIndex} as failed`,
-      )
+      assert.equal(result.complete, false, `${track.id}/${lesson.id} should reject a submission with required check ${checkIndex} removed`)
+      assert.equal(result.passedChecks[checkIndex], false, `${track.id}/${lesson.id} should mark removed check ${checkIndex} as failed`)
       result.passedChecks.forEach((passed, index) => {
         if (index !== checkIndex) {
-          assert.equal(
-            passed,
-            true,
-            `${track.id}/${lesson.id} should keep unrelated check ${index} passing when only check ${checkIndex} is removed`,
-          )
+          assert.equal(passed, true, `${track.id}/${lesson.id} should keep unrelated check ${index} passing when only check ${checkIndex} is removed`)
         }
       })
     }
@@ -241,3 +229,40 @@ test('Academy curriculum validator rejects empty metadata and non-positive lesso
   assert.ok(codes.includes('empty-module-id'))
   assert.ok(codes.includes('empty-module-title'))
   assert.ok(codes.includes('empty-lesson-id'))
+  assert.ok(codes.includes('empty-lesson-title'))
+  assert.ok(codes.includes('non-positive-points'))
+})
+
+test('Academy curriculum validator rejects non-finite lesson points', () => {
+  const issues = validateCurriculum([
+    track('invalid-points', [
+      lesson('root'),
+      lesson('nan-points', 'root', { points: Number.NaN }),
+      lesson('infinite-points', 'nan-points', { points: Number.POSITIVE_INFINITY }),
+    ]),
+  ])
+  assert.equal(issues.filter((issue) => issue.code === 'non-finite-points').length, 2)
+})
+
+test('Academy curriculum validator rejects blank verification assertions', () => {
+  const issues = validateCurriculum([
+    track('blank-checks', [
+      lesson('root', undefined, { checks: ['Console.WriteLine', '  '] }),
+    ]),
+  ])
+  assert.equal(issues.filter((issue) => issue.code === 'empty-check-assertion').length, 1)
+})
+
+test('Academy curriculum validator rejects whitespace-only instructions and success messages', () => {
+  const issues = validateCurriculum([
+    track('blank-content', [
+      lesson('root', undefined, {
+        instructions: ['Explain the task', '  '],
+        successOutput: ['passed', '\t'],
+      }),
+    ]),
+  ])
+  const codes = issues.map((issue) => issue.code)
+  assert.equal(codes.filter((code) => code === 'empty-instruction').length, 1)
+  assert.equal(codes.filter((code) => code === 'empty-success-message').length, 1)
+})
