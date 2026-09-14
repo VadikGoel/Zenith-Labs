@@ -1,3 +1,5 @@
+import type { CurriculumCheck } from './academy-checks.ts'
+
 export type Lesson = {
   id: string
   title: string
@@ -6,8 +8,8 @@ export type Lesson = {
   starterCode: string
   /** Optional explicit prerequisite; roots omit it. */
   prerequisiteId?: string
-  /** substrings that must appear in the code for verification to pass */
-  checks: string[]
+  /** Legacy strings remain supported while new lessons can use explicit verification kinds. */
+  checks: CurriculumCheck[]
   successOutput: string[]
 }
 
@@ -25,7 +27,7 @@ export type Track = {
   modules: Module[]
 }
 
-const lesson = (id: string, title: string, points: number, instructions: string[], starterCode: string, checks: string[], output: string[], prerequisiteId?: string): Lesson => ({
+const lesson = (id: string, title: string, points: number, instructions: string[], starterCode: string, checks: CurriculumCheck[], output: string[], prerequisiteId?: string): Lesson => ({
   id, title, points, instructions, starterCode, checks, successOutput: output,
   ...(prerequisiteId ? { prerequisiteId } : {}),
 })
