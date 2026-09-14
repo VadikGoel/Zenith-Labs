@@ -36,6 +36,14 @@ test('verifier accepts an explicit structural check without legacy classificatio
   assert.equal(result.complete, true)
 })
 
+test('verifier accepts structural checks across formatting differences', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'structural', value: 'if (' }] }, 'if(credits>0){Console.WriteLine("ready");}')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+})
+
 test('verifier accepts an explicit output check with a multi-word requirement', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'Console.WriteLine("Hello, Zenith");')
