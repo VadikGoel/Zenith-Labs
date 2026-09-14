@@ -56,7 +56,7 @@ test('Academy curriculum validator rejects lessons that could auto-pass without 
 test('Academy curriculum validation normalizes check values before rejecting empties', async () => {
   const validator = await read('lib/academy-curriculum.ts')
 
-  assert.match(validator, /import \{ normalizeCheck \} from '\.\/academy-checks\.ts'/)
+  assert.match(validator, /import \{ isVerificationCheck, normalizeCheck \} from '\.\/academy-checks\.ts'/)
   assert.match(validator, /for \(const rawCheck of lesson\.checks as unknown\[\]\)/)
   assert.match(validator, /const check = normalizeCheck\(rawCheck\)/)
   assert.match(validator, /if \(!check\.value\) issues\.push\(\{ code: 'empty-check-assertion'/)
