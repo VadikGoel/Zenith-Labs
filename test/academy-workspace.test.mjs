@@ -42,6 +42,12 @@ test('Academy verification service strips comments before evaluating typed requi
   assert.match(verifier, /return structuralCode\.includes\(check\.value\)/)
 })
 
+test('Academy output checks only match human-readable text inside literals', async () => {
+  const verifier = await read('lib/academy-verification.ts')
+  assert.match(verifier, /if \(check\.kind === 'output'\) \{[\s\S]*return containsLiteralContent\(executableCode, check\.value\)/)
+  assert.doesNotMatch(verifier, /if \(check\.kind === 'output'\) \{[\s\S]*return structuralCode\.includes\(check\.value\) \|\| containsLiteralContent/)
+})
+
 test('Academy verification preserves quoted source text while stripping comments', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /if \(quote\)/)
