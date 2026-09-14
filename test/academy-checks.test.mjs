@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 
-const { normalizeLegacyCheck } = await import('../lib/academy-checks.ts')
+const { normalizeLegacyCheck, normalizeCheck } = await import('../lib/academy-checks.ts')
 
 test('legacy structural checks normalize explicitly', () => {
   assert.deepEqual(normalizeLegacyCheck('Console.WriteLine'), {
@@ -28,5 +28,20 @@ test('normalization trims whitespace while preserving structural classification 
   assert.deepEqual(normalizeLegacyCheck('  int  '), {
     kind: 'structural',
     value: 'int',
+  })
+})
+
+test('explicit typed checks bypass legacy classification and preserve their declared kind', () => {
+  assert.deepEqual(normalizeCheck({ kind: 'structural', value: '  int credits  ' }), {
+    kind: 'structural',
+    value: 'int credits',
+  })
+  assert.deepEqual(normalizeCheck({ kind: 'output', value: 'Hello, Zenith' }), {
+    kind: 'output',
+    value: 'Hello, Zenith',
+  })
+  assert.deepEqual(normalizeCheck({ kind: 'quoted', value: '"Zenith"' }), {
+    kind: 'quoted',
+    value: '"Zenith"',
   })
 })
