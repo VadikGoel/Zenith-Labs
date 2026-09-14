@@ -44,6 +44,23 @@ test('verifier accepts an explicit output check with a multi-word requirement', 
   assert.equal(result.complete, true)
 })
 
+test('verifier accepts an explicit output check with a single-token requirement', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: '42' }] }, 'Console.WriteLine("42");')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+})
+
+test('verifier rejects a single-token output requirement that is only present structurally', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: '42' }] }, 'int answer = 42;')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier accepts an explicit quoted check', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'quoted', value: 'Console.WriteLine("Hello")' }] }, 'Console.WriteLine("Hello");')
