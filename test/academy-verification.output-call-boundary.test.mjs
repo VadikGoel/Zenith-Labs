@@ -55,6 +55,26 @@ test('verifier accepts fully-qualified C# Console output calls', async () => {
   assert.equal(result.complete, true)
 })
 
+test('verifier accepts indented C# Console output calls', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'if (ready) {\n  Console.WriteLine("Hello from Zenith");\n}',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
+test('verifier accepts indented C++ stream output calls', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'if (ready) {\n  std::cout << "Hello from Zenith";\n}',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
 test('verifier accepts multiline C# output calls', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
