@@ -73,6 +73,15 @@ test('verifier rejects output text stored in an unused variable', async () => {
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier rejects a recognized output call that appears only inside a string literal', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'string example = "Console.WriteLine(\\"Hello, Zenith\\")";')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.passedCount, 0)
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier accepts output text from a C++ stream expression', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Zenith Systems Online' }] }, 'std::cout << "Zenith Systems Online";')
