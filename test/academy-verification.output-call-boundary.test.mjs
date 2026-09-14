@@ -44,3 +44,33 @@ test('verifier still accepts supported output calls with exact boundaries', asyn
   assert.deepEqual(result.passedChecks, [true])
   assert.equal(result.complete, true)
 })
+
+test('verifier accepts fully-qualified C# Console output calls', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'System.Console.WriteLine("Hello from Zenith");',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
+test('verifier accepts multiline C# output calls', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'Console.WriteLine(\n  "Hello from Zenith"\n);',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
+test('verifier accepts compound output expressions with a literal argument', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'Console.WriteLine(prefix + "Hello from Zenith" + suffix);',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
