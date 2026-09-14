@@ -42,6 +42,14 @@ test('verifier accepts structural checks across formatting differences', async (
   assert.equal(result.complete, true)
 })
 
+test('verifier preserves identifier boundaries while normalizing structural whitespace', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'structural', value: 'int x' }] }, 'intx = 42;')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier accepts an explicit output check with a multi-word requirement', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'Console.WriteLine("Hello, Zenith");')
