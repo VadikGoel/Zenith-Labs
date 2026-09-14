@@ -128,6 +128,25 @@ function containsLiteralContent(code: string, requirement: string): boolean {
   return false
 }
 
+/** Return whether an index is inside a source literal. Comments have already been removed. */
+function isInsideLiteral(code: string, index: number): boolean {
+  let quote: Quote | null = null
+  let escaped = false
+
+  for (let i = 0; i < index; i += 1) {
+    const current = code[i]
+    if (quote) {
+      if (escaped) escaped = false
+      else if (current === '\\') escaped = true
+      else if (current === quote) quote = null
+    } else if (current === '"' || current === "'" || current === '`') {
+      quote = current
+    }
+  }
+
+  return quote !== null
+}
+
 /**
  * Match an output requirement only when the matching literal is part of a
  * recognized console/stream output expression. This avoids passing a check
@@ -138,6 +157,8 @@ function containsPrintedLiteralContent(code: string, requirement: string): boole
   let match: RegExpExecArray | null
 
   while ((match = outputCall.exec(code)) !== null) {
+    if (isInsideLiteral(code, match.index)) continue
+
     const expressionStart = match.index
     const expressionEnd = code.indexOf(';', outputCall.lastIndex)
     const segment = code.slice(expressionStart, expressionEnd === -1 ? code.length : expressionEnd)
