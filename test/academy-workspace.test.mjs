@@ -37,7 +37,7 @@ test('Academy verification service strips comments before evaluating typed requi
   assert.match(verifier, /current === '\/' && next === '\/'/)
   assert.match(verifier, /current === '\/' && next === '\*'/)
   assert.match(verifier, /const executableCode = stripComments\(code\)/)
-  assert.match(verifier, /normalizeLegacyCheck\(rawCheck\)/)
+  assert.match(verifier, /const check = normalizeCheck\(rawCheck\)/)
   assert.match(verifier, /const structuralCode = maskLiteralContents\(executableCode\)/)
   assert.match(verifier, /return structuralCode\.includes\(check\.value\)/)
 })
@@ -52,14 +52,14 @@ test('Academy verification preserves quoted source text while stripping comments
 
 test('Academy verification rejects blank requirements instead of passing them implicitly', async () => {
   const verifier = await read('lib/academy-verification.ts')
-  assert.match(verifier, /normalizeLegacyCheck\(rawCheck\)/)
+  assert.match(verifier, /const check = normalizeCheck\(rawCheck\)/)
   assert.match(verifier, /if \(check\.value\.length === 0\) return false/)
 })
 
 test('Academy verification service owns deterministic typed requirement evaluation', async () => {
   const verifier = await read('lib/academy-verification.ts')
   assert.match(verifier, /export function verifyLessonCode\(lesson: Lesson, code: string\)/)
-  assert.match(verifier, /lesson\.checks\.map\(\(rawCheck\) => \{[\s\S]*normalizeLegacyCheck\(rawCheck\)/)
+  assert.match(verifier, /lesson\.checks\.map\(\(rawCheck\) => \{[\s\S]*normalizeCheck\(rawCheck\)/)
   assert.match(verifier, /passedChecks\.filter\(Boolean\)\.length/)
   assert.match(verifier, /complete: failedIndex === -1/)
   assert.match(verifier, /const failedIndex = passedChecks\.findIndex\(\(passed\) => !passed\)/)
