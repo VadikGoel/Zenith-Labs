@@ -33,7 +33,6 @@ test('Academy progression uses the first-class Lesson prerequisite field', async
   assert.match(curriculum, /export type Lesson = \{[\s\S]*prerequisiteId\?: string/)
   assert.match(curriculum, /import type \{ CurriculumCheck \} from '\.\/academy-checks\.ts'/)
   assert.match(curriculum, /checks: CurriculumCheck\[\]/)
-  assert.match(curriculum, /checks: CurriculumCheck\[\]/)
   assert.match(progression, /lessons\[index\]\?\.prerequisiteId/)
   assert.doesNotMatch(progression, /type LessonWithPrerequisite = Lesson & \{ prerequisiteId\?: string \}/)
   assert.match(progression, /index <= 0 \? null : lessons\[index - 1\]\?\.id/)
