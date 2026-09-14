@@ -1,0 +1,40 @@
+name: Upgrade Next.js security patch
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 22
+          cache: npm
+      - name: Upgrade Next.js and regenerate lockfile
+        run: npm install next@16.3.3 --save-exact --ignore-scripts --no-audit --no-fund
+      - name: Validate dependency graph
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Remove temporary workflow and commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/upgrade-next-security.yml
+          git add package.json package-lock.json
+          git commit -m 'fix: upgrade Next.js security patch'
+          git push
