@@ -28,6 +28,30 @@ test('verifier reports complete only when every requirement is present in execut
   assert.equal(result.failedIndex, -1)
 })
 
+test('verifier accepts an explicit structural check without legacy classification', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'structural', value: 'int credits' }] }, 'int credits = 42;')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+})
+
+test('verifier accepts an explicit output check with a multi-word requirement', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'Console.WriteLine("Hello, Zenith");')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+})
+
+test('verifier accepts an explicit quoted check', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'quoted', value: 'Console.WriteLine("Hello")' }] }, 'Console.WriteLine("Hello");')
+  assert.deepEqual(checks(result), [true])
+  assert.equal(result.passedCount, 1)
+  assert.equal(result.complete, true)
+})
+
 test('verifier identifies the first missing requirement and preserves later failures', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: ['Console.WriteLine', 'return', 'missing'] }, 'Console.WriteLine("Hello"); return;')
