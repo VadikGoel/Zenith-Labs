@@ -128,6 +128,30 @@ test('Every active Academy lesson has an end-to-end completion fixture and an in
   }
 })
 
+test('Every active Academy lesson rejects a near-miss submission that removes one required assertion', () => {
+  const activeLessons = tracks
+    .filter((track) => track.available)
+    .flatMap((track) => track.modules.flatMap((module) => module.lessons.map((lesson) => ({ track, lesson }))))
+
+  for (const { track, lesson } of activeLessons) {
+    const completionCode = completionFixture(track, lesson)
+    for (const check of lesson.checks) {
+      const requirement = typeof check === 'string' ? check : check.value
+      const nearMiss = completionCode.replaceAll(requirement, '__ZENITH_REQUIRED_ASSERTION_REMOVED__')
+      const result = verifyLessonCode(lesson, nearMiss)
+      assert.equal(
+        result.complete,
+        false,
+        `${track.id}/${lesson.id} should reject a submission with the required ${requirement} assertion removed`,
+      )
+      assert.ok(
+        result.passedChecks.some((passed) => !passed),
+        `${track.id}/${lesson.id} should report at least one failed verification check for the near-miss submission`,
+      )
+    }
+  }
+})
+
 test('Academy curriculum validator catches implicit prerequisites in active tracks', () => {
   const issues = validateCurriculum([
     track('active', [lesson('root'), lesson('implicit')], undefined, true),
