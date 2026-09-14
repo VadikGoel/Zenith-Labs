@@ -23,3 +23,15 @@ test('every active Academy lesson starts incomplete', () => {
     )
   }
 })
+
+test('cs-interfaces starter leaves the contract method for the learner to implement', () => {
+  const lesson = tracks
+    .find((track) => track.id === 'csharp')
+    ?.modules.flatMap((module) => module.lessons)
+    .find((candidate) => candidate.id === 'cs-interfaces')
+
+  assert.ok(lesson)
+  assert.match(lesson.starterCode, /interface IRunner/)
+  assert.doesNotMatch(lesson.starterCode, /string Run\(\);/)
+  assert.equal(verifyLessonCode(lesson, lesson.starterCode).complete, false)
+})
