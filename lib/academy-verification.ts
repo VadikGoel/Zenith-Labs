@@ -8,7 +8,7 @@ export type VerificationResult = {
   failedIndex: number
 }
 
-type Quote = '"' | "'" | '`'
+type Quote = '\"' | "'" | '`'
 
 /** Remove comments without touching quoted string, character, or template literals. */
 function stripComments(code: string): string {
@@ -44,7 +44,7 @@ function stripComments(code: string): string {
       else if (current === quote) quote = null
       continue
     }
-    if (current === '"' || current === "'" || current === '`') {
+    if (current === '\"' || current === "'" || current === '`') {
       quote = current
       result += current
     } else if (current === '/' && next === '/') {
@@ -75,7 +75,7 @@ function maskLiteralContents(code: string): string {
       else result += ' '
       continue
     }
-    if (current === '"' || current === "'" || current === '`') { quote = current; result += current }
+    if (current === '\"' || current === "'" || current === '`') { quote = current; result += current }
     else result += current
   }
   return result
@@ -84,7 +84,7 @@ function maskLiteralContents(code: string): string {
 /** Normalize the common escape sequences used when source code prints text. */
 function normalizeLiteralContent(value: string): string {
   return value
-    .replace(/\\(["'`\\])/g, '$1')
+    .replace(/\\([\"'`\\])/g, '$1')
     .replace(/\\n/g, '\n')
     .replace(/\\r/g, '\r')
     .replace(/\\t/g, '\t')
@@ -97,6 +97,32 @@ function normalizeStructuralSyntax(value: string): string {
     .replace(/([()[\]{}.,;=<>:+\-*/%!?&|])\s+/g, '$1')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+/** Match a structural requirement without accepting a partial identifier match. */
+function containsStructuralRequirement(code: string, requirement: string): boolean {
+  const normalizedRequirement = normalizeStructuralSyntax(requirement)
+  if (normalizedRequirement.length === 0) return false
+
+  let searchFrom = 0
+  while (searchFrom <= code.length - normalizedRequirement.length) {
+    const index = code.indexOf(normalizedRequirement, searchFrom)
+    if (index === -1) return false
+
+    const before = index > 0 ? code[index - 1] : ''
+    const afterIndex = index + normalizedRequirement.length
+    const after = afterIndex < code.length ? code[afterIndex] : ''
+    const isIdentifierChar = (value: string) => /[A-Za-z0-9_$]/.test(value)
+    const startsWithIdentifier = isIdentifierChar(normalizedRequirement[0])
+    const endsWithIdentifier = isIdentifierChar(normalizedRequirement.at(-1) ?? '')
+
+    if ((!startsWithIdentifier || !isIdentifierChar(before)) && (!endsWithIdentifier || !isIdentifierChar(after))) {
+      return true
+    }
+    searchFrom = index + 1
+  }
+
+  return false
 }
 
 /** Match a human-readable output requirement inside a quoted literal. */
@@ -123,7 +149,7 @@ function containsLiteralContent(code: string, requirement: string): boolean {
       }
       continue
     }
-    if (current === '"' || current === "'" || current === '`') {
+    if (current === '\"' || current === "'" || current === '`') {
       quote = current
       literal = ''
     }
@@ -143,7 +169,7 @@ function isInsideLiteral(code: string, index: number): boolean {
       if (escaped) escaped = false
       else if (current === '\\') escaped = true
       else if (current === quote) quote = null
-    } else if (current === '"' || current === "'" || current === '`') {
+    } else if (current === '\"' || current === "'" || current === '`') {
       quote = current
     }
   }
@@ -164,7 +190,7 @@ function findStatementEnd(code: string, start: number): number {
       else if (current === quote) quote = null
       continue
     }
-    if (current === '"' || current === "'" || current === '`') {
+    if (current === '\"' || current === "'" || current === '`') {
       quote = current
     } else if (current === ';') {
       return i
@@ -214,7 +240,7 @@ function containsQuotedRequirement(code: string, requirement: string): boolean {
         if (escaped) escaped = false
         else if (current === '\\') escaped = true
         else if (current === quote) quote = null
-      } else if (current === '"' || current === "'" || current === '`') {
+      } else if (current === '\"' || current === "'" || current === '`') {
         quote = current
       }
     }
@@ -246,7 +272,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
       return containsPrintedLiteralContent(executableCode, check.value)
     }
 
-    return structuralCode.includes(normalizeStructuralSyntax(check.value))
+    return containsStructuralRequirement(structuralCode, check.value)
   })
   const failedIndex = passedChecks.findIndex((passed) => !passed)
   return {
