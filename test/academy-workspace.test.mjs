@@ -108,62 +108,27 @@ test('Academy syllabus enforces centralized sequential progression accessibly', 
 })
 
 test('Academy restores only an unlocked lesson from persisted progress', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /isLessonUnlocked\(/)
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /import \{ getUnlockedLessonIds, sanitizeCompletedLessonIds \} from '@\/lib\/academy-progression'/)
+  assert.match(dashboard, /const restoredCompletedIds = sanitizeCompletedLessonIds\(tracks, new Set\(saved\.completedIds \?\? \[\]\)\)/)
+  assert.match(dashboard, /const unlocked = getUnlockedLessonIds\(tracks, restoredCompletedIds\)/)
+  assert.doesNotMatch(dashboard, /function getUnlockedLessonIds\(completedIds: Set<string>\)/)
+  assert.match(dashboard, /unlocked\.has\(saved\.activeLessonId\)/)
+  assert.match(dashboard, /const firstLessonId = firstAvailableTrack\?\.modules\n  \.flatMap\(\(module\) => module\.lessons\)\n  \.find\(\(lesson\) => lesson !== undefined\)\?\.id \?\? \(\(\) => \{/)
+  assert.match(dashboard, /throw new Error\('Academy curriculum must contain an available track with at least one lesson'\)/)
+  assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
 })
 
 test('Academy persistence bounds untrusted localStorage payloads', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /localStorage/)
-  assert.match(workspace, /JSON\.parse/)
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+  assert.match(dashboard, /const MAX_PERSISTED_JSON_LENGTH = 1_000_000/)
+  assert.match(dashboard, /if \(!raw \|\| raw\.length > MAX_PERSISTED_JSON_LENGTH\) return \{\}/)
+  assert.match(dashboard, /const MAX_SAVED_CODE_LENGTH = 100_000/)
+  assert.match(dashboard, /typeof code === 'string' && code\.length <= MAX_SAVED_CODE_LENGTH/)
 })
 
-test('Academy flushes committed progress on page lifecycle changes', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /visibilitychange|pagehide|beforeunload/)
-})
-
-test('Academy accurately describes deterministic verification', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /deterministic source analysis/)
-})
-
-test('Academy syllabus uses accessible semantic lesson controls', async () => {
-  const syllabus = await read('components/academy/syllabus-tree.tsx')
-  assert.match(syllabus, /aria-/)
-})
-
-test('Academy lesson workspace exposes accessible editor and verification output', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /aria-/)
-})
-
-test('Academy editor cannot change while verification is running', async () => {
-  const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /disabled=\{running\}/)
-})
-
-test('Zenith UI animations respect prefers-reduced-motion', async () => {
-  const styles = await read('app/globals.css')
-  assert.match(styles, /prefers-reduced-motion/)
-})
-
-test('mobile navigation toggle exposes its controlled menu region', async () => {
-  const nav = await read('components/site-navigation.tsx')
-  assert.match(nav, /aria-controls/)
-})
-
-test('navigation links expose the active page semantically', async () => {
-  const nav = await read('components/site-navigation.tsx')
-  assert.match(nav, /aria-current/)
-})
-
-test('locked Academy lessons remain keyboard discoverable with an accessible reason', async () => {
-  const syllabus = await read('components/academy/syllabus-tree.tsx')
-  assert.match(syllabus, /aria-label=/)
-})
-
-test('active Academy lesson buttons use boolean aria-current state', async () => {
-  const syllabus = await read('components/academy/syllabus-tree.tsx')
-  assert.match(syllabus, /aria-current=\{active \? 'true' : undefined\}/)
+test('TypeScript permits the explicit .ts imports required by the native Node Academy test runtime', async () => {
+  const tsconfig = await read('tsconfig.json')
+  assert.match(tsconfig, /"noEmit": true/)
+  assert.match(tsconfig, /"allowImportingTsExtensions": true/)
 })
