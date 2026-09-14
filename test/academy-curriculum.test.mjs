@@ -31,9 +31,19 @@ test('Academy progression uses the first-class Lesson prerequisite field', async
   const curriculum = await read('lib/academy-data.ts')
 
   assert.match(curriculum, /export type Lesson = \{[\s\S]*prerequisiteId\?: string/)
+  assert.match(curriculum, /import type \{ CurriculumCheck \} from '\.\/academy-checks\.ts'/)
+  assert.match(curriculum, /checks: CurriculumCheck\[\]/)
+  assert.match(curriculum, /checks: CurriculumCheck\[\]/)
   assert.match(progression, /lessons\[index\]\?\.prerequisiteId/)
   assert.doesNotMatch(progression, /type LessonWithPrerequisite = Lesson & \{ prerequisiteId\?: string \}/)
   assert.match(progression, /index <= 0 \? null : lessons\[index - 1\]\?\.id/)
+})
+
+test('Academy lesson factory accepts typed checks without breaking legacy string lessons', async () => {
+  const curriculum = await read('lib/academy-data.ts')
+
+  assert.match(curriculum, /const lesson = \(id: string, title: string, points: number, instructions: string\[\], starterCode: string, checks: CurriculumCheck\[\]/)
+  assert.match(curriculum, /checks, successOutput: output/)
 })
 
 test('Academy curriculum validator rejects invalid prerequisite placement', async () => {
