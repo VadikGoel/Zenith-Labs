@@ -9,7 +9,7 @@ export type VerificationCheck = {
  * Convert the existing string-based curriculum checks into the new explicit
  * contract without changing their current verification behavior.
  *
- * New lessons can eventually declare the kind directly; existing lessons stay
+ * New lessons can declare the kind directly; existing lessons stay
  * source-compatible while the curriculum is migrated incrementally.
  */
 export function normalizeLegacyCheck(value: string): VerificationCheck {
@@ -21,4 +21,10 @@ export function normalizeLegacyCheck(value: string): VerificationCheck {
     return { kind: 'output', value: normalized }
   }
   return { kind: 'structural', value: normalized }
+}
+
+/** Normalize either a legacy string or an explicitly typed lesson check. */
+export function normalizeCheck(value: string | VerificationCheck): VerificationCheck {
+  if (typeof value === 'string') return normalizeLegacyCheck(value)
+  return { kind: value.kind, value: value.value.trim() }
 }
