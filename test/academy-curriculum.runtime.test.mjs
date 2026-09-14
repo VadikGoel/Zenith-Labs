@@ -56,6 +56,21 @@ test('Academy production root lessons use explicit verification kinds', () => {
   }
 })
 
+test('Academy active lessons use explicit verification kinds after curriculum migration', () => {
+  const activeLessons = tracks
+    .filter((track) => track.available)
+    .flatMap((track) => track.modules.flatMap((module) => module.lessons))
+
+  assert.ok(activeLessons.length > 0)
+  for (const lesson of activeLessons) {
+    assert.ok(lesson.checks.length > 0, `${lesson.id} should declare verification checks`)
+    assert.ok(
+      lesson.checks.every((check) => typeof check === 'object' && ['structural', 'output', 'quoted'].includes(check.kind)),
+      `${lesson.id} should use explicit verification kinds`,
+    )
+  }
+})
+
 test('Academy curriculum validator catches implicit prerequisites in active tracks', () => {
   const issues = validateCurriculum([
     track('active', [lesson('root'), lesson('implicit')], undefined, true),
