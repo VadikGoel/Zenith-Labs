@@ -5,6 +5,9 @@ export type VerificationCheck = {
   value: string
 }
 
+/** The compatibility contract used while the curriculum migrates to typed checks. */
+export type CurriculumCheck = string | VerificationCheck
+
 /**
  * Convert the existing string-based curriculum checks into the new explicit
  * contract without changing their current verification behavior.
@@ -30,6 +33,10 @@ export function isVerificationCheck(value: unknown): value is VerificationCheck 
     (candidate.kind === 'structural' || candidate.kind === 'output' || candidate.kind === 'quoted') &&
     typeof candidate.value === 'string'
   )
+}
+
+export function isCurriculumCheck(value: unknown): value is CurriculumCheck {
+  return typeof value === 'string' || isVerificationCheck(value)
 }
 
 /** Normalize legacy or typed checks and fail closed on malformed runtime data. */
