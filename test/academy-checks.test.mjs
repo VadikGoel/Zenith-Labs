@@ -26,3 +26,13 @@ test('malformed Academy check objects fail closed instead of becoming structural
     assert.deepEqual(normalized, { kind: 'structural', value: '' })
   }
 })
+
+test('Academy check type guard rejects untrusted runtime values', async () => {
+  const { isVerificationCheck } = await loadChecks()
+  assert.equal(isVerificationCheck({ kind: 'structural', value: 'Console.WriteLine' }), true)
+  assert.equal(isVerificationCheck({ kind: 'output', value: 'Hello' }), true)
+  assert.equal(isVerificationCheck({ kind: 'quoted', value: '"Hello"' }), true)
+  assert.equal(isVerificationCheck({ kind: 'output', value: 42 }), false)
+  assert.equal(isVerificationCheck({ kind: 'unknown', value: 'Hello' }), false)
+  assert.equal(isVerificationCheck(null), false)
+})
