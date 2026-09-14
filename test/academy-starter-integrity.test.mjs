@@ -32,6 +32,6 @@ test('cs-interfaces starter leaves the contract method for the learner to implem
 
   assert.ok(lesson)
   assert.match(lesson.starterCode, /interface IRunner/)
-  assert.doesNotMatch(lesson.starterCode, /string Run\(\);/)
+  assert.match(lesson.starterCode, /\/\* TODO: string Run\(\); \*\//)
   assert.equal(verifyLessonCode(lesson, lesson.starterCode).complete, false)
 })
