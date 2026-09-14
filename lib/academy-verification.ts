@@ -92,8 +92,6 @@ function normalizeLiteralContent(value: string): string {
 
 /** Match a human-readable output requirement inside a quoted literal. */
 function containsLiteralContent(code: string, requirement: string): boolean {
-  if (!/\s/.test(requirement)) return false
-
   let quote: Quote | null = null
   let escaped = false
   let literal = ''
