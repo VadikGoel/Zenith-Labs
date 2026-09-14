@@ -1,4 +1,5 @@
 import type { Lesson, Track } from './academy-data'
+import { normalizeCheck } from './academy-checks.ts'
 
 export type CurriculumIssue = {
   code:
@@ -78,8 +79,9 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
         if (!instruction.trim()) issues.push({ code: 'empty-instruction', trackId: track.id, lessonId: lesson.id })
       }
       if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
-      for (const check of lesson.checks) {
-        if (!check.trim()) issues.push({ code: 'empty-check-assertion', trackId: track.id, lessonId: lesson.id })
+      for (const rawCheck of lesson.checks as unknown[]) {
+        const check = normalizeCheck(rawCheck)
+        if (!check.value) issues.push({ code: 'empty-check-assertion', trackId: track.id, lessonId: lesson.id })
       }
       if (lesson.successOutput.length === 0) issues.push({ code: 'empty-success-output', trackId: track.id, lessonId: lesson.id })
       for (const message of lesson.successOutput) {
