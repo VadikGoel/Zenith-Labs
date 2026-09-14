@@ -40,3 +40,13 @@ test('Supported Node runtime matches the Next.js 16 baseline', async () => {
 
   assert.equal(packageJson.engines?.node, '>=20.9.0')
 })
+
+test('npm lockfile root metadata matches the project manifest', async () => {
+  const packageJson = JSON.parse(await read('package.json'))
+  const lockfile = JSON.parse(await read('package-lock.json'))
+
+  assert.equal(lockfile.name, packageJson.name)
+  assert.equal(lockfile.version, packageJson.version)
+  assert.equal(lockfile.packages?.['']?.name, packageJson.name)
+  assert.equal(lockfile.packages?.['']?.version, packageJson.version)
+})
