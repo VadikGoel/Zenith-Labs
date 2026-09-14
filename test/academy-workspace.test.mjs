@@ -38,13 +38,15 @@ test('Academy verification service strips comments before evaluating typed requi
   assert.match(verifier, /current === '\/' && next === '\*'/)
   assert.match(verifier, /const executableCode = stripComments\(code\)/)
   assert.match(verifier, /const check = normalizeCheck\(rawCheck\)/)
-  assert.match(verifier, /const structuralCode = maskLiteralContents\(executableCode\)/)
-  assert.match(verifier, /return structuralCode\.includes\(check\.value\)/)
+  assert.match(verifier, /const structuralCode = normalizeStructuralSyntax\(maskLiteralContents\(executableCode\)\)/)
+  assert.match(verifier, /return structuralCode\.includes\(normalizeStructuralSyntax\(check\.value\)\)/)
 })
 
-test('Academy output checks only match human-readable text inside literals', async () => {
+test('Academy output checks only match human-readable text inside recognized output expressions', async () => {
   const verifier = await read('lib/academy-verification.ts')
-  assert.match(verifier, /if \(check\.kind === 'output'\) \{[\s\S]*return containsLiteralContent\(executableCode, check\.value\)/)
+  assert.match(verifier, /if \(check\.kind === 'output'\) \{[\s\S]*return containsPrintedLiteralContent\(executableCode, check\.value\)/)
+  assert.match(verifier, /function containsPrintedLiteralContent\(code: string, requirement: string\)/)
+  assert.match(verifier, /if \(isInsideLiteral\(code, match\.index\)\) continue/)
   assert.doesNotMatch(verifier, /if \(check\.kind === 'output'\) \{[\s\S]*return structuralCode\.includes\(check\.value\) \|\| containsLiteralContent/)
 })
 
