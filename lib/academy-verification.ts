@@ -1,5 +1,5 @@
 import type { Lesson } from './academy-data'
-import { normalizeLegacyCheck } from './academy-checks.ts'
+import { normalizeCheck } from './academy-checks.ts'
 
 export type VerificationResult = {
   passedChecks: boolean[]
@@ -169,7 +169,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
   const executableCode = stripComments(code)
   const structuralCode = maskLiteralContents(executableCode)
   const passedChecks = lesson.checks.map((rawCheck) => {
-    const check = normalizeLegacyCheck(rawCheck)
+    const check = normalizeCheck(rawCheck)
     if (check.value.length === 0) return false
 
     if (check.kind === 'quoted') {
