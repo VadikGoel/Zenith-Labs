@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { tracks } from '../lib/academy-data.ts'
 import { validateCurriculum } from '../lib/academy-curriculum.ts'
+import { verifyLessonCode } from '../lib/academy-verification.ts'
 
 function lesson(id, prerequisiteId, overrides = {}) {
   return {
@@ -67,6 +68,29 @@ test('Academy active lessons use explicit verification kinds after curriculum mi
     assert.ok(
       lesson.checks.every((check) => typeof check === 'object' && ['structural', 'output', 'quoted'].includes(check.kind)),
       `${lesson.id} should use explicit verification kinds`,
+    )
+  }
+})
+
+test('Every production Academy output check is satisfiable by a supported language output expression', () => {
+  const outputChecks = tracks
+    .filter((track) => track.available)
+    .flatMap((track) => track.modules.flatMap((module) => module.lessons.map((lesson) => ({ track, lesson }))))
+    .flatMap(({ track, lesson }) => lesson.checks
+      .filter((check) => typeof check === 'object' && check.kind === 'output')
+      .map((check) => ({ track, lesson, check })))
+
+  assert.ok(outputChecks.length > 0)
+  for (const { track, lesson, check } of outputChecks) {
+    const literal = JSON.stringify(check.value)
+    const code = track.language === 'cpp'
+      ? `std::cout << ${literal};`
+      : `Console.WriteLine(${literal});`
+    const result = verifyLessonCode(lesson, code)
+    assert.equal(
+      result.passedChecks[lesson.checks.indexOf(check)],
+      true,
+      `${track.id}/${lesson.id} output check should accept its supported ${track.language} output form`,
     )
   }
 })
