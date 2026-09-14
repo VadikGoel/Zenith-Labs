@@ -147,6 +147,29 @@ function isInsideLiteral(code: string, index: number): boolean {
   return quote !== null
 }
 
+/** Find the first semicolon that is outside a string, character, or template literal. */
+function findStatementEnd(code: string, start: number): number {
+  let quote: Quote | null = null
+  let escaped = false
+
+  for (let i = start; i < code.length; i += 1) {
+    const current = code[i]
+    if (quote) {
+      if (escaped) escaped = false
+      else if (current === '\\') escaped = true
+      else if (current === quote) quote = null
+      continue
+    }
+    if (current === '"' || current === "'" || current === '`') {
+      quote = current
+    } else if (current === ';') {
+      return i
+    }
+  }
+
+  return -1
+}
+
 /**
  * Match an output requirement only when the matching literal is part of a
  * recognized console/stream output expression. This avoids passing a check
@@ -160,7 +183,7 @@ function containsPrintedLiteralContent(code: string, requirement: string): boole
     if (isInsideLiteral(code, match.index)) continue
 
     const expressionStart = match.index
-    const expressionEnd = code.indexOf(';', outputCall.lastIndex)
+    const expressionEnd = findStatementEnd(code, outputCall.lastIndex)
     const segment = code.slice(expressionStart, expressionEnd === -1 ? code.length : expressionEnd)
     if (containsLiteralContent(segment, requirement)) return true
   }
