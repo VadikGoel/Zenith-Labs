@@ -35,3 +35,16 @@ test('cs-interfaces starter leaves the contract method for the learner to implem
   assert.match(lesson.starterCode, /\/\* TODO: string Run\(\); \*\//)
   assert.equal(verifyLessonCode(lesson, lesson.starterCode).complete, false)
 })
+
+test('cpp-rule starter leaves unique ownership for the learner to add', () => {
+  const lesson = tracks
+    .find((track) => track.id === 'cpp')
+    ?.modules.flatMap((module) => module.lessons)
+    .find((candidate) => candidate.id === 'cpp-rule')
+
+  assert.ok(lesson)
+  assert.match(lesson.starterCode, /class Buffer/)
+  assert.match(lesson.starterCode, /\/\* TODO: add unique ownership \*\//)
+  assert.doesNotMatch(lesson.starterCode, /std::unique_ptr\s*</)
+  assert.equal(verifyLessonCode(lesson, lesson.starterCode).complete, false)
+})
