@@ -92,10 +92,6 @@ function normalizeLiteralContent(value: string): string {
 
 /** Match a human-readable output requirement inside a quoted literal. */
 function containsLiteralContent(code: string, requirement: string): boolean {
-  // Single-token assertions are structural by default. Allowing them to match
-  // literal contents would make checks such as `std::cout` or `return` too easy
-  // to satisfy with a quoted copy of the token. Human-readable output assertions
-  // are intentionally multi-token phrases until the verifier gains typed checks.
   if (!/\s/.test(requirement)) return false
 
   let quote: Quote | null = null
@@ -177,7 +173,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
     }
 
     if (check.kind === 'output') {
-      return structuralCode.includes(check.value) || containsLiteralContent(executableCode, check.value)
+      return containsLiteralContent(executableCode, check.value)
     }
 
     return structuralCode.includes(check.value)
