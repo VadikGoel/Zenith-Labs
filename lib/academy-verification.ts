@@ -206,7 +206,7 @@ function findStatementEnd(code: string, start: number): number {
  * merely because an unused string variable contains the expected text.
  */
 function containsPrintedLiteralContent(code: string, requirement: string): boolean {
-  const outputCall = /(?<![A-Za-z0-9_$. :])(?:Console\.(?:WriteLine|Write)(?=\s*\()|(?:std::)?cout\s*<<|(?:std::)?(?:printf|puts|println)(?=\s*\())/g
+  const outputCall = /(?<![A-Za-z0-9_$. :])(?:(?:System\.)?Console\.(?:WriteLine|Write)(?=\s*\()|(?:std::)?cout\s*<<|(?:std::)?(?:printf|puts|println)(?=\s*\())/g
   let match: RegExpExecArray | null
 
   while ((match = outputCall.exec(code)) !== null) {
