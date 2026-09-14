@@ -23,16 +23,18 @@ export function normalizeLegacyCheck(value: string): VerificationCheck {
   return { kind: 'structural', value: normalized }
 }
 
-function isVerificationCheckKind(value: unknown): value is VerificationCheckKind {
-  return value === 'structural' || value === 'output' || value === 'quoted'
+export function isVerificationCheck(value: unknown): value is VerificationCheck {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as { kind?: unknown; value?: unknown }
+  return (
+    (candidate.kind === 'structural' || candidate.kind === 'output' || candidate.kind === 'quoted') &&
+    typeof candidate.value === 'string'
+  )
 }
 
 /** Normalize legacy or typed checks and fail closed on malformed runtime data. */
-export function normalizeCheck(value: string | VerificationCheck): VerificationCheck {
+export function normalizeCheck(value: unknown): VerificationCheck {
   if (typeof value === 'string') return normalizeLegacyCheck(value)
-  if (!value || typeof value !== 'object') return { kind: 'structural', value: '' }
-  if (!isVerificationCheckKind(value.kind) || typeof value.value !== 'string') {
-    return { kind: 'structural', value: '' }
-  }
+  if (!isVerificationCheck(value)) return { kind: 'structural', value: '' }
   return { kind: value.kind, value: value.value.trim() }
 }
