@@ -1,5 +1,5 @@
 import type { Lesson, Track } from './academy-data'
-import { isVerificationCheck, normalizeCheck } from './academy-checks.ts'
+import { isCurriculumCheck, normalizeCheck } from './academy-checks.ts'
 
 export type CurriculumIssue = {
   code:
@@ -81,7 +81,7 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
       }
       if (lesson.checks.length === 0) issues.push({ code: 'empty-checks', trackId: track.id, lessonId: lesson.id })
       for (const rawCheck of lesson.checks as unknown[]) {
-        if (typeof rawCheck !== 'string' && !isVerificationCheck(rawCheck)) {
+        if (!isCurriculumCheck(rawCheck)) {
           issues.push({ code: 'invalid-check-definition', trackId: track.id, lessonId: lesson.id })
           continue
         }
