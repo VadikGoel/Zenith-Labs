@@ -5,6 +5,7 @@ import { Play, TerminalSquare } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { verifyLessonCode } from '@/lib/academy-verification'
 import type { Lesson } from '@/lib/academy-data'
+import type { CurriculumCheck } from '@/lib/academy-checks'
 
 type LessonWorkspaceProps = {
   lesson: Lesson
@@ -14,6 +15,11 @@ type LessonWorkspaceProps = {
   onCodeChange: (code: string) => void
   onPass: () => void
   isCompleted: boolean
+}
+
+function formatVerificationCheck(check: CurriculumCheck): string {
+  if (typeof check === 'string') return check
+  return `${check.kind}: ${check.value}`
 }
 
 export function LessonWorkspace({
@@ -68,11 +74,12 @@ export function LessonWorkspace({
         onPass()
       } else {
         const { failedIndex } = verification
+        const failedCheck = lesson.checks[failedIndex]
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
           'requirements checked (deterministic source analysis)',
           `ASSERTION FAILED [${failedIndex + 1}/${lesson.checks.length}]`,
-          `expected code to contain: ${lesson.checks[failedIndex]}`,
+          `expected: ${formatVerificationCheck(failedCheck)}`,
           '',
           'VERIFICATION FAILED — review the checklist and retry',
         ])
