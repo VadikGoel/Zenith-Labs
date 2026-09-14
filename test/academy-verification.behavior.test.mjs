@@ -82,6 +82,14 @@ test('verifier rejects a recognized output call that appears only inside a strin
   assert.equal(result.failedIndex, 0)
 })
 
+test('verifier rejects lookalike output member names', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Hello, Zenith' }] }, 'MyConsole.WriteLine("Hello, Zenith");')
+  assert.deepEqual(checks(result), [false])
+  assert.equal(result.complete, false)
+  assert.equal(result.failedIndex, 0)
+})
+
 test('verifier accepts output text from a C++ stream expression', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode({ ...lesson, checks: [{ kind: 'output', value: 'Zenith Systems Online' }] }, 'std::cout << "Zenith Systems Online";')
