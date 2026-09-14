@@ -90,9 +90,13 @@ function normalizeLiteralContent(value: string): string {
     .replace(/\\t/g, '\t')
 }
 
-/** Normalize source whitespace so structural checks are not formatting-sensitive. */
+/** Normalize source formatting while preserving separation between identifiers. */
 function normalizeStructuralSyntax(value: string): string {
-  return value.replace(/\s+/g, '')
+  return value
+    .replace(/\s+(?=[()[\]{}.,;=<>:+\-*/%!?&|])/g, '')
+    .replace(/([()[\]{}.,;=<>:+\-*/%!?&|])\s+/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 /** Match a human-readable output requirement inside a quoted literal. */
