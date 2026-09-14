@@ -22,6 +22,18 @@ function track(id, lessons, moduleId = `${id}-module`, available = false) {
   return { id, name: id, language: 'test', available, modules: [{ id: moduleId, title: moduleId, lessons }] }
 }
 
+function completionFixture(track, lesson) {
+  return lesson.checks.map((check) => {
+    if (typeof check === 'string') return check
+    if (check.kind === 'output') {
+      const literal = JSON.stringify(check.value)
+      return track.language === 'cpp' ? `std::cout << ${literal};` : `Console.WriteLine(${literal});`
+    }
+    if (check.kind === 'quoted' && check.value === '$"') return 'var label = $"Zenith";'
+    return check.value
+  }).join('\n')
+}
+
 test('Academy production curriculum passes structural integrity validation', () => {
   const issues = validateCurriculum(tracks)
   assert.deepEqual(issues, [], `Academy curriculum integrity issues:\n${JSON.stringify(issues, null, 2)}`)
@@ -92,6 +104,27 @@ test('Every production Academy output check is satisfiable by a supported langua
       true,
       `${track.id}/${lesson.id} output check should accept its supported ${track.language} output form`,
     )
+  }
+})
+
+test('Every active Academy lesson has an end-to-end completion fixture and an incomplete starter', () => {
+  const activeLessons = tracks
+    .filter((track) => track.available)
+    .flatMap((track) => track.modules.flatMap((module) => module.lessons.map((lesson) => ({ track, lesson }))))
+
+  assert.ok(activeLessons.length > 0)
+  for (const { track, lesson } of activeLessons) {
+    const completionCode = completionFixture(track, lesson)
+    const completed = verifyLessonCode(lesson, completionCode)
+    assert.equal(completed.complete, true, `${track.id}/${lesson.id} should have a submission that satisfies every configured check`)
+    assert.deepEqual(
+      completed.passedChecks,
+      lesson.checks.map(() => true),
+      `${track.id}/${lesson.id} completion fixture should turn every assertion green`,
+    )
+
+    const starter = verifyLessonCode(lesson, lesson.starterCode)
+    assert.equal(starter.complete, false, `${track.id}/${lesson.id} starter must remain incomplete before learner work`)
   }
 })
 
