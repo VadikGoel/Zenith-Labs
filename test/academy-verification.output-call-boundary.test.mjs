@@ -35,6 +35,26 @@ test('verifier rejects lookalike C++ output functions and namespaces', async () 
   assert.equal(result.complete, false)
 })
 
+test('verifier rejects C++ output calls from nested non-std namespaces', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello' }] },
+    'outer::std::cout << "Hello"; outer::std::printf("Hello");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
+
+test('verifier rejects malformed std namespace boundaries', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello' }] },
+    'std:::cout << "Hello"; std:::printf("Hello");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
+
 test('verifier still accepts supported output calls with exact boundaries', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
