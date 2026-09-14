@@ -129,6 +129,25 @@ function containsLiteralContent(code: string, requirement: string): boolean {
 }
 
 /**
+ * Match an output requirement only when the matching literal is part of a
+ * recognized console/stream output expression. This avoids passing a check
+ * merely because an unused string variable contains the expected text.
+ */
+function containsPrintedLiteralContent(code: string, requirement: string): boolean {
+  const outputCall = /(?:Console\.(?:WriteLine|Write)|(?:std::)?cout\s*<<|(?:std::)?printf\s*\(|(?:std::)?puts\s*\(|(?:std::)?println\s*\()/g
+  let match: RegExpExecArray | null
+
+  while ((match = outputCall.exec(code)) !== null) {
+    const expressionStart = match.index
+    const expressionEnd = code.indexOf(';', outputCall.lastIndex)
+    const segment = code.slice(expressionStart, expressionEnd === -1 ? code.length : expressionEnd)
+    if (containsLiteralContent(segment, requirement)) return true
+  }
+
+  return false
+}
+
+/**
  * Match a quoted-output requirement only when its occurrence begins in real
  * source code, rather than inside a larger string or template literal.
  */
@@ -176,7 +195,7 @@ export function verifyLessonCode(lesson: Lesson, code: string): VerificationResu
     }
 
     if (check.kind === 'output') {
-      return containsLiteralContent(executableCode, check.value)
+      return containsPrintedLiteralContent(executableCode, check.value)
     }
 
     return structuralCode.includes(normalizeStructuralSyntax(check.value))
