@@ -8,7 +8,7 @@ export type VerificationResult = {
   failedIndex: number
 }
 
-type Quote = '\"' | "'" | '`'
+type Quote = '"' | "'" | '`'
 
 /** Remove comments without touching quoted string, character, or template literals. */
 function stripComments(code: string): string {
@@ -44,7 +44,7 @@ function stripComments(code: string): string {
       else if (current === quote) quote = null
       continue
     }
-    if (current === '\"' || current === "'" || current === '`') {
+    if (current === '"' || current === "'" || current === '`') {
       quote = current
       result += current
     } else if (current === '/' && next === '/') {
@@ -75,7 +75,7 @@ function maskLiteralContents(code: string): string {
       else result += ' '
       continue
     }
-    if (current === '\"' || current === "'" || current === '`') { quote = current; result += current }
+    if (current === '"' || current === "'" || current === '`') { quote = current; result += current }
     else result += current
   }
   return result
@@ -149,7 +149,7 @@ function containsLiteralContent(code: string, requirement: string): boolean {
       }
       continue
     }
-    if (current === '\"' || current === "'" || current === '`') {
+    if (current === '"' || current === "'" || current === '`') {
       quote = current
       literal = ''
     }
@@ -169,7 +169,7 @@ function isInsideLiteral(code: string, index: number): boolean {
       if (escaped) escaped = false
       else if (current === '\\') escaped = true
       else if (current === quote) quote = null
-    } else if (current === '\"' || current === "'" || current === '`') {
+    } else if (current === '"' || current === "'" || current === '`') {
       quote = current
     }
   }
@@ -190,7 +190,7 @@ function findStatementEnd(code: string, start: number): number {
       else if (current === quote) quote = null
       continue
     }
-    if (current === '\"' || current === "'" || current === '`') {
+    if (current === '"' || current === "'" || current === '`') {
       quote = current
     } else if (current === ';') {
       return i
@@ -206,7 +206,7 @@ function findStatementEnd(code: string, start: number): number {
  * merely because an unused string variable contains the expected text.
  */
 function containsPrintedLiteralContent(code: string, requirement: string): boolean {
-  const outputCall = /(?<![A-Za-z0-9_$.])(?:(?:System\.)?Console\.(?:WriteLine|Write)(?=\s*\()|(?:std::)?cout\s*<<|(?:std::)?(?:printf|puts|println)(?=\s*\())/g
+  const outputCall = /(?<![A-Za-z0-9_$.\:])(?:(?:System\.)?Console\.(?:WriteLine|Write)(?=\s*\()|(?:std::)?cout\s*<<|(?:std::)?(?:printf|puts|println)(?=\s*\())/g
   let match: RegExpExecArray | null
 
   while ((match = outputCall.exec(code)) !== null) {
@@ -240,7 +240,7 @@ function containsQuotedRequirement(code: string, requirement: string): boolean {
         if (escaped) escaped = false
         else if (current === '\\') escaped = true
         else if (current === quote) quote = null
-      } else if (current === '\"' || current === "'" || current === '`') {
+      } else if (current === '"' || current === "'" || current === '`') {
         quote = current
       }
     }
