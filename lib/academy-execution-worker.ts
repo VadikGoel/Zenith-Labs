@@ -31,21 +31,6 @@ function expectedOutput(lesson: Lesson) {
     .trim()
 }
 
-function commandFor(language: AcademyExecutionLanguage, root: string) {
-  if (language === 'cpp') {
-    return {
-      file: 'g++',
-      args: ['-std=c++20', '-Wall', '-Wextra', '-Werror', join(root, 'main.cpp'), '-o', join(root, 'app')],
-      run: { file: join(root, 'app'), args: [] as string[] },
-    }
-  }
-  return {
-    file: 'dotnet',
-    args: ['new', 'console', '--framework', 'net10.0', '--force', '--no-restore', '--output', root],
-    run: { file: 'dotnet', args: ['run', '--no-restore', '--project', join(root, 'AcademyRunner.csproj')] },
-  }
-}
-
 export async function executeAcademySubmission(
   language: AcademyExecutionLanguage,
   code: string,
@@ -61,33 +46,55 @@ export async function executeAcademySubmission(
   let root = ''
   try {
     root = await mkdtemp(join(tmpdir(), 'zenith-academy-'))
-    const command = commandFor(language, root)
+    let runFile = ''
+    let runArgs: string[] = []
 
     if (language === 'cpp') {
-      await writeFile(join(root, 'main.cpp'), code, 'utf8')
-      await execFileAsync(command.file, command.args, { cwd: root, timeout: policy.timeoutMs, maxBuffer: policy.maxOutputBytes })
+      const source = join(root, 'main.cpp')
+      const binary = join(root, 'app')
+      await writeFile(source, code, 'utf8')
+      await execFileAsync('g++', ['-std=c++20', '-Wall', '-Wextra', '-Werror', source, '-o', binary], {
+        cwd: root,
+        timeout: policy.timeoutMs,
+        maxBuffer: policy.maxOutputBytes,
+        shell: false,
+      })
+      runFile = binary
     } else {
-      await execFileAsync(command.file, command.args, { cwd: root, timeout: policy.timeoutMs, maxBuffer: policy.maxOutputBytes })
+      await execFileAsync('dotnet', ['new', 'console', '--framework', 'net10.0', '--force', '--output', root], {
+        cwd: root,
+        timeout: policy.timeoutMs,
+        maxBuffer: policy.maxOutputBytes,
+        shell: false,
+      })
       await writeFile(join(root, 'Program.cs'), code, 'utf8')
-      await execFileAsync(command.run.file, command.run.args, { cwd: root, timeout: policy.timeoutMs, maxBuffer: policy.maxOutputBytes })
+      runFile = 'dotnet'
+      runArgs = ['run', '--no-restore', '--project', join(root, 'AcademyRunner.csproj')]
     }
 
-    const run = await execFileAsync(command.run.file, command.run.args, { cwd: root, timeout: policy.timeoutMs, maxBuffer: policy.maxOutputBytes })
-    const bounded = truncateExecutionOutput(run.stdout, policy.maxOutputBytes)
+    const run = await execFileAsync(runFile, runArgs, {
+      cwd: root,
+      timeout: policy.timeoutMs,
+      maxBuffer: policy.maxOutputBytes,
+      shell: false,
+    })
+    const stdout = truncateExecutionOutput(String(run.stdout ?? ''), policy.maxOutputBytes)
+    const stderr = truncateExecutionOutput(String(run.stderr ?? ''), policy.maxOutputBytes)
     const expected = expectedOutput(lesson)
+
     return {
-      status: bounded.output.trim() === expected ? 'passed' : 'failed',
-      stdout: bounded.output,
-      stderr: run.stderr,
+      status: !stdout.truncated && stdout.output.trim() === expected ? 'passed' : 'failed',
+      stdout: stdout.output,
+      stderr: stderr.output,
       exitCode: 0,
-      truncated: bounded.truncated,
+      truncated: stdout.truncated || stderr.truncated,
       durationMs: Date.now() - started,
     }
   } catch (error) {
-    const timedOut = typeof error === 'object' && error !== null && 'killed' in error && Boolean(error.killed)
     const err = error as { stdout?: string; stderr?: string; code?: number | string; killed?: boolean }
-    const stdout = truncateExecutionOutput(err.stdout ?? '', policy.maxOutputBytes)
-    const stderr = truncateExecutionOutput(err.stderr ?? '', policy.maxOutputBytes)
+    const stdout = truncateExecutionOutput(String(err.stdout ?? ''), policy.maxOutputBytes)
+    const stderr = truncateExecutionOutput(String(err.stderr ?? ''), policy.maxOutputBytes)
+    const timedOut = Boolean(err.killed)
     return {
       status: timedOut ? 'timed_out' : 'failed',
       stdout: stdout.output,
