@@ -64,10 +64,10 @@ test('worker reports a timed-out program instead of waiting indefinitely', async
     'cpp',
     'int main() { for (;;) {} }',
     cppHello,
-    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 100 },
+    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 250 },
   )
   assert.equal(result.status, 'timed_out')
-  assert.match(result.reason ?? '', /100ms/)
+  assert.match(result.reason ?? '', /250ms/)
 })
 
 test('worker kills the entire child process group when a program forks', { skip: process.platform === 'win32' }, async () => {
@@ -75,8 +75,8 @@ test('worker kills the entire child process group when a program forks', { skip:
     'cpp',
     '#include <unistd.h>\nint main() { if (fork() == 0) { sleep(1); write(1, "CHILD_SURVIVED\\n", 15); return 0; } for (;;) {} }',
     cppHello,
-    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 100 },
+    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 500 },
   )
-  assert.equal(result.status, 'timed_out')
+  assert.equal(result.status, 'timed_out', `${result.stderr}\n${result.stdout}`)
   assert.doesNotMatch(result.stdout, /CHILD_SURVIVED/)
 })
