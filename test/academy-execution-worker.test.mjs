@@ -36,6 +36,29 @@ test('worker compiles and runs a C# submission inside a temporary workspace', as
   assert.equal(result.stdout.trim(), 'Hello, Zenith')
 })
 
+test('worker reports output mismatches as failed without claiming success', async () => {
+  const result = await executeAcademySubmission(
+    'cpp',
+    '#include <iostream>\nint main() { std::cout << "Wrong output" << "\\n"; }',
+    cppHello,
+  )
+  assert.equal(result.status, 'failed')
+  assert.equal(result.exitCode, 0)
+  assert.equal(result.stdout.trim(), 'Wrong output')
+  assert.equal(result.truncated, false)
+})
+
+test('worker reports compiler failures as failed with diagnostics', async () => {
+  const result = await executeAcademySubmission(
+    'cpp',
+    'int main( { return 0; }',
+    cppHello,
+  )
+  assert.equal(result.status, 'failed')
+  assert.notEqual(result.exitCode, null)
+  assert.notEqual(result.stderr.trim(), '')
+})
+
 test('worker reports a timed-out program instead of waiting indefinitely', async () => {
   const result = await executeAcademySubmission(
     'cpp',
