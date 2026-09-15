@@ -14,6 +14,7 @@ type Quote = '"' | "'" | '`'
 function stripComments(code: string): string {
   let result = ''
   let quote: Quote | null = null
+  let verbatim = false
   let escaped = false
   let blockComment = false
   let lineComment = false
@@ -21,6 +22,7 @@ function stripComments(code: string): string {
   for (let i = 0; i < code.length; i += 1) {
     const current = code[i]
     const next = code[i + 1]
+    const previous = i > 0 ? code[i - 1] : ''
 
     if (lineComment) {
       if (current === '\n') {
@@ -39,13 +41,22 @@ function stripComments(code: string): string {
     }
     if (quote) {
       result += current
-      if (escaped) escaped = false
+      if (verbatim) {
+        if (current === '"' && next === '"') {
+          result += next
+          i += 1
+        } else if (current === '"') {
+          quote = null
+          verbatim = false
+        }
+      } else if (escaped) escaped = false
       else if (current === '\\') escaped = true
       else if (current === quote) quote = null
       continue
     }
     if (current === '"' || current === "'" || current === '`') {
       quote = current
+      verbatim = current === '"' && previous === '@'
       result += current
     } else if (current === '/' && next === '/') {
       lineComment = true
@@ -64,18 +75,35 @@ function stripComments(code: string): string {
 function maskLiteralContents(code: string): string {
   let result = ''
   let quote: Quote | null = null
+  let verbatim = false
   let escaped = false
   for (let i = 0; i < code.length; i += 1) {
     const current = code[i]
+    const next = code[i + 1]
+    const previous = i > 0 ? code[i - 1] : ''
     if (quote) {
-      if (escaped) { escaped = false; result += ' ' }
+      if (verbatim) {
+        if (current === '"' && next === '"') {
+          result += '  '
+          i += 1
+        } else if (current === '"') {
+          quote = null
+          verbatim = false
+          result += current
+        } else if (current === '\n') result += current
+        else result += ' '
+      } else if (escaped) { escaped = false; result += ' ' }
       else if (current === '\\') { escaped = true; result += ' ' }
       else if (current === quote) { quote = null; result += current }
       else if (current === '\n') result += current
       else result += ' '
       continue
     }
-    if (current === '"' || current === "'" || current === '`') { quote = current; result += current }
+    if (current === '"' || current === "'" || current === '`') {
+      quote = current
+      verbatim = current === '"' && previous === '@'
+      result += current
+    }
     else result += current
   }
   return result
@@ -176,16 +204,26 @@ function containsLiteralContent(code: string, requirement: string): boolean {
 /** Return whether an index is inside a source literal. Comments have already been removed. */
 function isInsideLiteral(code: string, index: number): boolean {
   let quote: Quote | null = null
+  let verbatim = false
   let escaped = false
 
   for (let i = 0; i < index; i += 1) {
     const current = code[i]
+    const next = code[i + 1]
+    const previous = i > 0 ? code[i - 1] : ''
     if (quote) {
-      if (escaped) escaped = false
+      if (verbatim) {
+        if (current === '"' && next === '"') i += 1
+        else if (current === '"') {
+          quote = null
+          verbatim = false
+        }
+      } else if (escaped) escaped = false
       else if (current === '\\') escaped = true
       else if (current === quote) quote = null
     } else if (current === '"' || current === "'" || current === '`') {
       quote = current
+      verbatim = current === '"' && previous === '@'
     }
   }
 
@@ -195,18 +233,28 @@ function isInsideLiteral(code: string, index: number): boolean {
 /** Find the first semicolon that is outside a string, character, or template literal. */
 function findStatementEnd(code: string, start: number): number {
   let quote: Quote | null = null
+  let verbatim = false
   let escaped = false
 
   for (let i = start; i < code.length; i += 1) {
     const current = code[i]
+    const next = code[i + 1]
+    const previous = i > 0 ? code[i - 1] : ''
     if (quote) {
-      if (escaped) escaped = false
+      if (verbatim) {
+        if (current === '"' && next === '"') i += 1
+        else if (current === '"') {
+          quote = null
+          verbatim = false
+        }
+      } else if (escaped) escaped = false
       else if (current === '\\') escaped = true
       else if (current === quote) quote = null
       continue
     }
     if (current === '"' || current === "'" || current === '`') {
       quote = current
+      verbatim = current === '"' && previous === '@'
     } else if (current === ';') {
       return i
     }
@@ -248,15 +296,25 @@ function containsQuotedRequirement(code: string, requirement: string): boolean {
     if (index === -1) return false
 
     let quote: Quote | null = null
+    let verbatim = false
     let escaped = false
     for (let i = 0; i < index; i += 1) {
       const current = code[i]
+      const next = code[i + 1]
+      const previous = i > 0 ? code[i - 1] : ''
       if (quote) {
-        if (escaped) escaped = false
+        if (verbatim) {
+          if (current === '"' && next === '"') i += 1
+          else if (current === '"') {
+            quote = null
+            verbatim = false
+          }
+        } else if (escaped) escaped = false
         else if (current === '\\') escaped = true
         else if (current === quote) quote = null
       } else if (current === '"' || current === "'" || current === '`') {
         quote = current
+        verbatim = current === '"' && previous === '@'
       }
     }
 
