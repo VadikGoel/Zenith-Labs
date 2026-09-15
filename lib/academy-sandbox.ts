@@ -23,6 +23,7 @@ export function buildSandboxArgs(
   if (!sandboxAvailable()) throw new Error('The Academy sandbox requires a Linux container runtime.')
 
   const image = language === 'cpp' ? ACADEMY_SANDBOX.cppImage : ACADEMY_SANDBOX.csharpImage
+  const outputMount = phase === 'run' ? `type=bind,src=${root}/output,dst=/output,readonly` : `type=bind,src=${root}/output,dst=/output`
   const common = [
     'run', '--rm', '--network', 'none',
     '--read-only', '--cap-drop', 'ALL', '--security-opt', 'no-new-privileges=true',
@@ -30,7 +31,7 @@ export function buildSandboxArgs(
     '--cpus', ACADEMY_SANDBOX.cpus, '--pids-limit', ACADEMY_SANDBOX.pidsLimit,
     '--tmpfs', '/tmp:rw,nosuid,nodev,size=16m',
     '--mount', `type=bind,src=${root}/input,dst=/input,readonly`,
-    '--mount', `type=bind,src=${root}/output,dst=/output`,
+    '--mount', outputMount,
     '--user', '65532:65532',
     ...(language === 'csharp' ? ['--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home', '--env', 'NUGET_PACKAGES=/tmp/nuget'] : []),
     image,
