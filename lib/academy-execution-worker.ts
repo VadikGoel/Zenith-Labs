@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process'
-import { mkdtemp, rm, writeFile } from 'node:fs/promises'
+import { mkdtemp, mkdir, rm, writeFile, chmod } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { Lesson } from './academy-data.ts'
@@ -10,6 +10,7 @@ import {
   type AcademyExecutionLanguage,
   type AcademyExecutionPolicy,
 } from './academy-execution-policy.ts'
+import { buildSandboxArgs, sandboxAvailable } from './academy-sandbox.ts'
 
 export type AcademyExecutionResult = {
   status: 'passed' | 'failed' | 'rejected' | 'timed_out'
@@ -39,7 +40,7 @@ function expectedOutput(lesson: Lesson) {
 function runWithProcessGroup(
   file: string,
   args: string[],
-  options: { cwd: string; timeoutMs: number; maxOutputBytes: number },
+  options: { cwd: string; timeoutMs: number; maxOutputBytes: number; timeoutCleanup?: () => void },
 ) {
   return new Promise<CommandResult>((resolve, reject) => {
     const child = spawn(file, args, {
@@ -68,11 +69,9 @@ function runWithProcessGroup(
     }
 
     const kill = () => {
-      if (process.platform === 'win32') {
-        child.kill('SIGKILL')
-      } else if (child.pid) {
-        process.kill(-child.pid, 'SIGKILL')
-      }
+      if (process.platform === 'win32') child.kill('SIGKILL')
+      else if (child.pid) process.kill(-child.pid, 'SIGKILL')
+      options.timeoutCleanup?.()
     }
 
     const finish = (exitCode: number | null) => {
@@ -99,23 +98,16 @@ function runWithProcessGroup(
   })
 }
 
-async function runBoundedCommand(
-  file: string,
+async function runBoundedDocker(
   args: string[],
-  options: { cwd: string; timeoutMs: number; maxOutputBytes: number },
+  options: { cwd: string; timeoutMs: number; maxOutputBytes: number; containerName: string },
 ) {
-  try {
-    return await runWithProcessGroup(file, args, options)
-  } catch (error) {
-    const err = error as NodeJS.ErrnoException
-    return {
-      stdout: '',
-      stderr: err.message,
-      exitCode: typeof err.code === 'number' ? err.code : null,
-      timedOut: false,
-      truncated: false,
-    }
-  }
+  return runWithProcessGroup('docker', args, {
+    ...options,
+    timeoutCleanup: () => {
+      spawn('docker', ['rm', '--force', options.containerName], { stdio: 'ignore', shell: false })
+    },
+  })
 }
 
 function failedCommandResult(command: CommandResult, policy: AcademyExecutionPolicy, started: number): AcademyExecutionResult | null {
@@ -145,6 +137,20 @@ function failedCommandResult(command: CommandResult, policy: AcademyExecutionPol
   return null
 }
 
+function containerName(root: string, phase: string) {
+  return `zenith-academy-${root.split('/').pop()?.replace(/[^a-zA-Z0-9_.-]/g, '-')}-${phase}`
+}
+
+function sandboxArgs(
+  language: AcademyExecutionLanguage,
+  phase: 'compile' | 'run',
+  root: string,
+  policy: AcademyExecutionPolicy,
+  name: string,
+) {
+  return ['--name', name, ...buildSandboxArgs(language, phase, root, policy)]
+}
+
 export async function executeAcademySubmission(
   language: AcademyExecutionLanguage,
   code: string,
@@ -156,42 +162,40 @@ export async function executeAcademySubmission(
   if (!admission.allowed) {
     return { status: 'rejected', stdout: '', stderr: '', exitCode: null, truncated: false, durationMs: Date.now() - started, reason: admission.reason }
   }
+  if (!sandboxAvailable()) {
+    return { status: 'rejected', stdout: '', stderr: '', exitCode: null, truncated: false, durationMs: Date.now() - started, reason: 'The Academy sandbox requires a Linux container runtime.' }
+  }
 
   let root = ''
   try {
     root = await mkdtemp(join(tmpdir(), 'zenith-academy-'))
-    let runFile = ''
-    let runArgs: string[] = []
+    await mkdir(join(root, 'input'))
+    await mkdir(join(root, 'output'))
+    await chmod(join(root, 'output'), 0o777)
 
     if (language === 'cpp') {
-      const source = join(root, 'main.cpp')
-      const binary = join(root, 'app')
-      await writeFile(source, code, 'utf8')
-      const compile = await runBoundedCommand('g++', ['-std=c++20', '-Wall', '-Wextra', '-Werror', source, '-o', binary], {
-        cwd: root,
-        timeoutMs: policy.timeoutMs,
-        maxOutputBytes: policy.maxOutputBytes,
-      })
-      const compileFailure = failedCommandResult(compile, policy, started)
-      if (compileFailure) return compileFailure
-      runFile = binary
+      await writeFile(join(root, 'input', 'main.cpp'), code, 'utf8')
     } else {
-      const setup = await runBoundedCommand('dotnet', ['new', 'console', '--framework', 'net10.0', '--force', '--output', root], {
-        cwd: root,
-        timeoutMs: policy.timeoutMs,
-        maxOutputBytes: policy.maxOutputBytes,
-      })
-      const setupFailure = failedCommandResult(setup, policy, started)
-      if (setupFailure) return setupFailure
-      await writeFile(join(root, 'Program.cs'), code, 'utf8')
-      runFile = 'dotnet'
-      runArgs = ['run', '--no-restore', '--project', join(root, 'AcademyRunner.csproj')]
+      await writeFile(join(root, 'input', 'Program.cs'), code, 'utf8')
+      await writeFile(join(root, 'input', 'AcademyRunner.csproj'), '<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup></Project>', 'utf8')
     }
 
-    const run = await runWithProcessGroup(runFile, runArgs, {
+    const compileName = containerName(root, 'compile')
+    const compile = await runBoundedDocker(sandboxArgs(language, 'compile', root, policy, compileName), {
       cwd: root,
       timeoutMs: policy.timeoutMs,
       maxOutputBytes: policy.maxOutputBytes,
+      containerName: compileName,
+    })
+    const compileFailure = failedCommandResult(compile, policy, started)
+    if (compileFailure) return compileFailure
+
+    const runName = containerName(root, 'run')
+    const run = await runBoundedDocker(sandboxArgs(language, 'run', root, policy, runName), {
+      cwd: root,
+      timeoutMs: policy.timeoutMs,
+      maxOutputBytes: policy.maxOutputBytes,
+      containerName: runName,
     })
     const stdout = truncateExecutionOutput(run.stdout, policy.maxOutputBytes)
     const stderr = truncateExecutionOutput(run.stderr, policy.maxOutputBytes)
@@ -207,18 +211,15 @@ export async function executeAcademySubmission(
       reason: run.timedOut ? `Execution exceeded ${policy.timeoutMs}ms.` : undefined,
     }
   } catch (error) {
-    const err = error as { stdout?: string; stderr?: string; code?: number | string; killed?: boolean }
-    const stdout = truncateExecutionOutput(String(err.stdout ?? ''), policy.maxOutputBytes)
-    const stderr = truncateExecutionOutput(String(err.stderr ?? ''), policy.maxOutputBytes)
-    const timedOut = Boolean(err.killed)
+    const err = error as NodeJS.ErrnoException
+    const stderr = truncateExecutionOutput(err.message ?? 'Sandbox execution failed.', policy.maxOutputBytes)
     return {
-      status: timedOut ? 'timed_out' : 'failed',
-      stdout: stdout.output,
+      status: 'failed',
+      stdout: '',
       stderr: stderr.output,
       exitCode: typeof err.code === 'number' ? err.code : null,
-      truncated: stdout.truncated || stderr.truncated,
+      truncated: stderr.truncated,
       durationMs: Date.now() - started,
-      reason: timedOut ? `Execution exceeded ${policy.timeoutMs}ms.` : undefined,
     }
   } finally {
     if (root) await rm(root, { recursive: true, force: true })
