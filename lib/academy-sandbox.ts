@@ -1,7 +1,7 @@
 import type { AcademyExecutionLanguage, AcademyExecutionPolicy } from './academy-execution-policy.ts'
 
 export const ACADEMY_SANDBOX = {
-  cppImage: 'gcc:14.4.0',
+  cppImage: 'gcc:14.4.0@sha256:4cd6d2f5b438d0124e659f3c46991d6d724b78066eb28668099a9ff46842f9b9',
   csharpImage: 'mcr.microsoft.com/dotnet/sdk:10.0-noble@sha256:ed034a8bf0b24ded0cbbac07e17825d8e9ebfe21e308191d0f7421eaf5ad4664',
   memory: '128m',
   cpus: '0.5',
