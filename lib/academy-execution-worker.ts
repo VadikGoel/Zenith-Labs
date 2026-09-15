@@ -148,7 +148,8 @@ function sandboxArgs(
   policy: AcademyExecutionPolicy,
   name: string,
 ) {
-  return ['--name', name, ...buildSandboxArgs(language, phase, root, policy)]
+  const args = buildSandboxArgs(language, phase, root, policy)
+  return [args[0], '--name', name, ...args.slice(1)]
 }
 
 export async function executeAcademySubmission(
