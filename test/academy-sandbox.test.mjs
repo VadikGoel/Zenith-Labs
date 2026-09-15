@@ -37,6 +37,7 @@ test('sandbox uses the pinned .NET image, isolated CLI state, and bounded build 
   assert.ok(compile.includes('--user') && compile.includes('65532:65532'))
   assert.ok(compile.includes('--env') && compile.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
   assert.ok(compile.includes('--env') && compile.includes('NUGET_PACKAGES=/tmp/nuget'))
+  assert.ok(compile.includes('--env') && compile.includes('MSBuildEnableWorkloadResolver=false'))
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
 
