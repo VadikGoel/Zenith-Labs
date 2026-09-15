@@ -110,7 +110,7 @@ async function runBoundedDocker(
   })
 }
 
-function failedCommandResult(command: CommandResult, policy: AcademyExecutionPolicy, started: number): AcademyExecutionResult | null {
+function failedCommandResult(command: CommandResult, policy: AcademyExecutionPolicy, started: number, timeoutMs: number, phase: 'compile' | 'run'): AcademyExecutionResult | null {
   if (command.timedOut) {
     return {
       status: 'timed_out',
@@ -119,7 +119,7 @@ function failedCommandResult(command: CommandResult, policy: AcademyExecutionPol
       exitCode: command.exitCode,
       truncated: command.truncated,
       durationMs: Date.now() - started,
-      reason: `Execution exceeded ${policy.timeoutMs}ms.`,
+      reason: `${phase === 'compile' ? 'Compilation' : 'Execution'} exceeded ${timeoutMs}ms.`,
     }
   }
   if (command.exitCode !== 0) {
@@ -184,11 +184,11 @@ export async function executeAcademySubmission(
     const compileName = containerName(root, 'compile')
     const compile = await runBoundedDocker(sandboxArgs(language, 'compile', root, policy, compileName), {
       cwd: root,
-      timeoutMs: policy.timeoutMs,
+      timeoutMs: policy.compileTimeoutMs,
       maxOutputBytes: policy.maxOutputBytes,
       containerName: compileName,
     })
-    const compileFailure = failedCommandResult(compile, policy, started)
+    const compileFailure = failedCommandResult(compile, policy, started, policy.compileTimeoutMs, 'compile')
     if (compileFailure) return compileFailure
 
     const runName = containerName(root, 'run')
