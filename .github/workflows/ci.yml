@@ -33,6 +33,7 @@ jobs:
         run: |
           docker pull gcc:14.4.0@sha256:4cd6d2f5b438d0124e659f3c46991d6d724b78066eb28668099a9ff46842f9b9
           docker pull mcr.microsoft.com/dotnet/sdk:10.0-noble@sha256:ed034a8bf0b24ded0cbbac07e17825d8e9ebfe21e308191d0f7421eaf5ad4664
+          docker pull mcr.microsoft.com/dotnet/runtime:10.0-noble@sha256:a365ce6a50b09176855d085c69da3fc1204a48432e36087e9a208f6e5860e235
 
       - name: Install dependencies
         run: npm ci
