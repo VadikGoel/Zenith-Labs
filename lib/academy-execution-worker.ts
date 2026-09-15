@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -29,6 +29,69 @@ function expectedOutput(lesson: Lesson) {
     .filter((line) => !line.startsWith('VERIFICATION PASSED'))
     .join('\n')
     .trim()
+}
+
+function runWithProcessGroup(
+  file: string,
+  args: string[],
+  options: { cwd: string; timeoutMs: number; maxOutputBytes: number },
+) {
+  return new Promise<{ stdout: string; stderr: string; exitCode: number | null; timedOut: boolean; truncated: boolean }>((resolve, reject) => {
+    const child = spawn(file, args, {
+      cwd: options.cwd,
+      shell: false,
+      detached: process.platform !== 'win32',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    })
+    let stdout = ''
+    let stderr = ''
+    let truncated = false
+    let timedOut = false
+    let settled = false
+    let timer: NodeJS.Timeout | undefined
+
+    const append = (target: 'stdout' | 'stderr', chunk: Buffer) => {
+      const current = target === 'stdout' ? stdout : stderr
+      const next = Buffer.concat([Buffer.from(current), chunk])
+      if (next.byteLength > options.maxOutputBytes) {
+        truncated = true
+        const bounded = next.subarray(0, options.maxOutputBytes).toString('utf8')
+        if (target === 'stdout') stdout = bounded
+        else stderr = bounded
+      } else if (target === 'stdout') stdout = next.toString('utf8')
+      else stderr = next.toString('utf8')
+    }
+
+    const kill = () => {
+      if (process.platform === 'win32') {
+        child.kill('SIGKILL')
+      } else if (child.pid) {
+        process.kill(-child.pid, 'SIGKILL')
+      }
+    }
+
+    const finish = (exitCode: number | null) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
+      resolve({ stdout, stderr, exitCode, timedOut, truncated })
+    }
+
+    child.stdout.on('data', (chunk: Buffer) => append('stdout', chunk))
+    child.stderr.on('data', (chunk: Buffer) => append('stderr', chunk))
+    child.once('error', (error) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
+      reject(error)
+    })
+    child.once('close', (exitCode) => finish(exitCode))
+
+    timer = setTimeout(() => {
+      timedOut = true
+      kill()
+    }, options.timeoutMs)
+  })
 }
 
 export async function executeAcademySubmission(
@@ -72,23 +135,23 @@ export async function executeAcademySubmission(
       runArgs = ['run', '--no-restore', '--project', join(root, 'AcademyRunner.csproj')]
     }
 
-    const run = await execFileAsync(runFile, runArgs, {
+    const run = await runWithProcessGroup(runFile, runArgs, {
       cwd: root,
-      timeout: policy.timeoutMs,
-      maxBuffer: policy.maxOutputBytes,
-      shell: false,
+      timeoutMs: policy.timeoutMs,
+      maxOutputBytes: policy.maxOutputBytes,
     })
-    const stdout = truncateExecutionOutput(String(run.stdout ?? ''), policy.maxOutputBytes)
-    const stderr = truncateExecutionOutput(String(run.stderr ?? ''), policy.maxOutputBytes)
+    const stdout = truncateExecutionOutput(run.stdout, policy.maxOutputBytes)
+    const stderr = truncateExecutionOutput(run.stderr, policy.maxOutputBytes)
     const expected = expectedOutput(lesson)
 
     return {
-      status: !stdout.truncated && stdout.output.trim() === expected ? 'passed' : 'failed',
+      status: run.timedOut ? 'timed_out' : (!stdout.truncated && stdout.output.trim() === expected ? 'passed' : 'failed'),
       stdout: stdout.output,
       stderr: stderr.output,
-      exitCode: 0,
-      truncated: stdout.truncated || stderr.truncated,
+      exitCode: run.exitCode,
+      truncated: run.truncated || stdout.truncated || stderr.truncated,
       durationMs: Date.now() - started,
+      reason: run.timedOut ? `Execution exceeded ${policy.timeoutMs}ms.` : undefined,
     }
   } catch (error) {
     const err = error as { stdout?: string; stderr?: string; code?: number | string; killed?: boolean }
