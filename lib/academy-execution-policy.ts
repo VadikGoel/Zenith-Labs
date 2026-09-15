@@ -12,12 +12,14 @@ export type AcademyExecutionPolicy = {
   maxCodeBytes: number
   maxOutputBytes: number
   timeoutMs: number
+  compileTimeoutMs: number
 }
 
 export const ACADEMY_EXECUTION_POLICY: AcademyExecutionPolicy = {
   maxCodeBytes: 32 * 1024,
   maxOutputBytes: 8 * 1024,
   timeoutMs: 3_000,
+  compileTimeoutMs: 15_000,
 }
 
 export type AcademyExecutionAdmission =
@@ -50,6 +52,10 @@ export function admitAcademyExecution(
 
   if (!Number.isInteger(policy.timeoutMs) || policy.timeoutMs <= 0) {
     return { allowed: false, reason: 'Execution timeout policy is invalid.' }
+  }
+
+  if (!Number.isInteger(policy.compileTimeoutMs) || policy.compileTimeoutMs <= 0) {
+    return { allowed: false, reason: 'Compilation timeout policy is invalid.' }
   }
 
   if (!Number.isInteger(policy.maxOutputBytes) || policy.maxOutputBytes <= 0) {
