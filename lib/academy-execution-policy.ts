@@ -63,7 +63,15 @@ export function truncateExecutionOutput(output: string, maxOutputBytes = ACADEMY
   const bytes = new TextEncoder().encode(output)
   if (bytes.byteLength <= maxOutputBytes) return { output, truncated: false }
 
-  const clipped = bytes.slice(0, maxOutputBytes)
-  const decoder = new TextDecoder('utf-8', { fatal: false })
-  return { output: decoder.decode(clipped), truncated: true }
+  let end = Math.max(0, maxOutputBytes)
+  const decoder = new TextDecoder('utf-8', { fatal: true })
+  while (end > 0) {
+    try {
+      return { output: decoder.decode(bytes.subarray(0, end)), truncated: true }
+    } catch {
+      end -= 1
+    }
+  }
+
+  return { output: '', truncated: true }
 }
