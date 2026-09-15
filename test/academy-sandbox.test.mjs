@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { ACADEMY_SANDBOX, buildSandboxArgs, sandboxSecurityContract } from '../lib/academy-sandbox.ts'
 
-const policy = { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 3_000 }
+const policy = { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 3_000, compileTimeoutMs: 60_000 }
 
 test('sandbox uses an immutable C++ image and explicit isolation controls', () => {
   const compile = buildSandboxArgs('cpp', 'compile', '/tmp/zenith-academy-test', policy)
@@ -39,8 +39,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('--env') && compile.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
   assert.ok(compile.includes('--env') && compile.includes('NUGET_PACKAGES=/tmp/nuget'))
   assert.ok(compile.includes('--env') && compile.includes('DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true'))
-  assert.ok(!compile.includes('MSBuildEnableWorkloadResolver=false'))
-  assert.ok(!compile.includes('-p:MSBuildEnableWorkloadResolver=false'))
+  assert.ok(compile.includes('-p:MSBuildEnableWorkloadResolver=false'))
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
 
