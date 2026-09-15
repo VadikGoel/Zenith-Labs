@@ -46,10 +46,10 @@ const fixtures = {
     'cpp-templates': `#include <iostream>\ntemplate <typename T> T echo(T value) { return value; }\nint main() { std::cout << echo(42); return 0; }`,
     'cpp-lambdas': `#include <iostream>\nint main() { int base = 40; auto add = [base](int value) { return base + value; }; std::cout << add(2); return 0; }`,
     'cpp-iterators': `#include <iostream>\n#include <vector>\nint main() { std::vector<int> values{10,20,30}; auto first = values.begin(); auto last = values.end(); for (auto it = first; it != last; ++it) std::cout << *it << ' '; return 0; }`,
-    'cpp-errors': `#include <iostream>\n#include <exception>\nint main() { try { throw std::runtime_error("failure"); } catch (const std::exception&) { std::cout << "Recovered"; } return 0; }`,
-    'cpp-files': `#include <fstream>\n#include <iostream>\n#include <string>\nint main() { std::ofstream out("zenith-test.txt"); out << "Zenith"; out.close(); std::ifstream in("zenith-test.txt"); std::string value; in >> value; in.close(); std::remove("zenith-test.txt"); std::cout << value; return 0; }`,
+    'cpp-errors': `#include <iostream>\n#include <stdexcept>\nint main() { try { throw std::runtime_error("failure"); } catch (const std::exception&) { std::cout << "Recovered"; } return 0; }`,
+    'cpp-files': `#include <cstdio>\n#include <fstream>\n#include <iostream>\n#include <string>\nint main() { std::ofstream out("zenith-test.txt"); out << "Zenith"; out.close(); std::ifstream in("zenith-test.txt"); std::string value; in >> value; in.close(); std::remove("zenith-test.txt"); std::cout << value; return 0; }`,
     'cpp-concurrency': `#include <iostream>\n#include <mutex>\n#include <thread>\nint main() { std::mutex mutex; int value = 0; std::thread worker([&] { std::lock_guard<std::mutex> lock(mutex); value = 1; }); worker.join(); std::cout << "thread complete"; return 0; }`,
-    'cpp-performance': `#include <chrono>\n#include <iostream>\nint main() { auto start = std::chrono::high_resolution_clock::now(); volatile int value = 1; (void)value; auto end = std::chrono::high_resolution_clock::now(); (void)start; (void)end; std::cout << "timed"; return 0; }`,
+    'cpp-performance': `#include <chrono>\n#include <iostream>\nint main() { auto start = std::chrono::high_resolution_clock::now(); int value = 1; (void)value; auto end = std::chrono::high_resolution_clock::now(); (void)start; (void)end; std::cout << "timed"; return 0; }`,
     'cpp-production': `#include <iostream>\n#include <memory>\n#include <vector>\nint main() { std::unique_ptr<int> value = std::make_unique<int>(1); std::vector<int> values{*value}; std::cout << "SYSTEM READY"; return 0; }`,
   },
 }
@@ -58,6 +58,12 @@ function lessonsFor(trackId) {
   const track = tracks.find((candidate) => candidate.id === trackId)
   assert.ok(track, `missing Academy track ${trackId}`)
   return track.modules.flatMap((module) => module.lessons)
+}
+
+function expectedRuntimeOutput(lesson) {
+  return lesson.successOutput
+    .filter((line) => !line.startsWith('VERIFICATION PASSED —'))
+    .join('\n')
 }
 
 function runCSharp(root, code) {
@@ -85,9 +91,7 @@ test('every active C# Academy lesson has a compiler-valid completion fixture', (
       assert.ok(code, `missing C# fixture for ${lesson.id}`)
       const verification = verifyLessonCode(lesson, code)
       assert.equal(verification.complete, true, `${lesson.id} should satisfy every verifier check`)
-      const expectedOutput = lesson.successOutput[0]
-      const actualOutput = runCSharp(root, code)
-      assert.equal(actualOutput, expectedOutput, `${lesson.id} runtime output mismatch`)
+      assert.equal(runCSharp(root, code), expectedRuntimeOutput(lesson), `${lesson.id} runtime output mismatch`)
     }
   } finally {
     rmSync(root, { recursive: true, force: true })
@@ -104,9 +108,7 @@ test('every active C++ Academy lesson has a compiler-valid completion fixture', 
       assert.ok(code, `missing C++ fixture for ${lesson.id}`)
       const verification = verifyLessonCode(lesson, code)
       assert.equal(verification.complete, true, `${lesson.id} should satisfy every verifier check`)
-      const expectedOutput = lesson.successOutput[0]
-      const actualOutput = runCpp(root, code, lesson.id)
-      assert.equal(actualOutput, expectedOutput, `${lesson.id} runtime output mismatch`)
+      assert.equal(runCpp(root, code, lesson.id), expectedRuntimeOutput(lesson), `${lesson.id} runtime output mismatch`)
     }
   } finally {
     rmSync(root, { recursive: true, force: true })
