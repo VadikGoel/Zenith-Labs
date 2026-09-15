@@ -19,11 +19,11 @@ test('worker rejects submissions before spawning a compiler when admission fails
 test('worker compiles and runs a C++ submission inside a temporary workspace', async () => {
   const result = await executeAcademySubmission(
     'cpp',
-    '#include <iostream>\nint main() { std::cout << "Hello, Zenith" << "\\n"; }',
+    '#include <iostream>\nint main() { std::cout << "Zenith Systems Online" << "\\n"; }',
     cppHello,
   )
   assert.equal(result.status, 'passed', `${result.stderr}\n${result.stdout}`)
-  assert.equal(result.stdout.trim(), 'Hello, Zenith')
+  assert.equal(result.stdout.trim(), 'Zenith Systems Online')
 })
 
 test('worker compiles and runs a C# submission inside a temporary workspace', async () => {
@@ -64,7 +64,7 @@ test('worker reports a timed-out program instead of waiting indefinitely', async
     'cpp',
     'int main() { for (;;) {} }',
     cppHello,
-    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 250 },
+    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 250, compileTimeoutMs: 15_000 },
   )
   assert.equal(result.status, 'timed_out')
   assert.match(result.reason ?? '', /250ms/)
@@ -75,7 +75,7 @@ test('worker kills the entire child process group when a program forks', { skip:
     'cpp',
     '#include <unistd.h>\nint main() { if (fork() == 0) { sleep(1); write(1, "CHILD_SURVIVED\\n", 15); return 0; } for (;;) {} }',
     cppHello,
-    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 500 },
+    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 500, compileTimeoutMs: 15_000 },
   )
   assert.equal(result.status, 'timed_out', `${result.stderr}\n${result.stdout}`)
   assert.doesNotMatch(result.stdout, /CHILD_SURVIVED/)
