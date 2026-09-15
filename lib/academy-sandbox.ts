@@ -32,6 +32,7 @@ export function buildSandboxArgs(
     '--mount', `type=bind,src=${root}/input,dst=/input,readonly`,
     '--mount', `type=bind,src=${root}/output,dst=/output`,
     '--user', '65532:65532',
+    ...(language === 'csharp' ? ['--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home', '--env', 'NUGET_PACKAGES=/tmp/nuget'] : []),
     image,
   ]
 
