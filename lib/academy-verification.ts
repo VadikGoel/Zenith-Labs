@@ -128,13 +128,27 @@ function containsStructuralRequirement(code: string, requirement: string): boole
 /** Match a human-readable output requirement inside a quoted literal. */
 function containsLiteralContent(code: string, requirement: string): boolean {
   let quote: Quote | null = null
+  let verbatim = false
   let escaped = false
   let literal = ''
 
   for (let i = 0; i < code.length; i += 1) {
     const current = code[i]
+    const previous = i > 0 ? code[i - 1] : ''
     if (quote) {
-      if (escaped) {
+      if (verbatim) {
+        if (current === '"' && code[i + 1] === '"') {
+          literal += '"'
+          i += 1
+        } else if (current === '"') {
+          if (normalizeLiteralContent(literal).includes(requirement)) return true
+          quote = null
+          verbatim = false
+          literal = ''
+        } else {
+          literal += current
+        }
+      } else if (escaped) {
         literal += current
         escaped = false
       } else if (current === '\\') {
@@ -151,6 +165,7 @@ function containsLiteralContent(code: string, requirement: string): boolean {
     }
     if (current === '"' || current === "'" || current === '`') {
       quote = current
+      verbatim = current === '"' && previous === '@'
       literal = ''
     }
   }
