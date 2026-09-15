@@ -1,8 +1,7 @@
-import { execFile, spawn } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { promisify } from 'node:util'
 import type { Lesson } from './academy-data.ts'
 import {
   ACADEMY_EXECUTION_POLICY,
@@ -12,8 +11,6 @@ import {
   type AcademyExecutionPolicy,
 } from './academy-execution-policy.ts'
 
-const execFileAsync = promisify(execFile)
-
 export type AcademyExecutionResult = {
   status: 'passed' | 'failed' | 'rejected' | 'timed_out'
   stdout: string
@@ -22,6 +19,14 @@ export type AcademyExecutionResult = {
   truncated: boolean
   durationMs: number
   reason?: string
+}
+
+type CommandResult = {
+  stdout: string
+  stderr: string
+  exitCode: number | null
+  timedOut: boolean
+  truncated: boolean
 }
 
 function expectedOutput(lesson: Lesson) {
@@ -36,7 +41,7 @@ function runWithProcessGroup(
   args: string[],
   options: { cwd: string; timeoutMs: number; maxOutputBytes: number },
 ) {
-  return new Promise<{ stdout: string; stderr: string; exitCode: number | null; timedOut: boolean; truncated: boolean }>((resolve, reject) => {
+  return new Promise<CommandResult>((resolve, reject) => {
     const child = spawn(file, args, {
       cwd: options.cwd,
       shell: false,
@@ -94,6 +99,52 @@ function runWithProcessGroup(
   })
 }
 
+async function runBoundedCommand(
+  file: string,
+  args: string[],
+  options: { cwd: string; timeoutMs: number; maxOutputBytes: number },
+) {
+  try {
+    return await runWithProcessGroup(file, args, options)
+  } catch (error) {
+    const err = error as NodeJS.ErrnoException
+    return {
+      stdout: '',
+      stderr: err.message,
+      exitCode: typeof err.code === 'number' ? err.code : null,
+      timedOut: false,
+      truncated: false,
+    }
+  }
+}
+
+function failedCommandResult(command: CommandResult, policy: AcademyExecutionPolicy, started: number): AcademyExecutionResult | null {
+  if (command.timedOut) {
+    return {
+      status: 'timed_out',
+      stdout: truncateExecutionOutput(command.stdout, policy.maxOutputBytes).output,
+      stderr: truncateExecutionOutput(command.stderr, policy.maxOutputBytes).output,
+      exitCode: command.exitCode,
+      truncated: command.truncated,
+      durationMs: Date.now() - started,
+      reason: `Execution exceeded ${policy.timeoutMs}ms.`,
+    }
+  }
+  if (command.exitCode !== 0) {
+    const stdout = truncateExecutionOutput(command.stdout, policy.maxOutputBytes)
+    const stderr = truncateExecutionOutput(command.stderr, policy.maxOutputBytes)
+    return {
+      status: 'failed',
+      stdout: stdout.output,
+      stderr: stderr.output,
+      exitCode: command.exitCode,
+      truncated: command.truncated || stdout.truncated || stderr.truncated,
+      durationMs: Date.now() - started,
+    }
+  }
+  return null
+}
+
 export async function executeAcademySubmission(
   language: AcademyExecutionLanguage,
   code: string,
@@ -116,20 +167,22 @@ export async function executeAcademySubmission(
       const source = join(root, 'main.cpp')
       const binary = join(root, 'app')
       await writeFile(source, code, 'utf8')
-      await execFileAsync('g++', ['-std=c++20', '-Wall', '-Wextra', '-Werror', source, '-o', binary], {
+      const compile = await runBoundedCommand('g++', ['-std=c++20', '-Wall', '-Wextra', '-Werror', source, '-o', binary], {
         cwd: root,
-        timeout: policy.timeoutMs,
-        maxBuffer: policy.maxOutputBytes,
-        shell: false,
+        timeoutMs: policy.timeoutMs,
+        maxOutputBytes: policy.maxOutputBytes,
       })
+      const compileFailure = failedCommandResult(compile, policy, started)
+      if (compileFailure) return compileFailure
       runFile = binary
     } else {
-      await execFileAsync('dotnet', ['new', 'console', '--framework', 'net10.0', '--force', '--output', root], {
+      const setup = await runBoundedCommand('dotnet', ['new', 'console', '--framework', 'net10.0', '--force', '--output', root], {
         cwd: root,
-        timeout: policy.timeoutMs,
-        maxBuffer: policy.maxOutputBytes,
-        shell: false,
+        timeoutMs: policy.timeoutMs,
+        maxOutputBytes: policy.maxOutputBytes,
       })
+      const setupFailure = failedCommandResult(setup, policy, started)
+      if (setupFailure) return setupFailure
       await writeFile(join(root, 'Program.cs'), code, 'utf8')
       runFile = 'dotnet'
       runArgs = ['run', '--no-restore', '--project', join(root, 'AcademyRunner.csproj')]
@@ -145,7 +198,7 @@ export async function executeAcademySubmission(
     const expected = expectedOutput(lesson)
 
     return {
-      status: run.timedOut ? 'timed_out' : (!stdout.truncated && stdout.output.trim() === expected ? 'passed' : 'failed'),
+      status: run.timedOut ? 'timed_out' : (!stdout.truncated && run.exitCode === 0 && stdout.output.trim() === expected ? 'passed' : 'failed'),
       stdout: stdout.output,
       stderr: stderr.output,
       exitCode: run.exitCode,
