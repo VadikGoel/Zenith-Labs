@@ -36,7 +36,6 @@ export function buildSandboxArgs(
     ...(language === 'csharp' ? [
       '--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home',
       '--env', 'NUGET_PACKAGES=/tmp/nuget',
-      '--env', 'MSBuildEnableWorkloadResolver=false',
       '--env', 'DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true',
     ] : []),
     image,
@@ -49,7 +48,7 @@ export function buildSandboxArgs(
   }
 
   return phase === 'compile'
-    ? [...common, 'dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
+    ? [...common, 'dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/']
     : [...common, 'dotnet', '/output/AcademyRunner.dll']
 }
 
