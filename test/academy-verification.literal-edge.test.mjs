@@ -25,6 +25,26 @@ test('verifier accepts doubled quotes in a C# verbatim output string', async () 
   assert.equal(result.complete, true)
 })
 
+test('verifier preserves // inside a C# verbatim output string', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'https://zenith.dev/docs' }] },
+    'Console.WriteLine(@"https://zenith.dev/docs");',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
+test('verifier preserves /* */ inside a C# verbatim output string', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Zenith /* ready */' }] },
+    'Console.WriteLine(@"Zenith /* ready */");',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
 test('verifier rejects output text that exists only in an unrelated multiline literal', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
