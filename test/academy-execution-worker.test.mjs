@@ -69,3 +69,14 @@ test('worker reports a timed-out program instead of waiting indefinitely', async
   assert.equal(result.status, 'timed_out')
   assert.match(result.reason ?? '', /100ms/)
 })
+
+test('worker kills the entire child process group when a program forks', { skip: process.platform === 'win32' }, async () => {
+  const result = await executeAcademySubmission(
+    'cpp',
+    '#include <unistd.h>\n#include <fstream>\nint main() { if (fork() == 0) { sleep(1); std::ofstream("child-survived"); return 0; } for (;;) {} }',
+    cppHello,
+    { maxCodeBytes: 32 * 1024, maxOutputBytes: 8 * 1024, timeoutMs: 100 },
+  )
+  assert.equal(result.status, 'timed_out')
+  assert.doesNotMatch(result.stdout, /child-survived/)
+})
