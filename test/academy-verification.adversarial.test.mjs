@@ -108,8 +108,8 @@ test('verifier does not mistake a member named Console for the supported console
 test('verifier ignores quoted requirements embedded inside another quoted literal', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
-    { checks: [{ kind: 'quoted', value: '"' }] },
-    'var text = "a quoted \\\" marker";',
+    { checks: [{ kind: 'quoted', value: 'Console.WriteLine("' }] },
+    'var text = "Console.WriteLine(\\"Zenith ready\\");";',
   )
   assert.deepEqual(result.passedChecks, [false])
   assert.equal(result.complete, false)
