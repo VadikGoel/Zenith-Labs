@@ -37,6 +37,7 @@ export function buildSandboxArgs(
       '--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home',
       '--env', 'NUGET_PACKAGES=/tmp/nuget',
       '--env', 'MSBuildEnableWorkloadResolver=false',
+      '--env', 'DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true',
     ] : []),
     image,
   ]
