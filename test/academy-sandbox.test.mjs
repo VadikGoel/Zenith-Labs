@@ -18,6 +18,8 @@ test('sandbox uses explicit isolation controls for C++ compile and run', () => {
   assert.equal(compile.at(-1), '/output/app')
 
   const run = buildSandboxArgs('cpp', 'run', '/tmp/zenith-academy-test', policy)
+  const outputMount = run.find((value) => value.includes('dst=/output'))
+  assert.match(outputMount ?? '', /readonly/)
   assert.equal(run.at(-1), '/output/app')
 })
 
