@@ -26,9 +26,10 @@ test('sandbox uses an immutable C++ image and explicit isolation controls', () =
   assert.equal(run.at(-1), '/output/app')
 })
 
-test('sandbox uses the pinned .NET image, isolated CLI state, and bounded build output', () => {
+test('sandbox uses the pinned .NET build image and isolated C# compiler state', () => {
   const compile = buildSandboxArgs('csharp', 'compile', '/tmp/zenith-academy-test', policy)
   assert.match(ACADEMY_SANDBOX.csharpImage, /^mcr\.microsoft\.com\/dotnet\/sdk:[^@]+@sha256:[0-9a-f]{64}$/)
+  assert.match(ACADEMY_SANDBOX.csharpRuntimeImage, /^mcr\.microsoft\.com\/dotnet\/runtime:[^@]+@sha256:[0-9a-f]{64}$/)
   assert.ok(compile.some((value) => value === ACADEMY_SANDBOX.csharpImage))
   assert.ok(compile.includes('--network') && compile.includes('none'))
   assert.ok(compile.includes('--read-only'))
@@ -45,6 +46,8 @@ test('sandbox uses the pinned .NET image, isolated CLI state, and bounded build 
 
   const run = buildSandboxArgs('csharp', 'run', '/tmp/zenith-academy-test', policy)
   const outputMount = run.find((value) => value.includes('dst=/output'))
+  assert.ok(run.some((value) => value === ACADEMY_SANDBOX.csharpRuntimeImage))
+  assert.ok(!run.some((value) => value === ACADEMY_SANDBOX.csharpImage))
   assert.match(outputMount ?? '', /readonly/)
   assert.equal(run.at(-1), '/output/AcademyRunner.dll')
 })
