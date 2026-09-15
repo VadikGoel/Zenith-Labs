@@ -21,6 +21,12 @@ test('execution admission allows supported lessons within policy limits', () => 
   if (result.allowed) assert.deepEqual(result.policy, ACADEMY_EXECUTION_POLICY)
 })
 
+test('execution policy provides separate runtime and compilation budgets', () => {
+  assert.equal(ACADEMY_EXECUTION_POLICY.timeoutMs, 3_000)
+  assert.equal(ACADEMY_EXECUTION_POLICY.compileTimeoutMs, 60_000)
+  assert.ok(ACADEMY_EXECUTION_POLICY.compileTimeoutMs > ACADEMY_EXECUTION_POLICY.timeoutMs)
+})
+
 test('execution admission rejects empty or contractless submissions', () => {
   assert.equal(admitAcademyExecution(request({ code: '   ' })).allowed, false)
   assert.equal(admitAcademyExecution(request({ lesson: { ...lesson, checks: [] } })).allowed, false)
