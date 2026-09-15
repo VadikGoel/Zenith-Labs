@@ -19,7 +19,7 @@ export const ACADEMY_EXECUTION_POLICY: AcademyExecutionPolicy = {
   maxCodeBytes: 32 * 1024,
   maxOutputBytes: 8 * 1024,
   timeoutMs: 3_000,
-  compileTimeoutMs: 15_000,
+  compileTimeoutMs: 60_000,
 }
 
 export type AcademyExecutionAdmission =
