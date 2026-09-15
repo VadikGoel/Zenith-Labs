@@ -48,6 +48,18 @@ test('execution output is bounded by UTF-8 bytes without splitting a code point'
   assert.equal(new TextEncoder().encode(result.output).byteLength, 10)
 })
 
+test('execution output preserves complete multibyte characters at the byte boundary', () => {
+  const output = 'A🙂é漢B'
+  const bytes = new TextEncoder().encode(output)
+  for (const limit of [2, 5, 7, 10, bytes.byteLength - 1]) {
+    const result = truncateExecutionOutput(output, limit)
+    assert.equal(result.truncated, true)
+    assert.equal(new TextDecoder('utf-8', { fatal: true }).decode(new TextEncoder().encode(result.output)), result.output)
+    assert.ok(new TextEncoder().encode(result.output).byteLength <= limit)
+    assert.ok(output.startsWith(result.output))
+  }
+})
+
 test('execution output remains unchanged when under the limit', () => {
   const result = truncateExecutionOutput('Hello', 100)
   assert.deepEqual(result, { output: 'Hello', truncated: false })
