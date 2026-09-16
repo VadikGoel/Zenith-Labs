@@ -53,6 +53,10 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(run.some((value) => value === ACADEMY_SANDBOX.csharpRuntimeImage))
   assert.ok(!run.some((value) => value === ACADEMY_SANDBOX.csharpImage))
   assert.match(outputMount ?? '', /readonly/)
+  assert.ok(run.includes('--env') && run.includes('DOTNET_ROOT=/usr/share/dotnet'))
+  assert.ok(run.includes('--env') && run.includes('HOME=/tmp'))
+  assert.ok(run.includes('--env') && run.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
+  assert.ok(run.includes('--workdir') && run.includes('/tmp'))
   assert.deepEqual(run.slice(-2), ['dotnet', '/output/AcademyRunner.dll'])
 })
 
