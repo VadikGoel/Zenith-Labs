@@ -60,7 +60,7 @@ export function buildSandboxArgs(
 
   return phase === 'compile'
     ? [...common, 'dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
-    : [...common, '/output/AcademyRunner.dll']
+    : [...common, '/usr/bin/dotnet', '/output/AcademyRunner.dll']
 }
 
 export function sandboxSecurityContract(policy: AcademyExecutionPolicy) {
