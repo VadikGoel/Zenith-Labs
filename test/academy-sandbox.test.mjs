@@ -48,8 +48,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(run.some((value) => value === ACADEMY_SANDBOX.csharpRuntimeImage))
   assert.ok(!run.some((value) => value === ACADEMY_SANDBOX.csharpImage))
   assert.match(outputMount ?? '', /readonly/)
-  assert.equal(run.at(-1), '/output/AcademyRunner.dll')
-  assert.ok(!run.includes('dotnet'))
+  assert.deepEqual(run.slice(-2), ['dotnet', '/output/AcademyRunner.dll'])
 })
 
 test('sandbox security contract exposes all enforced resource boundaries', () => {
