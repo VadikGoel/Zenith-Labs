@@ -45,7 +45,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
   assert.ok(compile.includes('--entrypoint') && compile.includes('/usr/bin/dotnet'))
-  assert.deepEqual(compile.slice(-11), [
+  assert.deepEqual(compile.slice(-10), [
     'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
     '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/',
     '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false',
