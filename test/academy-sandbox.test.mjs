@@ -42,6 +42,11 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('-p:MSBuildEnableWorkloadResolver=false'))
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
+  assert.deepEqual(compile.slice(-11), [
+    'dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
+    '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/',
+    '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false',
+  ].slice(-11))
 
   const run = buildSandboxArgs('csharp', 'run', '/tmp/zenith-academy-test', policy)
   const outputMount = run.find((value) => value.includes('dst=/output'))
