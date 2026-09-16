@@ -59,9 +59,10 @@ export function buildSandboxArgs(
       : [...common, '/output/app']
   }
 
+  const dotnetEntrypoint = ['--entrypoint', '/usr/bin/dotnet']
   return phase === 'compile'
-    ? [...common, '/usr/bin/dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
-    : [...common, '/usr/bin/dotnet', '/output/AcademyRunner.dll']
+    ? [...common, ...dotnetEntrypoint, 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
+    : [...common, ...dotnetEntrypoint, '/output/AcademyRunner.dll']
 }
 
 export function sandboxSecurityContract(policy: AcademyExecutionPolicy) {
