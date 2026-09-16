@@ -43,6 +43,12 @@ export function buildSandboxArgs(
       '--env', 'NUGET_PACKAGES=/tmp/nuget',
       '--env', 'DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true',
     ] : []),
+    ...(language === 'csharp' && phase === 'run' ? [
+      '--env', 'DOTNET_ROOT=/usr/share/dotnet',
+      '--env', 'HOME=/tmp',
+      '--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home',
+      '--workdir', '/tmp',
+    ] : []),
     image,
   ]
 
