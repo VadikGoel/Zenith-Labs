@@ -9,6 +9,17 @@ const cppHello = tracks.find((track) => track.id === 'cpp').modules[0].lessons.f
 assert.ok(csharpHello)
 assert.ok(cppHello)
 
+function executionDiagnostics(result) {
+  return JSON.stringify({
+    status: result.status,
+    exitCode: result.exitCode,
+    stdout: result.stdout,
+    stderr: result.stderr,
+    truncated: result.truncated,
+    reason: result.reason,
+  })
+}
+
 test('worker rejects submissions before spawning a compiler when admission fails', async () => {
   const result = await executeAcademySubmission('csharp', '   ', csharpHello)
   assert.equal(result.status, 'rejected')
@@ -22,7 +33,8 @@ test('worker compiles and runs a C++ submission inside a temporary workspace', a
     '#include <iostream>\nint main() { std::cout << "Zenith Systems Online" << "\\n"; }',
     cppHello,
   )
-  assert.equal(result.status, 'passed', `${result.stderr}\n${result.stdout}`)
+  assert.equal(result.status, 'passed', executionDiagnostics(result))
+  assert.equal(result.exitCode, 0, executionDiagnostics(result))
   assert.equal(result.stdout.trim(), 'Zenith Systems Online')
 })
 
@@ -32,7 +44,8 @@ test('worker compiles and runs a C# submission inside a temporary workspace', as
     'using System;\nclass Program { static void Main() { Console.WriteLine("Hello, Zenith"); } }',
     csharpHello,
   )
-  assert.equal(result.status, 'passed', `${result.stderr}\n${result.stdout}`)
+  assert.equal(result.status, 'passed', executionDiagnostics(result))
+  assert.equal(result.exitCode, 0, executionDiagnostics(result))
   assert.equal(result.stdout.trim(), 'Hello, Zenith')
 })
 
