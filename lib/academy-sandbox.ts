@@ -42,6 +42,7 @@ export function buildSandboxArgs(
       '--env', 'DOTNET_CLI_HOME=/tmp/dotnet-home',
       '--env', 'NUGET_PACKAGES=/tmp/nuget',
       '--env', 'DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true',
+      '--env', 'HOME=/tmp',
     ] : []),
     ...(language === 'csharp' && phase === 'run' ? [
       '--env', 'DOTNET_ROOT=/usr/share/dotnet',
@@ -59,7 +60,7 @@ export function buildSandboxArgs(
   }
 
   return phase === 'compile'
-    ? [...common, '/usr/bin/dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
+    ? [...common, '/usr/bin/dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources', '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/', '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false']
     : [...common, '/usr/bin/dotnet', '/output/AcademyRunner.dll']
 }
 
