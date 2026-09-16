@@ -39,12 +39,14 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('--env') && compile.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
   assert.ok(compile.includes('--env') && compile.includes('NUGET_PACKAGES=/tmp/nuget'))
   assert.ok(compile.includes('--env') && compile.includes('DOTNET_SKIP_WORKLOAD_INTEGRITY_CHECK=true'))
+  assert.ok(compile.includes('--env') && compile.includes('HOME=/tmp'))
+  assert.ok(compile.includes('-p:UseAppHost=false'))
   assert.ok(compile.includes('-p:MSBuildEnableWorkloadResolver=false'))
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
-  assert.deepEqual(compile.slice(-10), [
+  assert.deepEqual(compile.slice(-11), [
     '/usr/bin/dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
-    '-o', '/output', '-p:BaseIntermediateOutputPath=/tmp/obj/',
+    '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/',
     '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false',
   ])
 
