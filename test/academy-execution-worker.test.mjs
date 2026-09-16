@@ -38,6 +38,30 @@ test('worker compiles and runs a C++ submission inside a temporary workspace', a
   assert.equal(result.stdout.trim(), 'Zenith Systems Online')
 })
 
+test('worker preserves and verifies multiline C++ output exactly', async () => {
+  const multilineLesson = { ...cppHello, successOutput: ['Zenith', 'Systems', 'Online'] }
+  const result = await executeAcademySubmission(
+    'cpp',
+    '#include <iostream>\nint main() { std::cout << "Zenith" << "\\n" << "Systems" << "\\n" << "Online" << "\\n"; }',
+    multilineLesson,
+  )
+  assert.equal(result.status, 'passed', executionDiagnostics(result))
+  assert.equal(result.exitCode, 0, executionDiagnostics(result))
+  assert.equal(result.stdout, 'Zenith\nSystems\nOnline\n')
+})
+
+test('worker verifies chained C++ stream output without changing its ordering', async () => {
+  const chainedLesson = { ...cppHello, successOutput: ['Zenith Systems', 'Online'] }
+  const result = await executeAcademySubmission(
+    'cpp',
+    '#include <iostream>\nint main() { std::cout << "Zenith" << " " << "Systems" << "\\n" << "Online" << std::endl; }',
+    chainedLesson,
+  )
+  assert.equal(result.status, 'passed', executionDiagnostics(result))
+  assert.equal(result.exitCode, 0, executionDiagnostics(result))
+  assert.equal(result.stdout, 'Zenith Systems\nOnline\n')
+})
+
 test('worker compiles and runs a C# submission inside a temporary workspace', async () => {
   const result = await executeAcademySubmission(
     'csharp',
