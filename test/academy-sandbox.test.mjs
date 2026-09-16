@@ -17,7 +17,7 @@ test('sandbox uses an immutable C++ image and explicit isolation controls', () =
   assert.ok(compile.includes('--pids-limit') && compile.includes('64'))
   assert.ok(compile.includes('--user') && compile.includes('65532:65532'))
   assert.ok(compile.includes(`type=bind,src=/tmp/zenith-academy-test/input,dst=/input,readonly`))
-  assert.ok(compile.includes('type=bind,src=/tmp/zenith-academy-test/output,dst=/output'))
+  assert.ok(compile.includes(`type=bind,src=/tmp/zenith-academy-test/output,dst=/output`))
   assert.equal(compile.at(-1), '/output/app')
 
   const run = buildSandboxArgs('cpp', 'run', '/tmp/zenith-academy-test', policy)
@@ -49,6 +49,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(!run.some((value) => value === ACADEMY_SANDBOX.csharpImage))
   assert.match(outputMount ?? '', /readonly/)
   assert.equal(run.at(-1), '/output/AcademyRunner.dll')
+  assert.ok(!run.includes('dotnet'))
 })
 
 test('sandbox security contract exposes all enforced resource boundaries', () => {
