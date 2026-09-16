@@ -44,8 +44,9 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('-p:MSBuildEnableWorkloadResolver=false'))
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
+  assert.ok(compile.includes('--entrypoint') && compile.includes('/usr/bin/dotnet'))
   assert.deepEqual(compile.slice(-11), [
-    '/usr/bin/dotnet', 'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
+    'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
     '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/',
     '-p:MSBuildProjectExtensionsPath=/tmp/obj/', '-p:MSBuildEnableWorkloadResolver=false',
   ])
@@ -59,7 +60,8 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(run.includes('--env') && run.includes('HOME=/tmp'))
   assert.ok(run.includes('--env') && run.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
   assert.ok(run.includes('--workdir') && run.includes('/tmp'))
-  assert.deepEqual(run.slice(-2), ['/usr/bin/dotnet', '/output/AcademyRunner.dll'])
+  assert.ok(run.includes('--entrypoint') && run.includes('/usr/bin/dotnet'))
+  assert.equal(run.at(-1), '/output/AcademyRunner.dll')
 })
 
 test('sandbox security contract exposes all enforced resource boundaries', () => {
