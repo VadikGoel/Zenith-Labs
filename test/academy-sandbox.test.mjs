@@ -57,7 +57,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(run.includes('--env') && run.includes('HOME=/tmp'))
   assert.ok(run.includes('--env') && run.includes('DOTNET_CLI_HOME=/tmp/dotnet-home'))
   assert.ok(run.includes('--workdir') && run.includes('/tmp'))
-  assert.deepEqual(run.slice(-1), ['/output/AcademyRunner.dll'])
+  assert.deepEqual(run.slice(-2), ['dotnet', '/output/AcademyRunner.dll'])
 })
 
 test('sandbox security contract exposes all enforced resource boundaries', () => {
