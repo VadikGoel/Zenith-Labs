@@ -45,7 +45,7 @@ test('sandbox uses the pinned .NET build image and isolated C# compiler state', 
   assert.ok(compile.includes('-o'))
   assert.ok(compile.includes('/output'))
   assert.ok(compile.includes('--entrypoint') && compile.includes('/usr/bin/dotnet'))
-  assert.ok(compile.includes('--memory') && compile.includes('128m'))
+  assert.ok(compile.includes('--memory') && compile.includes(ACADEMY_SANDBOX.csharpCompileMemory))
   assert.deepEqual(compile.slice(-10), [
     'build', '/input/AcademyRunner.csproj', '--nologo', '--ignore-failed-sources',
     '-o', '/output', '-p:UseAppHost=false', '-p:BaseIntermediateOutputPath=/tmp/obj/',
@@ -73,6 +73,7 @@ test('sandbox security contract exposes all enforced resource boundaries', () =>
     droppedCapabilities: 'ALL',
     noNewPrivileges: true,
     memoryBytes: 128 * 1024 * 1024,
+    csharpCompileMemoryBytes: 256 * 1024 * 1024,
     runtimeMemoryBytes: 256 * 1024 * 1024,
     cpuCores: 0.5,
     pids: 64,
