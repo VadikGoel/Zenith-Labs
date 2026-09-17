@@ -72,5 +72,17 @@ test('Academy workspace prevents duplicate submissions while verification is run
   assert.match(workspace, /onClick=\{runVerification\}/)
   assert.match(workspace, /disabled=\{running\}/)
   assert.match(workspace, /aria-busy=\{running\}/)
-  assert.match(workspace, /disabled=\{running\}/)
+})
+
+test('Academy workspace exposes verification output as a live log', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  const outputStart = workspace.indexOf('id={outputId}')
+  const outputEnd = workspace.indexOf('</div>', outputStart)
+  const output = workspace.slice(outputStart, outputEnd)
+
+  assert.notEqual(outputStart, -1)
+  assert.match(output, /role="log"/)
+  assert.match(output, /aria-live="polite"/)
+  assert.match(output, /aria-atomic="false"/)
+  assert.match(output, /terminalLines\.map/)
 })
