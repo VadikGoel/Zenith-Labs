@@ -69,6 +69,7 @@ export function LessonWorkspace({
         setTerminalLines([
           '> zenith verify --lesson ' + lesson.id,
           'requirements checked (deterministic source analysis)',
+          'VERIFICATION PASSED',
           ...lesson.successOutput,
         ])
         onPass()
