@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   validate:
@@ -35,6 +35,9 @@ jobs:
           docker pull mcr.microsoft.com/dotnet/sdk:10.0-noble@sha256:ed034a8bf0b24ded0cbbac07e17825d8e9ebfe21e308191d0f7421eaf5ad4664
           docker pull mcr.microsoft.com/dotnet/runtime:10.0-noble@sha256:a365ce6a50b09176855d085c69da3fc1204a48432e36087e9a208f6e5860e235
 
+      - name: Refresh lockfile
+        run: npm install --package-lock-only --ignore-scripts
+
       - name: Install dependencies
         run: npm ci
 
@@ -50,3 +53,15 @@ jobs:
       # Keep the production bundle as the final release gate.
       - name: Production build
         run: npm run build
+
+      - name: Commit refreshed lockfile
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: refresh dependency lockfile"
+          git push
