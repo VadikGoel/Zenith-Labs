@@ -19,12 +19,19 @@ test('mobile navigation toggle exposes its controlled menu region', async () => 
   const header = await read('components/site-header.tsx')
   assert.match(header, /<button[\s\S]*?aria-expanded=\{open\}[\s\S]*?aria-controls="mobile-main-menu"/)
   assert.match(header, /<div[\s\S]*?id="mobile-main-menu"/)
+  assert.match(header, /aria-label=\{open \? 'Close menu' : 'Open menu'\}/)
 })
 
-test('navigation links expose the active page semantically', async () => {
+test('navigation links expose the active page semantically in both desktop and mobile menus', async () => {
   const header = await read('components/site-header.tsx')
   const activePageBindings = header.match(/aria-current=\{pathname === link\.href \? 'page' : undefined\}/g) ?? []
   assert.equal(activePageBindings.length, 2)
+})
+
+test('navigation controls retain visible keyboard focus styling', async () => {
+  const header = await read('components/site-header.tsx')
+  assert.match(header, /focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/)
+  assert.match(header, /focus-visible:outline-2 focus-visible:outline-offset-\[-2px\] focus-visible:outline-primary/)
 })
 
 test('locked Academy lessons remain keyboard discoverable with an accessible reason', async () => {
