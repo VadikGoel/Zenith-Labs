@@ -86,3 +86,14 @@ test('Academy workspace exposes verification output as a live log', async () => 
   assert.match(output, /aria-atomic="false"/)
   assert.match(output, /terminalLines\.map/)
 })
+
+test('Academy workspace connects editor descriptions to requirements and verification output', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  const editorStart = workspace.indexOf('<textarea')
+  const editorEnd = workspace.indexOf('/>', editorStart)
+  const editor = workspace.slice(editorStart, editorEnd)
+
+  assert.match(editor, /aria-describedby=\{`\$\{requirementsId\} \$\{outputId\}`\}/)
+  assert.match(workspace, /id=\{requirementsId\}/)
+  assert.match(workspace, /id=\{outputId\}/)
+})
