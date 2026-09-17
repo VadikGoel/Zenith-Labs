@@ -24,3 +24,24 @@ test('Academy reset requires confirmation and restores the first lesson state', 
   assert.match(dashboard, /setCompletedIds\(new Set\(\)\)/)
   assert.match(dashboard, /setCodeByLesson\(\{\}\)/)
 })
+
+test('Academy persistence flushes the latest progress when the page is hidden or unloaded', async () => {
+  const dashboard = await readDashboard()
+  assert.match(dashboard, /const snapshot = progressRef\.current/)
+  assert.match(dashboard, /const flushProgress = \(\) => \{[\s\S]*persistProgress\(\{[\s\S]*codeByLesson: snapshot\.codeByLesson[\s\S]*\}\)/)
+  assert.match(dashboard, /window\.addEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.addEventListener\('visibilitychange', flushWhenHidden\)/)
+  assert.match(dashboard, /if \(document\.visibilityState === 'hidden'\) flushProgress\(\)/)
+  assert.match(dashboard, /window\.removeEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.removeEventListener\('visibilitychange', flushWhenHidden\)/)
+})
+
+test('Academy debounces saved-code persistence without delaying ordinary progress persistence', async () => {
+  const dashboard = await readDashboard()
+  assert.match(dashboard, /const CODE_PERSIST_DEBOUNCE_MS = 250/)
+  assert.match(dashboard, /if \(!hydrated\) return/)
+  assert.match(dashboard, /const timeoutId = window\.setTimeout\(\(\) => \{[\s\S]*codeByLesson: snapshot\.codeByLesson[\s\S]*\}, CODE_PERSIST_DEBOUNCE_MS\)/)
+  assert.match(dashboard, /return \(\) => window\.clearTimeout\(timeoutId\)/)
+  assert.match(dashboard, /\}, \[codeByLesson, hydrated\]\)/)
+  assert.match(dashboard, /\}, \[activeLessonId, completedIds, hydrated\]\)/)
+})
