@@ -25,7 +25,10 @@ export function SiteHeader() {
           aria-label="Main navigation"
           className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-10"
         >
-          <Link href="/" className="flex items-center gap-2.5">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
             <span
               aria-hidden="true"
               className="flex size-7 items-center justify-center rounded-md border border-primary/40 bg-primary/10 font-mono text-sm font-bold text-primary"
@@ -45,7 +48,7 @@ export function SiteHeader() {
                   href={link.href}
                   aria-current={pathname === link.href ? 'page' : undefined}
                   className={cn(
-                    'text-sm tracking-tight transition-colors hover:text-foreground',
+                    'rounded-sm text-sm tracking-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:text-foreground',
                     pathname === link.href
                       ? 'text-primary'
                       : 'text-muted-foreground',
@@ -61,7 +64,7 @@ export function SiteHeader() {
           <div className="hidden md:block">
             <Link
               href="/contact"
-              className="group inline-flex items-center gap-2 rounded-md rounded-tr-3xl border border-primary/50 bg-primary/10 py-2 pl-4 pr-3 text-sm font-medium tracking-tight text-primary shadow-[0_0_16px_-4px_var(--color-primary)] transition-all hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_28px_-4px_var(--color-primary)]"
+              className="group inline-flex items-center gap-2 rounded-md rounded-tr-3xl border border-primary/50 bg-primary/10 py-2 pl-4 pr-3 text-sm font-medium tracking-tight text-primary shadow-[0_0_16px_-4px_var(--color-primary)] transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:bg-primary hover:text-primary-foreground hover:shadow-[0_0_28px_-4px_var(--color-primary)]"
             >
               Start a Build
               <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -75,7 +78,7 @@ export function SiteHeader() {
             aria-expanded={open}
             aria-controls="mobile-main-menu"
             aria-label={open ? 'Close menu' : 'Open menu'}
-            className="text-muted-foreground transition-colors hover:text-foreground md:hidden"
+            className="rounded-sm text-muted-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary hover:text-foreground md:hidden"
           >
             {open ? <Menu className="hidden" /> : null}
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -97,7 +100,7 @@ export function SiteHeader() {
                   onClick={() => setOpen(false)}
                   aria-current={pathname === link.href ? 'page' : undefined}
                   className={cn(
-                    'block rounded-md px-3 py-2.5 text-sm tracking-tight transition-colors',
+                    'block rounded-md px-3 py-2.5 text-sm tracking-tight transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
                     pathname === link.href
                       ? 'bg-primary/10 text-primary'
                       : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
@@ -111,7 +114,7 @@ export function SiteHeader() {
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-2 rounded-md rounded-tr-3xl border border-primary/50 bg-primary/10 py-2.5 text-sm font-medium tracking-tight text-primary"
+                className="flex items-center justify-center gap-2 rounded-md rounded-tr-3xl border border-primary/50 bg-primary/10 py-2.5 text-sm font-medium tracking-tight text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 Start a Build
                 <ArrowUpRight className="size-4" />
