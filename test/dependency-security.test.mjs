@@ -63,6 +63,7 @@ test('audited transitive dependency floors stay above current high-severity fixe
     'js-yaml': '4.3.2',
     undici: '7.29.0',
     hono: '4.13.5',
+    '@hono/node-server': '1.19.15',
     qs: '6.16.0',
   }
 
