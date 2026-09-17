@@ -76,7 +76,7 @@ test('Academy workspace prevents duplicate submissions while verification is run
 
 test('Academy workspace exposes verification output as a live log', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  const outputStart = workspace.indexOf('id={outputId}')
+  const outputStart = workspace.indexOf('role="log"')
   const outputEnd = workspace.indexOf('</div>', outputStart)
   const output = workspace.slice(outputStart, outputEnd)
 
