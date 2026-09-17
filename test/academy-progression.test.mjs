@@ -102,3 +102,42 @@ test('Academy progression fails closed on self-referential prerequisites', async
   assert.match(progression, /A lesson cannot unlock itself/)
   assert.match(progression, /if \(prerequisiteId === lesson\.id\) return false/)
 })
+
+test('Academy persistence is bounded and safely ignores malformed storage', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /const MAX_PERSISTED_JSON_LENGTH = 1_000_000/)
+  assert.match(dashboard, /const MAX_SAVED_CODE_LENGTH = 100_000/)
+  assert.match(dashboard, /if \(!raw \|\| raw\.length > MAX_PERSISTED_JSON_LENGTH\) return \{\}/)
+  assert.match(dashboard, /const parsed: unknown = JSON\.parse\(raw\)/)
+  assert.match(dashboard, /if \(!parsed \|\| typeof parsed !== 'object'\) return \{\}/)
+  assert.match(dashboard, /catch \{\n    return \{\}\n  \}/)
+})
+
+test('Academy persistence only stores known lessons and caps saved code size', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /lessonIndex\.has\(id\) && typeof code === 'string' && code\.length <= MAX_SAVED_CODE_LENGTH/)
+  assert.match(dashboard, /filter\(\(\[id, code\]\) => lessonIndex\.has\(id\) && typeof code === 'string' && code\.length <= MAX_SAVED_CODE_LENGTH\)/)
+  assert.match(dashboard, /if \(candidateLength > MAX_PERSISTED_JSON_LENGTH\) break/)
+})
+
+test('Academy reset clears persisted progress and resets in-memory state', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /const resetProgress = \(\) => \{/)
+  assert.match(dashboard, /window\.localStorage\.removeItem\(STORAGE_KEY\)/)
+  assert.match(dashboard, /setActiveLessonId\(firstLessonId\)/)
+  assert.match(dashboard, /setCompletedIds\(new Set\(\)\)/)
+  assert.match(dashboard, /setCodeByLesson\(\{\}\)/)
+})
+
+test('Academy progress flushes on page hide and visibility changes', async () => {
+  const dashboard = await read('components/academy/academy-dashboard.tsx')
+
+  assert.match(dashboard, /window\.addEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.addEventListener\('visibilitychange', flushWhenHidden\)/)
+  assert.match(dashboard, /if \(document\.visibilityState === 'hidden'\) flushProgress\(\)/)
+  assert.match(dashboard, /window\.removeEventListener\('pagehide', flushProgress\)/)
+  assert.match(dashboard, /document\.removeEventListener\('visibilitychange', flushWhenHidden\)/)
+})
