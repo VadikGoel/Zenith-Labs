@@ -30,8 +30,9 @@ test('navigation links expose the active page semantically in both desktop and m
 
 test('navigation controls retain visible keyboard focus styling', async () => {
   const header = await read('components/site-header.tsx')
+  const syllabus = await read('components/academy/syllabus-tree.tsx')
   assert.match(header, /focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary/)
-  assert.match(header, /focus-visible:outline-2 focus-visible:outline-offset-\[-2px\] focus-visible:outline-primary/)
+  assert.match(syllabus, /focus-visible:outline-2 focus-visible:outline-offset-\[-2px\] focus-visible:outline-primary/)
 })
 
 test('locked Academy lessons remain keyboard discoverable with an accessible reason', async () => {
