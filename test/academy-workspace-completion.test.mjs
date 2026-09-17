@@ -64,3 +64,13 @@ test('Academy workspace blocks empty verification contracts before scheduling co
   assert.match(emptyCheckGuard, /setRunning\(false\)/)
   assert.match(emptyCheckGuard, /return/)
 })
+
+test('Academy workspace prevents duplicate submissions while verification is running', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+
+  assert.match(workspace, /function runVerification\(\) \{\n    if \(running\) return/)
+  assert.match(workspace, /onClick=\{runVerification\}/)
+  assert.match(workspace, /disabled=\{running\}/)
+  assert.match(workspace, /aria-busy=\{running\}/)
+  assert.match(workspace, /disabled=\{running\}/)
+})
