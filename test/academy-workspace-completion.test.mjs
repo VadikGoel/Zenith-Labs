@@ -9,34 +9,55 @@ async function read(path) {
   return readFile(resolve(root, path), 'utf8')
 }
 
-test('Academy workspace calls onPass only after a complete verification result', async () => {
+test('Academy workspace gates completion on verification.complete', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  const completeBranch = workspace.match(/if \(verification\.complete\) \{([\s\S]*?)\} else \{/)?.[1] ?? ''
-  const failureBranch = workspace.match(/\} else \{([\s\S]*?)\n      \}\n      setRunning\(false\)/)?.[1] ?? ''
+  const completeBranchStart = workspace.indexOf('if (verification.complete) {')
+  const failureBranchStart = workspace.indexOf('} else {', completeBranchStart)
+
+  assert.notEqual(completeBranchStart, -1)
+  assert.notEqual(failureBranchStart, -1)
+
+  const completeBranch = workspace.slice(completeBranchStart, failureBranchStart)
+  const failureBranch = workspace.slice(failureBranchStart, workspace.indexOf('setRunning(false)', failureBranchStart))
 
   assert.match(completeBranch, /onPass\(\)/)
   assert.doesNotMatch(failureBranch, /onPass\(\)/)
   assert.match(completeBranch, /requirements checked \(deterministic source analysis\)/)
 })
 
-test('Academy workspace reports every configured assertion on successful verification', async () => {
+test('Academy workspace emits success output before completing a lesson', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /if \(verification\.complete\) \{[\s\S]*\.\.\.lesson\.successOutput,[\s\S]*onPass\(\)/)
+  const completeBranchStart = workspace.indexOf('if (verification.complete) {')
+  const failureBranchStart = workspace.indexOf('} else {', completeBranchStart)
+  const completeBranch = workspace.slice(completeBranchStart, failureBranchStart)
+
+  assert.match(completeBranch, /\.\.\.lesson\.successOutput/)
+  assert.match(completeBranch, /onPass\(\)/)
+  assert.ok(completeBranch.indexOf('...lesson.successOutput') < completeBranch.indexOf('onPass()'))
   assert.match(workspace, /const verification = verifyLessonCode\(lesson, code\)/)
 })
 
-test('Academy workspace reports the first failed assertion without completing the lesson', async () => {
+test('Academy workspace reports the first failed assertion without completing', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  assert.match(workspace, /const \{ failedIndex \} = verification/)
-  assert.match(workspace, /const failedCheck = lesson\.checks\[failedIndex\]/)
-  assert.match(workspace, /ASSERTION FAILED \[\$\{failedIndex \+ 1\}\/\$\{lesson\.checks\.length\}\]/)
-  assert.match(workspace, /VERIFICATION FAILED — review the checklist and retry/)
-  assert.match(workspace, /\} else \{[\s\S]*VERIFICATION FAILED — review the checklist and retry[\s\S]*\n      \}\n      setRunning\(false\)/)
+  const failureStart = workspace.indexOf('} else {', workspace.indexOf('if (verification.complete) {'))
+  const runningReset = workspace.indexOf('setRunning(false)', failureStart)
+  const failureBranch = workspace.slice(failureStart, runningReset)
+
+  assert.match(failureBranch, /const \{ failedIndex \} = verification/)
+  assert.match(failureBranch, /const failedCheck = lesson\.checks\[failedIndex\]/)
+  assert.match(failureBranch, /ASSERTION FAILED \[\$\{failedIndex \+ 1\}\/\$\{lesson\.checks\.length\}\]/)
+  assert.match(failureBranch, /expected: \$\{formatVerificationCheck\(failedCheck\)\}/)
+  assert.match(failureBranch, /VERIFICATION FAILED — review the checklist and retry/)
+  assert.doesNotMatch(failureBranch, /onPass\(\)/)
 })
 
 test('Academy workspace blocks empty verification contracts before scheduling completion', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
-  const emptyCheckGuard = workspace.match(/if \(lesson\.checks\.length === 0\) \{([\s\S]*?)\n    \}/)?.[1] ?? ''
+  const guardStart = workspace.indexOf('if (lesson.checks.length === 0) {')
+  const guardEnd = workspace.indexOf('    }', guardStart)
+  const emptyCheckGuard = workspace.slice(guardStart, guardEnd)
+
+  assert.notEqual(guardStart, -1)
   assert.match(emptyCheckGuard, /NO VERIFICATION CHECKS CONFIGURED — submission blocked/)
   assert.match(emptyCheckGuard, /setRunning\(false\)/)
   assert.match(emptyCheckGuard, /return/)
