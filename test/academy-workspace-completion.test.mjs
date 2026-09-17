@@ -25,14 +25,16 @@ test('Academy workspace gates completion on verification.complete', async () => 
   assert.match(completeBranch, /requirements checked \(deterministic source analysis\)/)
 })
 
-test('Academy workspace emits success output before completing a lesson', async () => {
+test('Academy workspace emits an explicit pass state before completing a lesson', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
   const completeBranchStart = workspace.indexOf('if (verification.complete) {')
   const failureBranchStart = workspace.indexOf('} else {', completeBranchStart)
   const completeBranch = workspace.slice(completeBranchStart, failureBranchStart)
 
+  assert.match(completeBranch, /'VERIFICATION PASSED'/)
   assert.match(completeBranch, /\.\.\.lesson\.successOutput/)
   assert.match(completeBranch, /onPass\(\)/)
+  assert.ok(completeBranch.indexOf('VERIFICATION PASSED') < completeBranch.indexOf('onPass()'))
   assert.ok(completeBranch.indexOf('...lesson.successOutput') < completeBranch.indexOf('onPass()'))
   assert.match(workspace, /const verification = verifyLessonCode\(lesson, code\)/)
 })
