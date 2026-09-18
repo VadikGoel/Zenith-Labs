@@ -15,6 +15,16 @@ test('verifier rejects lookalike Console output method names', async () => {
   assert.equal(result.complete, false)
 })
 
+test('verifier rejects qualified lookalike Console output method names', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello' }] },
+    'System.Console.WriteLineExtra("Hello"); global::System.Console.WriteExtra("Hello");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
+
 test('verifier rejects output calls attached to another namespace or member', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
