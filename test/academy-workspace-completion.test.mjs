@@ -98,28 +98,27 @@ test('Academy workspace connects editor descriptions to requirements and verific
   assert.match(workspace, /id=\{outputId\}/)
 })
 
-test('Academy verification outcomes are rendered inside the live output region', async () => {
+test('Academy verification outcomes feed the same terminal state rendered by the live output region', async () => {
   const workspace = await read('components/academy/lesson-workspace.tsx')
   const logStart = workspace.indexOf('<div role="log"')
   const logEnd = workspace.indexOf('</div>', logStart)
   const liveLog = workspace.slice(logStart, logEnd)
+  const completeBranchStart = workspace.indexOf('if (verification.complete) {')
+  const failureBranchStart = workspace.indexOf('} else {', completeBranchStart)
+  const completeBranch = workspace.slice(completeBranchStart, failureBranchStart)
+  const failureBranch = workspace.slice(failureBranchStart, workspace.indexOf('setRunning(false)', failureBranchStart))
 
   assert.notEqual(logStart, -1)
+  assert.notEqual(completeBranchStart, -1)
+  assert.notEqual(failureBranchStart, -1)
+
   assert.match(liveLog, /terminalLines\.map/)
+  assert.match(completeBranch, /setTerminalLines\(\[/)
+  assert.match(completeBranch, /'VERIFICATION PASSED'/)
+  assert.match(completeBranch, /\.\.\.lesson\.successOutput/)
+  assert.match(failureBranch, /setTerminalLines\(\[/)
+  assert.match(failureBranch, /VERIFICATION FAILED — review the checklist and retry/)
 
-  const successStart = workspace.indexOf("'VERIFICATION PASSED'")
-  const successTerminalStart = workspace.lastIndexOf('setTerminalLines([', successStart)
-  const successTerminalEnd = workspace.indexOf('])', successTerminalStart)
-  const successOutput = workspace.slice(successTerminalStart, successTerminalEnd)
-  assert.match(successOutput, /'VERIFICATION PASSED'/)
-
-  const failureMarker = 'VERIFICATION FAILED — review the checklist and retry'
-  const failureMarkerStart = workspace.indexOf(failureMarker)
-  const failureTerminalStart = workspace.lastIndexOf('setTerminalLines([', failureMarkerStart)
-  const failureTerminalEnd = workspace.indexOf('])', failureTerminalStart)
-  const failureOutput = workspace.slice(failureTerminalStart, failureTerminalEnd)
-  assert.match(failureOutput, /VERIFICATION FAILED — review the checklist and retry/)
-
-  assert.ok(successTerminalStart > logStart)
-  assert.ok(failureTerminalStart > logStart)
+  assert.ok(completeBranch.indexOf("'VERIFICATION PASSED'") < completeBranch.indexOf('onPass()'))
+  assert.ok(failureBranch.indexOf('VERIFICATION FAILED — review the checklist and retry') < failureBranch.length)
 })
