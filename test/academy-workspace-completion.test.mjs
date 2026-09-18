@@ -97,3 +97,29 @@ test('Academy workspace connects editor descriptions to requirements and verific
   assert.match(workspace, /id=\{requirementsId\}/)
   assert.match(workspace, /id=\{outputId\}/)
 })
+
+test('Academy verification outcomes are rendered inside the live output region', async () => {
+  const workspace = await read('components/academy/lesson-workspace.tsx')
+  const logStart = workspace.indexOf('<div role="log"')
+  const logEnd = workspace.indexOf('</div>', logStart)
+  const liveLog = workspace.slice(logStart, logEnd)
+
+  assert.notEqual(logStart, -1)
+  assert.match(liveLog, /terminalLines\.map/)
+
+  const successStart = workspace.indexOf("'VERIFICATION PASSED'")
+  const successTerminalStart = workspace.lastIndexOf('setTerminalLines([', successStart)
+  const successTerminalEnd = workspace.indexOf('])', successTerminalStart)
+  const successOutput = workspace.slice(successTerminalStart, successTerminalEnd)
+  assert.match(successOutput, /'VERIFICATION PASSED'/)
+
+  const failureMarker = 'VERIFICATION FAILED — review the checklist and retry'
+  const failureMarkerStart = workspace.indexOf(failureMarker)
+  const failureTerminalStart = workspace.lastIndexOf('setTerminalLines([', failureMarkerStart)
+  const failureTerminalEnd = workspace.indexOf('])', failureTerminalStart)
+  const failureOutput = workspace.slice(failureTerminalStart, failureTerminalEnd)
+  assert.match(failureOutput, /VERIFICATION FAILED — review the checklist and retry/)
+
+  assert.ok(successTerminalStart > logStart)
+  assert.ok(failureTerminalStart > logStart)
+})
