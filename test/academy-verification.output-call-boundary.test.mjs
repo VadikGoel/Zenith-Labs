@@ -134,3 +134,23 @@ test('verifier accepts compound output expressions with a literal argument', asy
   assert.deepEqual(result.passedChecks, [true])
   assert.equal(result.complete, true)
 })
+
+test('verifier does not accept a commented output call when executable code does not print the requirement', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello' }] },
+    '// Console.WriteLine("Hello");\nConsole.WriteLine("Goodbye");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
+
+test('verifier does not accept an output call embedded inside a string literal', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello' }] },
+    'const example = "Console.WriteLine(\\\"Hello\\\")"; Console.WriteLine("Goodbye");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
