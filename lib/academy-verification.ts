@@ -140,7 +140,7 @@ function containsStructuralRequirement(code: string, requirement: string): boole
     const before = index > 0 ? code[index - 1] : ''
     const afterIndex = index + normalizedRequirement.length
     const after = afterIndex < code.length ? code[afterIndex] : ''
-    const isIdentifierChar = (value: string) => /[A-Za-z0-9_$]/.test(value)
+    const isIdentifierChar = (value: string) => /[\p{L}\p{N}_$]/u.test(value)
     const startsWithIdentifier = isIdentifierChar(normalizedRequirement[0])
     const endsWithIdentifier = isIdentifierChar(normalizedRequirement.at(-1) ?? '')
     const startsInsideIdentifier = startsWithIdentifier && isIdentifierChar(before)
