@@ -31,7 +31,8 @@ export function isVerificationCheck(value: unknown): value is VerificationCheck 
   const candidate = value as { kind?: unknown; value?: unknown }
   return (
     (candidate.kind === 'structural' || candidate.kind === 'output' || candidate.kind === 'quoted') &&
-    typeof candidate.value === 'string'
+    typeof candidate.value === 'string' &&
+    candidate.value.trim().length > 0
   )
 }
 
