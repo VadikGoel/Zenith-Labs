@@ -75,6 +75,16 @@ test('verifier accepts fully-qualified C# Console output calls', async () => {
   assert.equal(result.complete, true)
 })
 
+test('verifier accepts globally-qualified C# Console output calls', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'Hello from Zenith' }] },
+    'global::System.Console.WriteLine("Hello from Zenith");',
+  )
+  assert.deepEqual(result.passedChecks, [true])
+  assert.equal(result.complete, true)
+})
+
 test('verifier accepts indented C# Console output calls', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
