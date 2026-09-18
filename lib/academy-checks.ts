@@ -37,7 +37,7 @@ export function isVerificationCheck(value: unknown): value is VerificationCheck 
 }
 
 export function isCurriculumCheck(value: unknown): value is CurriculumCheck {
-  return typeof value === 'string' || isVerificationCheck(value)
+  return (typeof value === 'string' && value.trim().length > 0) || isVerificationCheck(value)
 }
 
 /** Normalize legacy or typed checks and fail closed on malformed runtime data. */
