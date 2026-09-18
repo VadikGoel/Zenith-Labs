@@ -45,6 +45,16 @@ test('verifier rejects structural requirements embedded in Unicode identifiers',
   assert.equal(result.complete, false)
 })
 
+test('verifier rejects structural requirements embedded after a combining mark', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'structural', value: 'total' }] },
+    'int cafe\u0301total = 42;',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
+
 test('verifier accepts structural requirements across harmless formatting', async () => {
   const verifyLessonCode = await loadVerifier()
   const result = verifyLessonCode(
