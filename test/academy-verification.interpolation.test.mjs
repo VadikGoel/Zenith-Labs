@@ -24,3 +24,13 @@ test('verifier still counts literal content around a C# interpolation', async ()
   assert.deepEqual(result.passedChecks, [true])
   assert.equal(result.complete, true)
 })
+
+test('verifier does not count string literals nested inside C# interpolation expressions', async () => {
+  const verifyLessonCode = await loadVerifier()
+  const result = verifyLessonCode(
+    { checks: [{ kind: 'output', value: 'ready' }] },
+    'Console.WriteLine($"Status: {Get("ready")}");',
+  )
+  assert.deepEqual(result.passedChecks, [false])
+  assert.equal(result.complete, false)
+})
