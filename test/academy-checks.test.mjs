@@ -50,3 +50,13 @@ test('Academy check type guard rejects empty or whitespace-only typed checks', a
     assert.deepEqual(normalizeCheck(value), { kind: 'structural', value: '' })
   }
 })
+
+test('Academy curriculum check guard rejects blank legacy checks', async () => {
+  const { isCurriculumCheck, normalizeCheck } = await loadChecks()
+  const malformed = ['', '   ', '\n\t']
+
+  for (const value of malformed) {
+    assert.equal(isCurriculumCheck(value), false)
+    assert.deepEqual(normalizeCheck(value), { kind: 'structural', value: '' })
+  }
+})
