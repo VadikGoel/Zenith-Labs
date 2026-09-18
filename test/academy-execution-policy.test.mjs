@@ -43,7 +43,9 @@ test('execution admission rejects code over the byte limit', () => {
   if (!result.allowed) assert.match(result.reason, /byte code limit/)
 })
 
-test('execution admission rejects invalid runtime and compilation policy values', () => {
+test('execution admission rejects invalid runtime, compilation, and resource policy values', () => {
+  assert.equal(admitAcademyExecution(request(), { ...ACADEMY_EXECUTION_POLICY, maxCodeBytes: 0 }).allowed, false)
+  assert.equal(admitAcademyExecution(request(), { ...ACADEMY_EXECUTION_POLICY, maxCodeBytes: 1.5 }).allowed, false)
   assert.equal(admitAcademyExecution(request(), { ...ACADEMY_EXECUTION_POLICY, timeoutMs: 0 }).allowed, false)
   assert.equal(admitAcademyExecution(request(), { ...ACADEMY_EXECUTION_POLICY, compileTimeoutMs: 0 }).allowed, false)
   assert.equal(admitAcademyExecution(request(), { ...ACADEMY_EXECUTION_POLICY, maxOutputBytes: 0 }).allowed, false)
