@@ -46,6 +46,10 @@ export function admitAcademyExecution(
     return { allowed: false, reason: 'Submission is empty.' }
   }
 
+  if (!Number.isInteger(policy.maxCodeBytes) || policy.maxCodeBytes <= 0) {
+    return { allowed: false, reason: 'Execution code-size policy is invalid.' }
+  }
+
   if (byteLength(request.code) > policy.maxCodeBytes) {
     return { allowed: false, reason: `Submission exceeds the ${policy.maxCodeBytes}-byte code limit.` }
   }
