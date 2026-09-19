@@ -83,7 +83,6 @@ export function validateCurriculum(tracks: Track[]): CurriculumIssue[] {
       for (const rawCheck of lesson.checks as unknown[]) {
         if (!isCurriculumCheck(rawCheck)) {
           issues.push({ code: 'invalid-check-definition', trackId: track.id, lessonId: lesson.id })
-          continue
         }
         const check = normalizeCheck(rawCheck)
         if (!check.value) issues.push({ code: 'empty-check-assertion', trackId: track.id, lessonId: lesson.id })
