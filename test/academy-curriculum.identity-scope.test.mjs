@@ -42,3 +42,16 @@ test('Academy module identity collision is detected within one track', () => {
 
   assert.equal(issues.filter((issue) => issue.code === 'duplicate-module-id').length, 1)
 })
+
+test('Academy track identity collision is detected globally', () => {
+  const issues = validateCurriculum([
+    track('duplicate-track', [
+      { id: 'first-module', title: 'First', lessons: [lesson('first-track-lesson')] },
+    ]),
+    track('duplicate-track', [
+      { id: 'second-module', title: 'Second', lessons: [lesson('second-track-lesson')] },
+    ]),
+  ])
+
+  assert.equal(issues.filter((issue) => issue.code === 'duplicate-track-id').length, 1)
+})
