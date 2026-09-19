@@ -200,6 +200,18 @@ test('Academy curriculum validator distinguishes cross-track and duplicate ident
   assert.ok(codes.includes('cross-track-prerequisite'))
 })
 
+test('Academy curriculum validator catches duplicate track and module identities at runtime', () => {
+  const issues = validateCurriculum([
+    track('duplicate-track', [lesson('first')], 'module-a'),
+    track('duplicate-track', [lesson('second')], 'module-b'),
+    track('module-collision', [lesson('third')], 'shared-module'),
+    track('module-collision', [lesson('fourth')], 'shared-module'),
+  ])
+  const codes = issues.map((issue) => issue.code)
+  assert.equal(codes.filter((code) => code === 'duplicate-track-id').length, 2)
+  assert.equal(codes.filter((code) => code === 'duplicate-module-id').length, 1)
+})
+
 test('Academy curriculum validator catches a prerequisite on the first lesson', () => {
   const issues = validateCurriculum([
     track('first-prerequisite', [lesson('root', 'later'), lesson('later')]),
