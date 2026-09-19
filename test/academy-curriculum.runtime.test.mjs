@@ -204,11 +204,19 @@ test('Academy curriculum validator catches duplicate track and module identities
   const issues = validateCurriculum([
     track('duplicate-track', [lesson('first')], 'module-a'),
     track('duplicate-track', [lesson('second')], 'module-b'),
-    track('module-collision', [lesson('third')], 'shared-module'),
-    track('module-collision', [lesson('fourth')], 'shared-module'),
+    {
+      id: 'module-collision',
+      name: 'module-collision',
+      language: 'test',
+      available: false,
+      modules: [
+        { id: 'shared-module', title: 'Shared A', lessons: [lesson('third')] },
+        { id: 'shared-module', title: 'Shared B', lessons: [lesson('fourth')] },
+      ],
+    },
   ])
   const codes = issues.map((issue) => issue.code)
-  assert.equal(codes.filter((code) => code === 'duplicate-track-id').length, 2)
+  assert.equal(codes.filter((code) => code === 'duplicate-track-id').length, 1)
   assert.equal(codes.filter((code) => code === 'duplicate-module-id').length, 1)
 })
 
